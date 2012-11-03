@@ -19,6 +19,7 @@ public abstract class Game implements Runnable, IUpdateable, IRenderable
         try
         {
             initialize();
+            initScreen(Screen.getInstance());            
             
             long past;
             long latest = System.nanoTime();
@@ -52,6 +53,8 @@ public abstract class Game implements Runnable, IUpdateable, IRenderable
     
     protected void initialize()
     {}
+    
+    protected abstract void initScreen(Screen screen); 
     
     protected void terminate()
     {}

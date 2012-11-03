@@ -86,7 +86,7 @@ public class Screen
     
     public void setIcon(String path)
     {
-        Image image = Ressources.loadProjectImage(path);
+        Image image = Ressources.loadImage(path);
         frame.setIconImage(image);
     }
     
@@ -122,7 +122,7 @@ public class Screen
     {
         if (path != null)
         {
-            Image cursor = Ressources.loadProjectImage(path);
+            Image cursor = Ressources.loadImage(path);
             if (cursor != null)
             {
                 frame.setCursor(frame.getToolkit().createCustomCursor(cursor, new Point(x, y), path));

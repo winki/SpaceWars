@@ -2,9 +2,11 @@ package spacewars.network;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.List;
 import de.root1.simon.Lookup;
 import de.root1.simon.Registry;
 import de.root1.simon.Simon;
+import de.root1.simon.SimonPublication;
 import de.root1.simon.exceptions.EstablishConnectionFailed;
 import de.root1.simon.exceptions.LookupFailedException;
 import de.root1.simon.exceptions.NameBindingException;
@@ -33,6 +35,16 @@ public class Network
         catch (IOException | NameBindingException ex)
         {
             ex.printStackTrace();
+        }
+    }
+    
+    public static void searchGames()
+    {
+        List<SimonPublication> games = Simon.searchRemoteObjects(100000);
+        System.out.println("Anzahl gefundener Spiele: ");
+        for (SimonPublication game : games)
+        {
+            System.out.printf(" - %10s %10s %10s \n", game.getAddress(), game.getPort(), game.getRemoteObjectName());
         }
     }
     

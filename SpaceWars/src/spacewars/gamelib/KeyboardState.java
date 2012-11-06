@@ -5,28 +5,18 @@ import java.util.Set;
 
 public class KeyboardState
 {
-    private final Set<Integer> pressedKeys;
+    protected final Set<Integer> pressedKeys;
     
-    KeyboardState()
+    protected KeyboardState()
     {
-        this.pressedKeys = new HashSet<>(10);        
+        this.pressedKeys = new HashSet<>(10);
     }
     
-    KeyboardState(KeyboardState source)
+    protected KeyboardState(KeyboardState source)
     {
         this();
         
         this.pressedKeys.addAll(source.pressedKeys);
-    }
-    
-    void addKeyCode(int keyCode)
-    {
-        pressedKeys.add(keyCode);
-    }
-    
-    void removeKeyCode(int keyCode)
-    {
-        pressedKeys.remove(keyCode);
     }
     
     public boolean isKeyDown(Key key)
@@ -37,10 +27,5 @@ public class KeyboardState
     public boolean isKeyUp(Key key)
     {
         return !pressedKeys.contains(key.keyCode());
-    }
-    
-    public Key[] getKeys()
-    {
-        return pressedKeys.toArray(new Key[pressedKeys.size()]);
     }
 }

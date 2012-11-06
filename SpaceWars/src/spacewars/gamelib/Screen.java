@@ -8,23 +8,21 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.RenderingHints;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
+import javax.swing.*;
 import spacewars.util.Ressources;
 
 public class Screen
 {
-    private static Screen instance;
+    private static Screen  instance;
     
-    Game          owner;
-    final JFrame  frame;
-    
-    int           framerate;
+    protected Game         owner;
+    protected final JFrame frame;
+    protected int          framerate;
     
     private Screen()
     {
         frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);        
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setBackground(Color.BLACK);
         frame.addKeyListener(Keyboard.getListener());
         frame.setContentPane(new JComponent()
@@ -56,13 +54,18 @@ public class Screen
                 
                 // draw framerate
                 g.setColor(Color.WHITE);
-                g.drawString("Framerate: " + framerate + " fps", 10, 20);                
+                g.drawString("FPS: " + framerate, 10, 20);
             }
-        }); 
+        });
         frame.setResizable(false);
         frame.setPreferredSize(new Dimension(800, 600));
         frame.pack();
         frame.setLocationRelativeTo(null);
+    }
+    
+    protected void register(Game owner)
+    {
+        this.owner = owner;
     }
     
     public static Screen getInstance()
@@ -74,11 +77,6 @@ public class Screen
         return instance;
     }
     
-    void setOwner(Game owner)
-    {
-        this.owner = owner;
-    }
-
     public void setTitle(String title)
     {
         frame.setTitle(title);
@@ -88,6 +86,11 @@ public class Screen
     {
         Image image = Ressources.loadImage(path);
         frame.setIconImage(image);
+    }
+    
+    public Dimension getSize()
+    {
+        return frame.getSize();
     }
     
     public void setSize(Dimension size)
@@ -133,7 +136,7 @@ public class Screen
             }
         }
     }
-
+    
     public void render(int framerate)
     {
         this.framerate = framerate;

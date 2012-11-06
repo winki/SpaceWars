@@ -9,23 +9,38 @@ import javax.imageio.ImageIO;
 
 public class Ressources
 {
-    public static final String PATH = "res/";
+    public static final String PATH_RES = "res/";
+    public static final String PATH_IMG = "img/";
     
+    /**
+     * Loads an <code>Image</code> from the path relative to the directory
+     * "res/img/".
+     * 
+     * @param path the path to the image
+     * @return the image
+     */
     public static Image loadImage(String path)
     {
-        return Toolkit.getDefaultToolkit().getImage(PATH + "img/" + path);        
-    } 
+        return Toolkit.getDefaultToolkit().getImage(PATH_RES + PATH_IMG + path);
+    }
     
+    /**
+     * Loads a <code>BufferedImage</code> from the path relative to the
+     * directory "res/img/".
+     * 
+     * @param path the path to the image
+     * @return the image
+     */
     public static BufferedImage loadBufferedImage(String path)
     {
         try
         {
-            return ImageIO.read(new File(PATH + "img/" + path));
+            return ImageIO.read(new File(PATH_RES + PATH_IMG + path));
         }
-        catch (IOException e)
+        catch (IOException ex)
         {
-            e.printStackTrace();
+            ex.printStackTrace();
         }
         return null;
-    } 
+    }
 }

@@ -2,6 +2,7 @@ package spacewars.game.model;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import spacewars.game.SpaceWarsGame;
 import spacewars.gamelib.IRenderable;
 
 public class MineralPlanet extends Planet implements IRenderable
@@ -16,7 +17,7 @@ public class MineralPlanet extends Planet implements IRenderable
         this.x = x;
         this.y = y;
         this.mineralReserves = mineralReserves;
-        this.size = 30;
+        this.size = 20;
     }
     
     public int getX()
@@ -42,8 +43,11 @@ public class MineralPlanet extends Planet implements IRenderable
     @Override
     public void render(Graphics2D g)
     {
+        final int x = SpaceWarsGame.game.viewport.getViewport().x / 2 + getX() - getSize()/2;
+        final int y = SpaceWarsGame.game.viewport.getViewport().y / 2 + getY() - getSize()/2;     
+        
         Color color = new Color(Color.HSBtoRGB(0.3f, 1.0f, 0.01f * getMineralReserves()));
         g.setColor(color);
-        g.fillOval(getX() - getSize()/2, getY() - getSize()/2, getSize(), getSize());
+        g.fillOval(x, y, getSize(), getSize());
     }
 }

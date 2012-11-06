@@ -5,39 +5,53 @@ import java.awt.event.KeyListener;
 
 public class Keyboard
 {
-    private static KeyboardState stateBuffer = new KeyboardState();
-    private static KeyboardState frozenState;
-    private static KeyListener listener = new KeyListener()
-    {
-        @Override
-        public void keyTyped(KeyEvent e)
-        {}
-        
-        @Override
-        public synchronized void keyPressed(KeyEvent e)
-        {
-            stateBuffer.addKeyCode(e.getKeyCode());
-        }
-        
-        @Override
-        public synchronized void keyReleased(KeyEvent e)
-        {
-            stateBuffer.removeKeyCode(e.getKeyCode());
-        }
-    };
+    private static KeyboardState     buffer   = new KeyboardState();
+    private static KeyboardState     state    = new KeyboardState();
+    private static final KeyListener listener = new KeyListener()
+                                              {
+                                                  @Override
+                                                  public void keyTyped(KeyEvent e)
+                                                  {}
+                                                  
+                                                  @Override
+                                                  public void keyPressed(KeyEvent e)
+                                                  {
+                                                      synchronized (buffer)
+                                                      {
+                                                          buffer.pressedKeys.add(e.getKeyCode());
+                                                      }
+                                                  }
+                                                  
+                                                  @Override
+                                                  public void keyReleased(KeyEvent e)
+                                                  {
+                                                      synchronized (buffer)
+                                                      {
+                                                          buffer.pressedKeys.remove(e.getKeyCode());
+                                                      }
+                                                  }
+                                              };
     
-    static void captureState()
+    protected static void captureState()
     {
-        frozenState = new KeyboardState(stateBuffer);
+        synchronized (state)
+        {
+            state = new KeyboardState(buffer);
+        }
     }
-
-    static KeyListener getListener()
+    
+    protected static KeyListener getListener()
     {
         return listener;
     }
     
+    /**
+     * Gets the current keyboard state.
+     * 
+     * @return the keyboard state
+     */
     public static KeyboardState getState()
     {
-        return frozenState;
+        return state;
     }
 }

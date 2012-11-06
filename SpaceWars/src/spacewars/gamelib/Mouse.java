@@ -6,74 +6,101 @@ import java.awt.event.MouseWheelEvent;
 
 public class Mouse
 {
-    private static MouseState stateBuffer = new MouseState();
-    private static MouseState frozenState;
-    private static MouseAdapter listener = new MouseAdapter()
-    {
-        @Override
-        public void mouseWheelMoved(MouseWheelEvent e)
-        {
-            stateBuffer.buttonStates = new boolean[4];
-            stateBuffer.wheelRotation = e.getWheelRotation();
-        }
-        
-        @Override
-        public void mouseDragged(MouseEvent e)
-        {
-            stateBuffer.x = e.getX();
-            stateBuffer.y = e.getY();
-        }
-        
-        @Override
-        public void mouseMoved(MouseEvent e)
-        {
-            stateBuffer.x = e.getX();
-            stateBuffer.y = e.getY();
-        }
-        
-        @Override
-        public void mouseClicked(MouseEvent e)
-        {}
-        
-        @Override
-        public void mousePressed(MouseEvent e)
-        {
-            stateBuffer.buttonStates[e.getButton()] = true;
-            stateBuffer.modifiers = e.getModifiers();
-        }
-        
-        @Override
-        public void mouseReleased(MouseEvent e)
-        {
-            stateBuffer.buttonStates[e.getButton()] = false;
-            stateBuffer.modifiers = e.getModifiers();
-        }
-        
-        @Override
-        public void mouseEntered(MouseEvent e)
-        {
-            stateBuffer.isInScreen = true;
-        }
-        
-        @Override
-        public void mouseExited(MouseEvent e)
-        {
-            stateBuffer.isInScreen = false;
-        }
-    };
+    private static MouseState         buffer   = new MouseState();
+    private static MouseState         state    = new MouseState();
+    private static final MouseAdapter listener = new MouseAdapter()
+                                               {
+                                                   @Override
+                                                   public void mouseWheelMoved(MouseWheelEvent e)
+                                                   {
+                                                       synchronized (buffer)
+                                                       {
+                                                           buffer.wheelRotation = e.getWheelRotation();
+                                                       }
+                                                   }
+                                                   
+                                                   @Override
+                                                   public void mouseDragged(MouseEvent e)
+                                                   {
+                                                       synchronized (buffer)
+                                                       {
+                                                           buffer.x = e.getX();
+                                                           buffer.y = e.getY();
+                                                       }
+                                                   }
+                                                   
+                                                   @Override
+                                                   public void mouseMoved(MouseEvent e)
+                                                   {
+                                                       synchronized (buffer)
+                                                       {
+                                                           buffer.x = e.getX();
+                                                           buffer.y = e.getY();
+                                                       }
+                                                   }
+                                                   
+                                                   @Override
+                                                   public void mouseClicked(MouseEvent e)
+                                                   {}
+                                                   
+                                                   @Override
+                                                   public void mousePressed(MouseEvent e)
+                                                   {
+                                                       synchronized (buffer)
+                                                       {
+                                                           buffer.buttonStates[e.getButton()] = true;
+                                                       }
+                                                   }
+                                                   
+                                                   @Override
+                                                   public void mouseReleased(MouseEvent e)
+                                                   {
+                                                       synchronized (buffer)
+                                                       {
+                                                           buffer.buttonStates[e.getButton()] = false;
+                                                       }
+                                                   }
+                                                   
+                                                   @Override
+                                                   public void mouseEntered(MouseEvent e)
+                                                   {
+                                                       synchronized (buffer)
+                                                       {
+                                                           buffer.cursorInScreen = true;
+                                                       }
+                                                   }
+                                                   
+                                                   @Override
+                                                   public void mouseExited(MouseEvent e)
+                                                   {
+                                                       synchronized (buffer)
+                                                       {
+                                                           buffer.cursorInScreen = false;
+                                                       }
+                                                   }
+                                               };
     
-    static void captureState()
+    protected static void captureState()
     {
-        frozenState = new MouseState(stateBuffer);
+        synchronized (state)
+        {
+            state = new MouseState(buffer);
+            buffer.wheelRotation = 0;
+        }
     }
-
-    static MouseAdapter getListener()
+    
+    protected static MouseAdapter getListener()
     {
         return listener;
     }
     
+    /**
+     * Gets the current mouse state.
+     * 
+     * @return the mouse state
+     */
     public static MouseState getState()
     {
-        return frozenState;
+        return state;
     }
 }

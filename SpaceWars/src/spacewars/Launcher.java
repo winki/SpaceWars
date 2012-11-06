@@ -8,10 +8,10 @@ public class Launcher
     private static final boolean TESTING = true;
     
     /**
-     * This method will be only called for testing.
+     * This method will be called if we are testing.
      */
     private static void testing()
-    {
+    {        
         Game game = new SpaceWarsGame();
         game.run();
     }
@@ -24,7 +24,7 @@ public class Launcher
      * server will be started and then a client will be started that will
      * connect to the server.
      * 
-     * @param args
+     * @param args program arguments
      */
     public static void main(String[] args)
     {

@@ -1,11 +1,19 @@
 package spacewars.game.model;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class GameState
 {   
     private Map map;
-    private ArrayList<Object> gameObjects = new ArrayList<>();
+    private final List<GameElement> gameElements;
+    private final List<Player> players;
+    
+    public GameState()
+    {
+        this.gameElements = new LinkedList<>();
+        this.players = new LinkedList<>();
+    }
     
     public Map getMap()
     {
@@ -17,13 +25,13 @@ public class GameState
         this.map = map;
     }
     
-    public void addObject(Object object){
-    	this.gameObjects.add(object);
+    public List<GameElement> getGameElements()
+    {
+        return gameElements;
     }
     
-    public int getLength(){
-    	return this.gameObjects.size();
+    public List<Player> getPlayers()
+    {
+        return players;
     }
-    
-    
 }

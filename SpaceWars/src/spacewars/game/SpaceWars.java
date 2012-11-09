@@ -1,5 +1,6 @@
 package spacewars.game;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -23,6 +24,7 @@ public class SpaceWars extends Game {
 	private Map map;
 
 	private BuildingType buildingType;
+	private GameElement      selected;
 
 	private SpaceWars() {
 	}
@@ -121,10 +123,58 @@ public class SpaceWars extends Game {
 		map.render(g);
 
 		// render hud
+		
+		// render debug info
+        final int LINE_DELTA = 25;
+        final int LINE_HEIGHT = 14;
+        
+        g.setColor(Color.WHITE);
+        g.drawString("Mouse: " + Mouse.getState().getX() + ", " + Mouse.getState().getX(), 10, 1 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Mouse delta: " + Mouse.getState().getDeltaX() + ", " + Mouse.getState().getDeltaX(), 10, 2 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Viewport origin: " + Screen.getInstance().getViewport().getOriginVector().x + ", " + Screen.getInstance().getViewport().getOriginVector().y, 10, 3 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Viewport central: " + Screen.getInstance().getViewport().getCentralVector().x + ", " + Screen.getInstance().getViewport().getCentralVector().y, 10, 4 * LINE_HEIGHT + LINE_DELTA);
+        
 
 	}
 
 	public Map getMap() {
 		return map;
 	}
+                
+                if (element.isHit(mouse.sub(origin)))
+                {
+                    selected = element;
+                }
+            }
+        }
+    }
+    
+    @Override
+    public void render(Graphics2D g)
+    {
+        map.render(g);
+        
+        // TODO: render hud
+        
+        // render debug info
+        final int LINE_DELTA = 25;
+        final int LINE_HEIGHT = 14;
+        
+        g.setColor(Color.WHITE);
+        g.drawString("Mouse: " + Mouse.getState().getX() + ", " + Mouse.getState().getX(), 10, 1 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Mouse delta: " + Mouse.getState().getDeltaX() + ", " + Mouse.getState().getDeltaX(), 10, 2 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Viewport origin: " + Screen.getInstance().getViewport().getOriginVector().x + ", " + Screen.getInstance().getViewport().getOriginVector().y, 10, 3 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Viewport central: " + Screen.getInstance().getViewport().getCentralVector().x + ", " + Screen.getInstance().getViewport().getCentralVector().y, 10, 4 * LINE_HEIGHT + LINE_DELTA);
+        
+    }
+    
+    public Map getMap()
+    {
+        return map;
+    }
+    
+    public GameElement getSelected()
+    {
+        return selected;
+    }
 }

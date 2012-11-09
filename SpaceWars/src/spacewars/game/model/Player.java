@@ -2,18 +2,33 @@ package spacewars.game.model;
 
 public class Player
 {   
-    public int score = 0;
-    //amount of res he owns
-    public int res;
-    //which homeplanet does he have
-    public int homePlanetNr;
+    /**
+     * which homeplanet does he have
+     */
+    protected int playerId;
+    /**
+     * 
+     */
+    protected int score;
+    /**
+     * amount of minerals he owns
+     */
+    protected int minerals;    
+    protected int mineralsPerMinute;    
+
     
-    
-    public int getScore(){
-    	return this.score;
+    public Player()
+    {   
+        
+    }
+
+    public int getScore()
+    {
+        return score;
     }
     
-    public int updateScore(){
-    	return this.score = 100 + 100;	
+    public void setScore(int score)
+    {
+        this.score = score;
     }
 }

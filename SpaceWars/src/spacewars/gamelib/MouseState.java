@@ -25,7 +25,7 @@ public class MouseState
         this();
         
         System.arraycopy(buffer.buttonStates, 0, this.buttonStates, 0, this.buttonStates.length);
-        System.arraycopy(lastState.buttonStates, 0, this.lastButtonStates, 0, this.lastButtonStates.length);        
+        System.arraycopy(lastState.buttonStates, 0, this.lastButtonStates, 0, this.lastButtonStates.length);
         this.cursorInScreen = buffer.cursorInScreen;
         this.wheelRotation = buffer.wheelRotation;
         this.x = buffer.x;
@@ -78,7 +78,7 @@ public class MouseState
     {
         return y;
     }
-
+    
     public Vector getVector()
     {
         return new Vector(x, y);
@@ -93,9 +93,9 @@ public class MouseState
     {
         return deltaY;
     }
-
+    
     protected void clean()
     {
-        wheelRotation = 0;        
+        wheelRotation = 0;
     }
 }

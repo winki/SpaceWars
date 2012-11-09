@@ -1,18 +1,16 @@
 package spacewars.game.model;
 
+import spacewars.gamelib.IRenderable;
 import spacewars.gamelib.geometrics.Vector;
 
-public class GameElement
-{   
+public abstract class GameElement implements IRenderable
+{
     protected Vector position;
     protected int sizeRadius;
     protected int viewRadius;
-
-	//coordinates
-	public int x;
-	public int y;
-	
-	//higher the level better the building
+    /**
+     * The higher the level, the better the building
+     */
 	public int level;
     
     public GameElement(Vector position, int sizeRadius, int viewRadius)
@@ -46,4 +44,6 @@ public class GameElement
     {
         return position.distance(other) <= sizeRadius;
     }
+    
+    
 }

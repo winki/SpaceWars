@@ -15,7 +15,8 @@ public class Viewport
     }
     
     /**
-     * Gets the position of the top left point of the viewport.
+     * Gets the position of the top left point of the viewport as a
+     * <code>Vector</code> object.
      * 
      * @return origin position
      */
@@ -35,7 +36,8 @@ public class Viewport
     }
     
     /**
-     * Gets the position of the central point of the viewport.
+     * Gets the position of the central point of the viewport as a
+     * <code>Vector</code> object.
      * 
      * @return central position
      */

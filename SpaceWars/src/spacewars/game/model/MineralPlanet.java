@@ -7,14 +7,11 @@ import spacewars.gamelib.Screen;
 
 public class MineralPlanet extends Planet implements IRenderable
 {
-    private int x;
-    private int y;
     private int mineralReserves;
-    private int size;
     
     public MineralPlanet(int x, int y, int mineralReserves)
     {
-        this.x = x;
+    	this.x = x;
         this.y = y;
         this.mineralReserves = mineralReserves;
         this.size = 20;

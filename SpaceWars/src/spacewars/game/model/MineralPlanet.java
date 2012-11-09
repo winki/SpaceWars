@@ -14,10 +14,6 @@ public class MineralPlanet extends Planet implements IRenderable
     public MineralPlanet(Vector position, int mineralReserves)
     {
         super(position, 20, 0);
-
-    	this.x = x;
-        this.y = y;
-
         this.mineralReserves = mineralReserves;
     }
     

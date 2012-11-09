@@ -2,7 +2,7 @@ package spacewars.game.model;
 
 import spacewars.gamelib.geometrics.Vector;
 
-public class Building extends GameElement
+public abstract class Building extends GameElement
 {
 
     public Building(Vector position, int sizeRadius, int viewRadius)

@@ -72,12 +72,12 @@ public class Map implements IRenderable
     {
         // render map bounds
         g.setColor(Color.RED);
-        g.drawRect(Screen.getInstance().getViewport().getOriginPosition().x, Screen.getInstance().getViewport().getOriginPosition().y, width, height);
+        g.drawRect(Screen.getInstance().getViewport().getOriginVector().x, Screen.getInstance().getViewport().getOriginVector().y, width, height);
         
         for (Star star : stars)
         {
-            final int viewportx = Screen.getInstance().getViewport().getOriginPosition().x;
-            final int viewporty = Screen.getInstance().getViewport().getOriginPosition().y;
+            final int viewportx = Screen.getInstance().getViewport().getOriginVector().x;
+            final int viewporty = Screen.getInstance().getViewport().getOriginVector().y;
             final int screenw = Screen.getInstance().getSize().width;
             final int screenh = Screen.getInstance().getSize().height;
             
@@ -106,8 +106,8 @@ public class Map implements IRenderable
         for (Point position : homePlanetPositions)
         {
             final int SIZE = 26;
-            final int x = Screen.getInstance().getViewport().getOriginPosition().x + position.x - SIZE / 2;
-            final int y = Screen.getInstance().getViewport().getOriginPosition().y + position.y - SIZE / 2;
+            final int x = Screen.getInstance().getViewport().getOriginVector().x + position.x - SIZE / 2;
+            final int y = Screen.getInstance().getViewport().getOriginVector().y + position.y - SIZE / 2;
             
             Color color = Color.BLUE;
             g.setColor(color);

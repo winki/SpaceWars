@@ -2,7 +2,7 @@ package spacewars.game.model;
 
 import spacewars.gamelib.geometrics.Vector;
 
-public class Ship extends GameElement
+public abstract class Ship extends GameElement
 {
     public int costs;
     public int power;

@@ -15,15 +15,11 @@ public class Viewport
     }
     
     /**
-     * Gets the position of the top left point of the viewport.
+     * Gets the position of the top left point of the viewport as a
+     * <code>Vector</code> object.
      * 
      * @return origin position
      */
-    public Point getOriginPosition()
-    {
-        return viewport.getLocation();
-    }
-    
     public Vector getOriginVector()
     {
         return new Vector(viewport.x, viewport.y);
@@ -35,13 +31,14 @@ public class Viewport
     }
     
     /**
-     * Gets the position of the central point of the viewport.
+     * Gets the position of the central point of the viewport as a
+     * <code>Vector</code> object.
      * 
      * @return central position
      */
-    public Point getCentralPosition()
+    public Vector getCentralVector()
     {
-        return new Point(viewport.x + viewport.width / 2, viewport.y + viewport.height / 2);
+        return new Vector(viewport.x + viewport.width / 2, viewport.y + viewport.height / 2);
     }
     
     public void setCentralPosition(int x, int y)

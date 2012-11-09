@@ -1,5 +1,6 @@
 package spacewars.game;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -18,6 +19,8 @@ public class SpaceWars extends Game
 {
     private static SpaceWars instance;
     private Map              map;
+    
+    private GameElement      selected;
     
     private SpaceWars()
     {}
@@ -38,7 +41,7 @@ public class SpaceWars extends Game
         
         screen.setTitle("Space Wars");
         screen.setIcon("icon.png");
-        //screen.setSize(null);
+        // screen.setSize(null);
         screen.setSize(new Dimension(800, 600));
         screen.setDebug(true);
         
@@ -63,8 +66,8 @@ public class SpaceWars extends Game
         {
             final int dx = Mouse.getState().getDeltaX();
             final int dy = Mouse.getState().getDeltaY();
-            final int x = Screen.getInstance().getViewport().getOriginPosition().x + dx;
-            final int y = Screen.getInstance().getViewport().getOriginPosition().y + dy;
+            final int x = Screen.getInstance().getViewport().getOriginVector().x + dx;
+            final int y = Screen.getInstance().getViewport().getOriginVector().y + dy;
             
             Screen.getInstance().getViewport().setOriginPosition(x, y);
         }
@@ -76,17 +79,12 @@ public class SpaceWars extends Game
                 final Vector origin = Screen.getInstance().getViewport().getOriginVector();
                 final Vector mouse = Mouse.getState().getVector();
                 
-                if (element.isHit(mouse))
+                if (element.isHit(mouse.sub(origin)))
                 {
-                    System.out.println("Origin: "+origin);
-                    System.out.println("Mouse: "+mouse);
-                    System.out.println("Klick: "+origin.add(mouse));
-                    System.out.println("Planet POS: "+element.getPosition());
+                    selected = element;
                 }
-            }            
+            }
         }
-        
-        System.out.println(Screen.getInstance().getViewport().getOriginVector());
     }
     
     @Override
@@ -94,13 +92,27 @@ public class SpaceWars extends Game
     {
         map.render(g);
         
-        // render hud
-           
-       
+        // TODO: render hud
+        
+        // render debug info
+        final int LINE_DELTA = 25;
+        final int LINE_HEIGHT = 14;
+        
+        g.setColor(Color.WHITE);
+        g.drawString("Mouse: " + Mouse.getState().getX() + ", " + Mouse.getState().getX(), 10, 1 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Mouse delta: " + Mouse.getState().getDeltaX() + ", " + Mouse.getState().getDeltaX(), 10, 2 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Viewport origin: " + Screen.getInstance().getViewport().getOriginVector().x + ", " + Screen.getInstance().getViewport().getOriginVector().y, 10, 3 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Viewport central: " + Screen.getInstance().getViewport().getCentralVector().x + ", " + Screen.getInstance().getViewport().getCentralVector().y, 10, 4 * LINE_HEIGHT + LINE_DELTA);
+        
     }
     
     public Map getMap()
     {
         return map;
+    }
+    
+    public GameElement getSelected()
+    {
+        return selected;
     }
 }

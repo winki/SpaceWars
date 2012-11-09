@@ -37,7 +37,7 @@ public class Vector
     
     public double lenght()
     {
-        return Math.sqrt(x * x + y + y);
+        return Math.sqrt(x * x + y * y);
     }
     
     public String toString()

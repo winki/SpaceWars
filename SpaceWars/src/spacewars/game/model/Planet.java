@@ -10,4 +10,7 @@ public class Planet extends GameElement
         // TODO Auto-generated constructor stub
     }   
     
+
+  
+    public int size;
 }

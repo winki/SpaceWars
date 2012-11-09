@@ -78,7 +78,7 @@ public class MouseState
     {
         return y;
     }
-    
+
     public Vector getVector()
     {
         return new Vector(x, y);

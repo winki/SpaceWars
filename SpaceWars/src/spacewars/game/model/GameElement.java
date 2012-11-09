@@ -7,6 +7,13 @@ public class GameElement
     protected Vector position;
     protected int sizeRadius;
     protected int viewRadius;
+
+	//coordinates
+	public int x;
+	public int y;
+	
+	//higher the level better the building
+	public int level;
     
     public GameElement(Vector position, int sizeRadius, int viewRadius)
     {

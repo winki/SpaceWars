@@ -9,11 +9,15 @@ import spacewars.gamelib.geometrics.Vector;
 public class MineralPlanet extends Planet implements IRenderable
 {
     protected int mineralReserves;
+
     
     public MineralPlanet(Vector position, int mineralReserves)
     {
         super(position, 20, 0);
-        
+
+    	this.x = x;
+        this.y = y;
+
         this.mineralReserves = mineralReserves;
     }
     

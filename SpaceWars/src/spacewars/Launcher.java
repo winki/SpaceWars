@@ -1,6 +1,6 @@
 package spacewars;
 
-import spacewars.game.SpaceWarsGame;
+import spacewars.game.SpaceWars;
 
 public class Launcher
 {
@@ -11,7 +11,7 @@ public class Launcher
      */
     private static void testing()
     {
-        SpaceWarsGame.getInstance().run();
+        SpaceWars.getInstance().run();
     }
     
     /**

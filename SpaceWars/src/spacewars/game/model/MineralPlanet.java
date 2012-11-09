@@ -4,50 +4,36 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import spacewars.gamelib.IRenderable;
 import spacewars.gamelib.Screen;
+import spacewars.gamelib.geometrics.Vector;
 
 public class MineralPlanet extends Planet implements IRenderable
 {
-    private int x;
-    private int y;
-    private int mineralReserves;
-    private int size;
+    protected int mineralReserves;
     
-    public MineralPlanet(int x, int y, int mineralReserves)
+    public MineralPlanet(Vector position, int mineralReserves)
     {
-        this.x = x;
-        this.y = y;
+        super(position, 20, 0);
+        
         this.mineralReserves = mineralReserves;
-        this.size = 20;
     }
     
-    public int getX()
-    {
-        return x;
-    }
-
-    public int getY()
-    {
-        return y;
-    }
-
     public int getMineralReserves()
     {
         return mineralReserves;
     }
     
-    public int getSize()
+    public void setMineralReserves(int mineralReserves)
     {
-        return size;
+        this.mineralReserves = mineralReserves;
     }
-
+    
     @Override
     public void render(Graphics2D g)
     {
-        final int x = Screen.getInstance().getViewport().getOriginPosition().x + getX() - getSize()/2;
-        final int y = Screen.getInstance().getViewport().getOriginPosition().y + getY() - getSize()/2;     
+        final Vector p = Screen.getInstance().getViewport().getOriginVector().add(position);
         
         Color color = new Color(Color.HSBtoRGB(0.3f, 1.0f, 0.01f * getMineralReserves()));
         g.setColor(color);
-        g.fillOval(x, y, getSize(), getSize());
+        g.fillOval(p.x - getSizeRadius(), p.y - getSizeRadius(), 2 * getSizeRadius(), 2 * getSizeRadius());
     }
 }

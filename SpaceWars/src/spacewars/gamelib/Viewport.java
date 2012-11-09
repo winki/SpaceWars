@@ -3,6 +3,7 @@ package spacewars.gamelib;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import spacewars.gamelib.geometrics.Vector;
 
 public class Viewport
 {
@@ -21,6 +22,11 @@ public class Viewport
     public Point getOriginPosition()
     {
         return viewport.getLocation();
+    }
+    
+    public Vector getOriginVector()
+    {
+        return new Vector(viewport.x, viewport.y);
     }
     
     public void setOriginPosition(int x, int y)

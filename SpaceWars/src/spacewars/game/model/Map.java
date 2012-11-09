@@ -62,6 +62,11 @@ public class Map implements IRenderable
         stars.add(star);
     }
     
+    public List<MineralPlanet> getMineralPlanets()
+    {
+        return mineralPlanets;
+    }
+    
     @Override
     public void render(Graphics2D g)
     {

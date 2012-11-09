@@ -1,5 +1,7 @@
 package spacewars.gamelib;
 
+import spacewars.gamelib.geometrics.Vector;
+
 public class MouseState
 {
     protected boolean[] buttonStates;
@@ -75,6 +77,11 @@ public class MouseState
     public int getY()
     {
         return y;
+    }
+    
+    public Vector getVector()
+    {
+        return new Vector(x, y);
     }
     
     public int getDeltaX()

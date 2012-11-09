@@ -8,6 +8,7 @@ import spacewars.game.model.Map;
 import spacewars.game.model.MineralPlanet;
 import spacewars.game.model.Star;
 import spacewars.gamelib.Screen;
+import spacewars.gamelib.geometrics.Vector;
 import spacewars.util.Ressources;
 
 public class MapFactory
@@ -48,7 +49,7 @@ public class MapFactory
                     {
                         // mineral planet
                         int mineralReserves = (100 * color.getGreen()) / 255;
-                        map.addMineralPlanet(new MineralPlanet(getPixelPosition(x), getPixelPosition(y), mineralReserves));
+                        map.addMineralPlanet(new MineralPlanet(new Vector(getPixelPosition(x), getPixelPosition(y)), mineralReserves));
                     }
                 }
             }

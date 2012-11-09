@@ -23,7 +23,7 @@ public class SpaceWars extends Game {
 	private static SpaceWars instance;
 	private Map map;
 
-	private BuildingType buildingType;
+	private BuildingType buildingType = BuildingType.NOTHING;
 
 	private SpaceWars() {
 	}
@@ -33,6 +33,10 @@ public class SpaceWars extends Game {
 			instance = new SpaceWars();
 		}
 		return instance;
+	}
+	
+	public String getBuildingType(){
+		return buildingType.name();
 	}
 
 	@Override
@@ -61,29 +65,38 @@ public class SpaceWars extends Game {
 		}
 
 		// go to build-mode
-		if (Keyboard.getState().isKeyPressed(Key.B)) {
-
+		if (Keyboard.getState().isKeyPressed(Key.M)) {
 			buildingType = BuildingType.MINE;
-
-			if (Mouse.getState().isButtonDown(Button.LEFT)) {
-				switch (buildingType) {
-					case MINE:
-						Mine mine = new Mine(new Vector(Mouse.getState().getX(),Mouse.getState().getY()), 100,100);
-						GameState game = new GameState();
-						break;
-					case RELAY:
-					case SOLAR:
-						break;
-					default:
-						break;
-
-				}
-				
-				
-				
-			}
+		}else if (Keyboard.getState().isKeyPressed(Key.S)){
+			buildingType = BuildingType.SOLAR;
+		}else if (Keyboard.getState().isKeyPressed(Key.R)){
+			buildingType = BuildingType.RELAY;
+		}else if (Keyboard.getState().isKeyPressed(Key.Y)){
+			buildingType = BuildingType.SHIPYARD;
+		}else if (Keyboard.getState().isKeyPressed(Key.ESCAPE)){
+			buildingType = BuildingType.NOTHING;
 		}
 
+		if (Mouse.getState().isButtonDown(Button.LEFT)) {
+			switch (buildingType) {
+				case MINE:
+					System.out.println("im in");
+					Mine mine = new Mine(new Vector(Mouse.getState().getX(),Mouse.getState().getY()), 100,100);
+					GameState game = new GameState();
+					game.setGameElements(mine);
+					System.out.println(game.getGameElements().size());
+					break;
+				case RELAY:
+					break;
+				case SOLAR:
+					break;
+				case SHIPYARD:
+					break;
+				default:
+					break;
+
+			}
+		}
 		
 
 		// drag map

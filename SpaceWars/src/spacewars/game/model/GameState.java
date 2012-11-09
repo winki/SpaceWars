@@ -30,6 +30,10 @@ public class GameState
         return gameElements;
     }
     
+    public void setGameElements(GameElement object){
+    	gameElements.add(object);
+    }
+    
     public List<Player> getPlayers()
     {
         return players;

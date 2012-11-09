@@ -9,20 +9,26 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
+import java.util.List;
+import java.util.Vector;
+
 import javax.swing.*;
 
+import spacewars.game.SpaceWars;
 import spacewars.game.model.BuildingType;
+import spacewars.game.model.GameElement;
+import spacewars.game.model.GameState;
 import spacewars.util.Ressources;
 
 public class Screen
 {
-    private static Screen  instance;
+    private static Screen  	instance;
     
-    private boolean        debug;
-    private Game           owner;
-    private final JFrame   frame;
-    private final Viewport viewport;
-    private BuildingType buildingType;
+    private boolean        	debug;
+    private Game           	owner;
+    private final JFrame   	frame;
+    private final Viewport 	viewport;
+    private BuildingType 	buildingType;
     
     private Screen()
     {
@@ -52,7 +58,8 @@ public class Screen
             
             public void paintComponent(Graphics graphics)
             {
-                Graphics2D g = (Graphics2D) graphics;
+                String building = "";
+            	Graphics2D g = (Graphics2D) graphics;
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 
                 if (owner != null)
@@ -61,12 +68,26 @@ public class Screen
                     
                     if (isDebug())
                     {
-                        // draw framerate
+                        if (!SpaceWars.getInstance().getBuildingType().equals("")){
+                        	building = SpaceWars.getInstance().getBuildingType().toString();
+                        }
+                        //draw framerate
                         g.setColor(Color.WHITE);
                         g.drawString("FPS: " + owner.getGameTime().getFrameRate(), 10, 20);
                         
-                        g.drawString("Buildingtype: " + buildingType, 10, 40);
+                        g.drawString("Buildingtype: " + building, 160, 40);
                     }
+                    
+                    //problem weil ich einen neuen gamestate erzeuge?!
+                    
+                    GameState state = new GameState();
+                    List<GameElement> elements = state.getGameElements();
+                    if(elements.size() >0 ){
+                    	spacewars.gamelib.geometrics.Vector position = elements.get(0).getPosition();
+                        g.setColor(Color.white);
+                    	g.drawRect(position.x, position.y, 100, 100);
+                    }
+                    
                 }
             }
         });

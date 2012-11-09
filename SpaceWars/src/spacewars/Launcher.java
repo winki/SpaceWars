@@ -1,7 +1,6 @@
 package spacewars;
 
 import spacewars.game.SpaceWarsGame;
-import spacewars.gamelib.Game;
 
 public class Launcher
 {
@@ -11,9 +10,8 @@ public class Launcher
      * This method will be called if we are testing.
      */
     private static void testing()
-    {        
-        Game game = new SpaceWarsGame();
-        game.run();
+    {
+        SpaceWarsGame.getInstance().run();
     }
     
     /**

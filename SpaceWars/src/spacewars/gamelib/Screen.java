@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import javax.swing.*;
 import spacewars.util.Ressources;
 
@@ -15,14 +16,18 @@ public class Screen
 {
     private static Screen  instance;
     
-    protected Game         owner;
-    protected final JFrame frame;
-    protected int          framerate;
+    private boolean        debug;
+    private Game           owner;
+    private final JFrame   frame;
+    private final Viewport viewport;
     
     private Screen()
     {
+        this.viewport = new Viewport();
+        
         frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
         frame.setBackground(Color.BLACK);
         frame.addKeyListener(Keyboard.getListener());
         frame.setContentPane(new JComponent()
@@ -50,17 +55,17 @@ public class Screen
                 if (owner != null)
                 {
                     owner.render(g);
+                    
+                    if (isDebug())
+                    {
+                        // draw framerate
+                        g.setColor(Color.WHITE);
+                        g.drawString("FPS: " + owner.getGameTime().getFrameRate(), 10, 20);
+                    }
                 }
-                
-                // draw framerate
-                g.setColor(Color.WHITE);
-                g.drawString("FPS: " + framerate, 10, 20);
             }
         });
-        frame.setResizable(false);
-        frame.setPreferredSize(new Dimension(800, 600));
-        frame.pack();
-        frame.setLocationRelativeTo(null);
+        setSize(null);
     }
     
     protected void register(Game owner)
@@ -77,6 +82,16 @@ public class Screen
         return instance;
     }
     
+    public boolean isDebug()
+    {
+        return debug;
+    }
+
+    public void setDebug(boolean debug)
+    {
+        this.debug = debug;
+    }
+
     public void setTitle(String title)
     {
         frame.setTitle(title);
@@ -90,7 +105,12 @@ public class Screen
     
     public Dimension getSize()
     {
-        return frame.getSize();
+        return frame.getContentPane().getSize();
+    }
+    
+    public Viewport getViewport()
+    {
+        return viewport;
     }
     
     public void setSize(Dimension size)
@@ -103,16 +123,22 @@ public class Screen
         {
             frame.setUndecorated(false);
             frame.setExtendedState(JFrame.NORMAL);
-            frame.setPreferredSize(size);
+            frame.getContentPane().setPreferredSize(size);
+            frame.getContentPane().setSize(size);
             frame.pack();
             frame.setLocationRelativeTo(null);
         }
         else
         {
+            size = Toolkit.getDefaultToolkit().getScreenSize();
+            
             frame.setUndecorated(true);
+            frame.getContentPane().setPreferredSize(size);
+            frame.getContentPane().setSize(size);
             frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         }
         
+        viewport.setSize(size.width, size.height);
         frame.setVisible(visibility);
     }
     
@@ -137,9 +163,8 @@ public class Screen
         }
     }
     
-    public void render(int framerate)
+    public void render()
     {
-        this.framerate = framerate;
         frame.repaint();
     }
 }

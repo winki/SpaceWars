@@ -1,30 +1,55 @@
 package spacewars.gamelib;
 
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 
 public class Viewport
 {
     public final Rectangle viewport;
     
-    public Viewport(int width, int height)
+    public Viewport()
     {
-        this.viewport = new Rectangle(0, 0, width, height);
+        this.viewport = new Rectangle();
     }
     
-    public Rectangle getViewport()
+    /**
+     * Gets the position of the top left point of the viewport.
+     * 
+     * @return origin position
+     */
+    public Point getOriginPosition()
     {
-        return viewport;
+        return viewport.getLocation();
     }
     
-    public void setPosition(int x, int y)
+    public void setOriginPosition(int x, int y)
     {
-        viewport.x = x;
-        viewport.y = y;
+        viewport.setLocation(x, y);
     }
     
-    public void setDimension(int width, int height)
+    /**
+     * Gets the position of the central point of the viewport.
+     * 
+     * @return central position
+     */
+    public Point getCentralPosition()
     {
-        viewport.width = width;
-        viewport.height = height;
+        return new Point(viewport.x + viewport.width / 2, viewport.y + viewport.height / 2);
+    }
+    
+    public void setCentralPosition(int x, int y)
+    {
+        viewport.setLocation(viewport.width / 2 - x, viewport.height / 2 - y);
+    }
+    
+    public Dimension getSize()
+    {
+        return viewport.getSize();
+    }
+    
+    public void setSize(int width, int height)
+    {
+        viewport.setSize(new Dimension(width, height));
     }
 }

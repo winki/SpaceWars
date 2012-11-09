@@ -8,8 +8,8 @@ import java.awt.Point;
 import java.util.LinkedList;
 import java.util.List;
 import spacewars.game.MapFactory;
-import spacewars.game.SpaceWarsGame;
 import spacewars.gamelib.IRenderable;
+import spacewars.gamelib.Screen;
 
 public class Map implements IRenderable
 {
@@ -50,6 +50,12 @@ public class Map implements IRenderable
         homePlanetPositions.add(position);
     }
     
+    public Point getHomePlanetPosition(int index)
+    {
+        assert index >= 0 && index < homePlanetPositions.size();
+        return homePlanetPositions.get(index);
+    }
+    
     public void addStar(Star star)
     {
         assert star != null;
@@ -59,14 +65,26 @@ public class Map implements IRenderable
     @Override
     public void render(Graphics2D g)
     {
+        // render map bounds
+        g.setColor(Color.RED);
+        g.drawRect(Screen.getInstance().getViewport().getOriginPosition().x, Screen.getInstance().getViewport().getOriginPosition().y, width, height);
+        
         for (Star star : stars)
         {
+            final int viewportx = Screen.getInstance().getViewport().getOriginPosition().x;
+            final int viewporty = Screen.getInstance().getViewport().getOriginPosition().y;
+            final int screenw = Screen.getInstance().getSize().width;
+            final int screenh = Screen.getInstance().getSize().height;
+            
             final int DEEP_DELTA = 2;
-            final int DEEP_FACTOR= 2;
+            final int DEEP_FACTOR = 1;
             final double FACTOR = 0.5;
             final int SIZE = (int) ((MapFactory.NUMBER_OF_LAYERS - star.getLayer()) * FACTOR);
-            final int x = SpaceWarsGame.game.viewport.getViewport().x / (2+DEEP_DELTA+star.getLayer()*DEEP_FACTOR) + star.getPosititon().x - SIZE / 2;
-            final int y = SpaceWarsGame.game.viewport.getViewport().y / (2+DEEP_DELTA+star.getLayer()*DEEP_FACTOR) + star.getPosititon().y - SIZE / 2;
+            
+            int x = (viewportx / (1 + DEEP_DELTA + star.getLayer() * DEEP_FACTOR) + star.getPosititon().x - SIZE / 2) % screenw;
+            int y = (viewporty / (1 + DEEP_DELTA + star.getLayer() * DEEP_FACTOR) + star.getPosititon().y - SIZE / 2) % screenh;
+            if (x < 0) x += screenw;
+            if (y < 0) y += screenh;
             
             Composite original = g.getComposite();
             g.setColor(Color.WHITE);
@@ -82,10 +100,10 @@ public class Map implements IRenderable
         
         for (Point position : homePlanetPositions)
         {
-            final int SIZE = 26;            
-            final int x = SpaceWarsGame.game.viewport.getViewport().x / 2 + position.x - SIZE / 2;
-            final int y = SpaceWarsGame.game.viewport.getViewport().y / 2 + position.y - SIZE / 2;           
-
+            final int SIZE = 26;
+            final int x = Screen.getInstance().getViewport().getOriginPosition().x + position.x - SIZE / 2;
+            final int y = Screen.getInstance().getViewport().getOriginPosition().y + position.y - SIZE / 2;
+            
             Color color = Color.BLUE;
             g.setColor(color);
             g.fillOval(x, y, SIZE, SIZE);

@@ -7,11 +7,12 @@ import java.util.Random;
 import spacewars.game.model.Map;
 import spacewars.game.model.MineralPlanet;
 import spacewars.game.model.Star;
+import spacewars.gamelib.Screen;
 import spacewars.util.Ressources;
 
 public class MapFactory
 {
-    private static final int NUMBER_OF_STARS  = 1000;
+    private static final int NUMBER_OF_STARS  = 500;
     public static final int  NUMBER_OF_LAYERS = 10;
     private static final int UNIT_SIZE        = 4;
     
@@ -54,13 +55,13 @@ public class MapFactory
             image.flush();
         }
         
-        final int OVERLAP = 200;
+        final int OVERLAP = 0;
         final Random random = new Random();
         int x, y, layer;
         for (int i = 0; i < NUMBER_OF_STARS; i++)
         {
-            x = random.nextInt(map.getWidth() + 2 * OVERLAP) - OVERLAP;
-            y = random.nextInt(map.getHeight() + 2 * OVERLAP) - OVERLAP;
+            x = random.nextInt(Screen.getInstance().getSize().width + 2 * OVERLAP) - OVERLAP;
+            y = random.nextInt(Screen.getInstance().getSize().height + 2 * OVERLAP) - OVERLAP;
             layer = random.nextInt(NUMBER_OF_LAYERS);
             
             map.addStar(new Star(x, y, layer));

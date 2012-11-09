@@ -193,7 +193,7 @@ public enum Key
     
     private int keyCode;
     
-    Key(int keyCode)
+    private Key(int keyCode)
     {
         this.keyCode = keyCode;
     }

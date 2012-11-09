@@ -1,52 +1,68 @@
 package spacewars.game;
 
-import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import spacewars.game.model.Map;
+import spacewars.gamelib.Button;
 import spacewars.gamelib.Game;
 import spacewars.gamelib.GameTime;
+import spacewars.gamelib.Key;
+import spacewars.gamelib.Keyboard;
 import spacewars.gamelib.Mouse;
 import spacewars.gamelib.Screen;
-import spacewars.gamelib.Viewport;
 
 public class SpaceWarsGame extends Game
 {
-    public static SpaceWarsGame game;
+    private static SpaceWarsGame instance;
+    private Map              map;
     
-    public Viewport             viewport;
-    protected Map               map;
+    private SpaceWarsGame()
+    {}
     
-    public SpaceWarsGame()
+    public static SpaceWarsGame getInstance()
     {
-        game = this;
+        if (instance == null)
+        {
+            instance = new SpaceWarsGame();
+        }
+        return instance;
     }
     
     @Override
     protected void initialize()
     {
-        viewport = new Viewport(Screen.getInstance().getSize().width, Screen.getInstance().getSize().height);
-        map = MapFactory.loadMap("map1.png");
-    }
-    
-    @Override
-    protected void initializeScreen(Screen screen)
-    {
+        Screen screen = Screen.getInstance();
+        
         screen.setTitle("Space Wars");
         screen.setIcon("icon.png");
-        //screen.setSize(null);
-        screen.setSize(new Dimension(1280, 800));
+        screen.setSize(null);
+        screen.setDebug(true);
+        
+        // create map
+        map = MapFactory.loadMap("map1.png");
+        
         screen.setVisible(true);
     }
     
     @Override
     public void update(GameTime gameTime)
     {
-        if (Mouse.getState().isCursorInScreen())
+        // return to home planet
+        if (Keyboard.getState().isKeyPressed(Key.H))
         {
-            final int x = Screen.getInstance().getSize().width / 2 - Mouse.getState().getX();
-            final int y = Screen.getInstance().getSize().height / 2 - Mouse.getState().getY();
+            Point home = map.getHomePlanetPosition(0);
+            Screen.getInstance().getViewport().setCentralPosition(home.x, home.y);
+        }
+        
+        // drag map
+        if (Mouse.getState().isButtonDragged(Button.LEFT))
+        {
+            final int dx = Mouse.getState().getDeltaX();
+            final int dy = Mouse.getState().getDeltaY();
+            final int x = Screen.getInstance().getViewport().getOriginPosition().x + dx;
+            final int y = Screen.getInstance().getViewport().getOriginPosition().y + dy;
             
-            viewport.setPosition(x, y);
+            Screen.getInstance().getViewport().setOriginPosition(x, y);
         }
     }
     
@@ -54,5 +70,10 @@ public class SpaceWarsGame extends Game
     public void render(Graphics2D g)
     {
         map.render(g);
+    }
+    
+    public Map getMap()
+    {
+        return map;
     }
 }

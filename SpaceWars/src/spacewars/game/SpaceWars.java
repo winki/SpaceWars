@@ -24,7 +24,6 @@ public class SpaceWars extends Game {
 	private Map map;
 
 	private BuildingType buildingType;
-	private GameElement      selected;
 
 	private SpaceWars() {
 	}
@@ -71,7 +70,6 @@ public class SpaceWars extends Game {
 					case MINE:
 						Mine mine = new Mine(new Vector(Mouse.getState().getX(),Mouse.getState().getY()), 100,100);
 						GameState game = new GameState();
-						game.addObject(mine);
 						break;
 					case RELAY:
 					case SOLAR:
@@ -108,51 +106,17 @@ public class SpaceWars extends Game {
 						.getOriginVector();
 				final Vector mouse = Mouse.getState().getVector();
 
-				if (element.isHit(mouse)) {
-					System.out.println("Origin: " + origin);
-					System.out.println("Mouse: " + mouse);
-					System.out.println("Klick: " + origin.add(mouse));
-					System.out.println("Planet POS: " + element.getPosition());
-				}
+				if (element.isHit(mouse.sub(origin)))
+                {
+                    //selected = element;
+                }
 			}
 		}
 	}
 
 	@Override
 	public void render(Graphics2D g) {
-		map.render(g);
-
-		// render hud
-		
-		// render debug info
-        final int LINE_DELTA = 25;
-        final int LINE_HEIGHT = 14;
-        
-        g.setColor(Color.WHITE);
-        g.drawString("Mouse: " + Mouse.getState().getX() + ", " + Mouse.getState().getX(), 10, 1 * LINE_HEIGHT + LINE_DELTA);
-        g.drawString("Mouse delta: " + Mouse.getState().getDeltaX() + ", " + Mouse.getState().getDeltaX(), 10, 2 * LINE_HEIGHT + LINE_DELTA);
-        g.drawString("Viewport origin: " + Screen.getInstance().getViewport().getOriginVector().x + ", " + Screen.getInstance().getViewport().getOriginVector().y, 10, 3 * LINE_HEIGHT + LINE_DELTA);
-        g.drawString("Viewport central: " + Screen.getInstance().getViewport().getCentralVector().x + ", " + Screen.getInstance().getViewport().getCentralVector().y, 10, 4 * LINE_HEIGHT + LINE_DELTA);
-        
-
-	}
-
-	public Map getMap() {
-		return map;
-	}
-                
-                if (element.isHit(mouse.sub(origin)))
-                {
-                    selected = element;
-                }
-            }
-        }
-    }
-    
-    @Override
-    public void render(Graphics2D g)
-    {
-        map.render(g);
+		 map.render(g);
         
         // TODO: render hud
         
@@ -164,17 +128,17 @@ public class SpaceWars extends Game {
         g.drawString("Mouse: " + Mouse.getState().getX() + ", " + Mouse.getState().getX(), 10, 1 * LINE_HEIGHT + LINE_DELTA);
         g.drawString("Mouse delta: " + Mouse.getState().getDeltaX() + ", " + Mouse.getState().getDeltaX(), 10, 2 * LINE_HEIGHT + LINE_DELTA);
         g.drawString("Viewport origin: " + Screen.getInstance().getViewport().getOriginVector().x + ", " + Screen.getInstance().getViewport().getOriginVector().y, 10, 3 * LINE_HEIGHT + LINE_DELTA);
-        g.drawString("Viewport central: " + Screen.getInstance().getViewport().getCentralVector().x + ", " + Screen.getInstance().getViewport().getCentralVector().y, 10, 4 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Viewport central: " + Screen.getInstance().getViewport().getCentralPosition().x + ", " + Screen.getInstance().getViewport().getCentralPosition().y, 10, 4 * LINE_HEIGHT + LINE_DELTA);
         
-    }
+
+	}
+
+	public Map getMap() {
+		return map;
+	}
     
-    public Map getMap()
+  //  public GameElement getSelected()
     {
-        return map;
-    }
-    
-    public GameElement getSelected()
-    {
-        return selected;
+        //return selected;
     }
 }

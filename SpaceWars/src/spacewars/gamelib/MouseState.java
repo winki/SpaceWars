@@ -1,5 +1,7 @@
 package spacewars.gamelib;
 
+import java.awt.Button;
+
 public class MouseState
 {
     protected boolean[] buttonStates;

@@ -12,4 +12,9 @@ public class Player
     public int getScore(){
     	return this.score;
     }
+    
+    public boolean balabalagagagugus()
+    {
+        return true;
+    }
 }

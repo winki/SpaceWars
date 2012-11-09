@@ -75,7 +75,7 @@ public class SpaceWars extends Game
             {
                 final Vector origin = Screen.getInstance().getViewport().getOriginVector();
                 final Vector mouse = Mouse.getState().getVector();
-
+                
                 if (element.isHit(mouse))
                 {
                     System.out.println("Origin: "+origin);
@@ -85,6 +85,8 @@ public class SpaceWars extends Game
                 }
             }            
         }
+        
+        System.out.println(Screen.getInstance().getViewport().getOriginVector());
     }
     
     @Override

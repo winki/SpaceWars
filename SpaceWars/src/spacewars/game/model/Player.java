@@ -12,4 +12,8 @@ public class Player
     public int getScore(){
     	return this.score;
     }
+    
+    public int updateScore(){
+    	return this.score = 100 + 100;	
+    }
 }

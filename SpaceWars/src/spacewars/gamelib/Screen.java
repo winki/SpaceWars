@@ -10,6 +10,8 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import javax.swing.*;
+
+import spacewars.game.model.BuildingType;
 import spacewars.util.Ressources;
 
 public class Screen
@@ -20,6 +22,7 @@ public class Screen
     private Game           owner;
     private final JFrame   frame;
     private final Viewport viewport;
+    private BuildingType buildingType;
     
     private Screen()
     {
@@ -61,6 +64,8 @@ public class Screen
                         // draw framerate
                         g.setColor(Color.WHITE);
                         g.drawString("FPS: " + owner.getGameTime().getFrameRate(), 10, 20);
+                        
+                        g.drawString("Buildingtype: " + buildingType, 10, 40);
                     }
                 }
             }

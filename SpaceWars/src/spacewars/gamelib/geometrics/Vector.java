@@ -1,7 +1,14 @@
 package spacewars.gamelib.geometrics;
 
-public class Vector
+import java.io.Serializable;
+
+public class Vector implements Serializable
 {
+    /**
+     * Id for serialization
+     */
+    private static final long serialVersionUID = 1L;
+    
     public int x;
     public int y;
     

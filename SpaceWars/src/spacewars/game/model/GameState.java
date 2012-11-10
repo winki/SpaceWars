@@ -1,18 +1,30 @@
 package spacewars.game.model;
 
+import java.awt.Graphics2D;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import spacewars.game.model.buildings.Building;
+import spacewars.gamelib.IRenderable;
 
-public class GameState
-{   
-    private Map map;
-    private final List<GameElement> gameElements;
-    private final List<Player> players;
+public class GameState implements IRenderable, Serializable
+{
+    /**
+     * Id for serialization
+     */
+    private static final long serialVersionUID = 1L;
     
-    public GameState()
+    private Map                  map;
+    private final List<Player>   players;
+    private final List<Building> buildings;
+    private final List<Ship>     ships;
+    
+    public GameState(Map map)
     {
-        this.gameElements = new LinkedList<>();
+        this.map = map;
         this.players = new LinkedList<>();
+        this.buildings = new LinkedList<>();
+        this.ships = new LinkedList<>();        
     }
     
     public Map getMap()
@@ -20,22 +32,37 @@ public class GameState
         return map;
     }
     
-    public void setMap(Map map)
+    public List<Building> getBuildings()
     {
-        this.map = map;
+        return buildings;
     }
-    
-    public List<GameElement> getGameElements()
+
+    public List<Ship> getShips()
     {
-        return gameElements;
-    }
-    
-    public void setGameElements(GameElement object){
-    	gameElements.add(object);
+        return ships;
     }
     
     public List<Player> getPlayers()
     {
         return players;
+    }
+    
+    @Override
+    public void render(Graphics2D g)
+    {
+        // render map
+        map.render(g);
+        
+        // render players
+        for (Player player : players)
+        {
+            player.getHomePlanet().render(g);
+        }
+        
+        // render building elements
+        for (GameElement element : buildings)
+        {
+            element.render(g);
+        }
     }
 }

@@ -1,4 +1,4 @@
-package spacewars.game.model;
+package spacewars.game.model.planets;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -8,12 +8,16 @@ import spacewars.gamelib.geometrics.Vector;
 
 public class MineralPlanet extends Planet implements IRenderable
 {
-    protected int mineralReserves;
-
+    /**
+     * Id for serialization
+     */
+    private static final long serialVersionUID = 1L;
     
-    public MineralPlanet(Vector position, int mineralReserves)
+    protected int mineralReserves;
+    
+    public MineralPlanet(Vector position, int sizeRadius, int mineralReserves)
     {
-        super(position, 20, 0);
+        super(position, sizeRadius, 0);
         this.mineralReserves = mineralReserves;
     }
     
@@ -30,10 +34,12 @@ public class MineralPlanet extends Planet implements IRenderable
     @Override
     public void render(Graphics2D g)
     {
-        final Vector p = Screen.getInstance().getViewport().getOriginVector().add(position);
+        final Vector o = Screen.getInstance().getViewport().getOriginPosition();
+        final Vector p = getPosition().add(o);
+        final int r = getSizeRadius();
         
         Color color = new Color(Color.HSBtoRGB(0.3f, 1.0f, 0.01f * getMineralReserves()));
         g.setColor(color);
-        g.fillOval(p.x - getSizeRadius(), p.y - getSizeRadius(), 2 * getSizeRadius(), 2 * getSizeRadius());
+        g.fillOval(p.x - r, p.y - r, 2 * r, 2 * r);
     }
 }

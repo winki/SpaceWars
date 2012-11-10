@@ -1,21 +1,25 @@
 package spacewars.game;
 
 import java.awt.Color;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 import spacewars.game.model.Map;
-import spacewars.game.model.MineralPlanet;
 import spacewars.game.model.Star;
+import spacewars.game.model.planets.MineralPlanet;
 import spacewars.gamelib.Screen;
 import spacewars.gamelib.geometrics.Vector;
 import spacewars.util.Ressources;
 
 public class MapFactory
 {
-    private static final int NUMBER_OF_STARS  = 500;
-    public static final int  NUMBER_OF_LAYERS = 10;
-    private static final int UNIT_SIZE        = 4;
+    public static final int     NUMBER_OF_LAYERS          = 10;
+    private static final int    NUMBER_OF_STARS           = 500;
+    private static final int    UNIT_SIZE                 = 10;
+    
+    private static final int    MINERAL_PLANET_MIN_RADIUS = 5;
+    private static final int    MINERAL_PLANET_MAX_RADIUS = 30;
+    
+    private static final Random random                    = new Random(0);
     
     /**
      * Loads a map from a path. Example:
@@ -43,27 +47,25 @@ public class MapFactory
                     if (color.getRed() == 255 && color.getGreen() == 0 && color.getBlue() == 0)
                     {
                         // home planet position
-                        map.addHomePlanetPosition(new Point(getPixelPosition(x), getPixelPosition(y)));
+                        map.addHomePlanetPosition(new Vector(getPixelPosition(x), getPixelPosition(y)));
                     }
                     else if (color.getGreen() > 0 && color.getRed() == 0 && color.getBlue() == 0)
                     {
                         // mineral planet
-                        int mineralReserves = (100 * color.getGreen()) / 255;
-                        map.addMineralPlanet(new MineralPlanet(new Vector(getPixelPosition(x), getPixelPosition(y)), mineralReserves));
+                        final int mineralReserves = (100 * color.getGreen()) / 255;
+                        final int radius = random.nextInt(MINERAL_PLANET_MAX_RADIUS - MINERAL_PLANET_MIN_RADIUS + 1) + MINERAL_PLANET_MIN_RADIUS;
+                        map.addMineralPlanet(new MineralPlanet(new Vector(getPixelPosition(x), getPixelPosition(y)), radius, mineralReserves));
                     }
                 }
             }
             image.flush();
         }
         
-        final int OVERLAP = 0;
-        final Random random = new Random();
-        int x, y, layer;
         for (int i = 0; i < NUMBER_OF_STARS; i++)
         {
-            x = random.nextInt(Screen.getInstance().getSize().width + 2 * OVERLAP) - OVERLAP;
-            y = random.nextInt(Screen.getInstance().getSize().height + 2 * OVERLAP) - OVERLAP;
-            layer = random.nextInt(NUMBER_OF_LAYERS);
+            final int x = random.nextInt(Screen.getInstance().getSize().width);
+            final int y = random.nextInt(Screen.getInstance().getSize().height);
+            final int layer = random.nextInt(NUMBER_OF_LAYERS);
             
             map.addStar(new Star(x, y, layer));
         }

@@ -1,11 +1,17 @@
 package spacewars.game.model;
 
 import java.awt.Point;
+import java.io.Serializable;
 
-public class Star
-{   
-    private Point posititon;
-    private int layer;
+public class Star implements Serializable
+{
+    /**
+     * Id for serialization
+     */
+    private static final long serialVersionUID = 1L;
+    
+    private Point             posititon;
+    private int               layer;
     
     public Star(int x, int y, int layer)
     {

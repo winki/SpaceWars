@@ -4,14 +4,19 @@ import spacewars.game.SpaceWars;
 
 public class Launcher
 {
-    private static final boolean TESTING = true;
+    private static final boolean DEBUG = true;
     
     /**
      * This method will be called if we are testing.
      */
     private static void testing()
-    {
+    {   
         SpaceWars.getInstance().run();
+        
+        /*
+        Network.runServer();
+        Network.runClient("127.0.0.1");
+        */
     }
     
     /**
@@ -26,7 +31,7 @@ public class Launcher
      */
     public static void main(String[] args)
     {
-        if (TESTING)
+        if (DEBUG)
         {
             testing();
             System.exit(0);

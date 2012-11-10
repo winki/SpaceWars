@@ -1,11 +1,19 @@
 package spacewars.game.model;
 
-public class Player
-{   
+import java.io.Serializable;
+import spacewars.game.model.planets.HomePlanet;
+
+public class Player implements Serializable
+{      
+    /**
+     * Id for serialization
+     */
+    private static final long serialVersionUID = 1L;
+    
     /**
      * which homeplanet does he have
      */
-    protected int playerId;
+    protected int id;
     /**
      * 
      */
@@ -14,12 +22,13 @@ public class Player
      * amount of minerals he owns
      */
     protected int minerals;    
-    protected int mineralsPerMinute;    
-
+    protected int mineralsPerMinute;
+    protected HomePlanet homePlanet;
     
-    public Player()
+    public Player(int id, Map map)
     {   
-        
+        this.id = id;
+        this.homePlanet = new HomePlanet(map.getHomePlanetPosition(id));
     }
 
     public int getScore()
@@ -30,5 +39,15 @@ public class Player
     public void setScore(int score)
     {
         this.score = score;
+    }
+    
+    public int getId()
+    {
+        return id;
+    }
+    
+    public HomePlanet getHomePlanet()
+    {
+        return homePlanet;
     }
 }

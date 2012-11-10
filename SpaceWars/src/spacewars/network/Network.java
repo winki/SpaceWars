@@ -3,6 +3,7 @@ package spacewars.network;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.List;
+import spacewars.game.model.GameState;
 import de.root1.simon.Lookup;
 import de.root1.simon.Registry;
 import de.root1.simon.Simon;
@@ -82,7 +83,12 @@ public class Network
             // 1 megabyte:
             testNetworkSpeed(server, 1024 * 1024);
             // 10 megabyte:
-            testNetworkSpeed(server, 10 * 1024 * 1024);            
+            testNetworkSpeed(server, 10 * 1024 * 1024);  
+            
+            // get game state
+            final long start = System.currentTimeMillis();
+            GameState gameState = server.getGameState(new ClientInput());
+            System.out.printf("\nGetting GameState: %5d ms | %s", (int) (System.currentTimeMillis() - start), gameState);
         }
         catch (LookupFailedException | EstablishConnectionFailed | UnknownHostException ex)
         {

@@ -24,6 +24,7 @@ public class Player implements Serializable
     protected int minerals;    
     protected int mineralsPerMinute;
     protected HomePlanet homePlanet;
+    protected int energy;
     
     public Player(int id, Map map)
     {   
@@ -57,6 +58,18 @@ public class Player implements Serializable
     
     public void removeMinerals(int mineralsToRemove){
     	this.minerals -= mineralsToRemove;
+    }
+    
+    public void addEnergy(int energy){
+    	this.energy += energy;
+    }
+    
+    public void removeEnergy(int energy){
+    	this.energy -= energy;
+    }
+    
+    public int getEnergy(){
+    	return this.energy;
     }
     
     public int getMinerals(){

@@ -352,12 +352,19 @@ public class SpaceWars extends Game
         final int LINE_DELTA = 22;
         final int LINE_HEIGHT = 14;
         
-        // amount of res
+        // amount of res and energy
        
-        for (Building mine : gameState.getBuildings()){
-        	if (mine instanceof Mine){
-        		player.addMinerals(((Mine) mine).getResPerMin());     		
-        	}         
+        for (Building building : gameState.getBuildings()){
+        	if (building.isPlaced()){
+        		if (building instanceof Mine){
+            		player.addMinerals(((Mine) building).getResPerMin()); 
+            		player.removeEnergy(((Mine) building).getEnergyConsumPerMin());
+            	}
+            	
+            	if (building instanceof SolarStation){
+            		player.addEnergy(((SolarStation) building).getEnergyPerMin());
+            	}
+        	}
         }
            
         
@@ -369,5 +376,6 @@ public class SpaceWars extends Game
         g.drawString("Viewport central: " + Screen.getInstance().getViewport().getCentralPosition().x + ", " + Screen.getInstance().getViewport().getCentralPosition().y, 10, 4 * LINE_HEIGHT + LINE_DELTA);
         g.drawString("Buildingtype: " + buildingType, 10, 5 * LINE_HEIGHT + LINE_DELTA);
         g.drawString("Amount of Minerals: " + player.getMinerals(), 10, 6 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Amount of Energy: " + player.getEnergy(), 10, 7 * LINE_HEIGHT + LINE_DELTA);
     }
 }

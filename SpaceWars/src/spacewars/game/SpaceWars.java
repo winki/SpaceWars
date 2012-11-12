@@ -6,6 +6,8 @@ import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
+import java.util.Calendar;
+
 import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Map;
@@ -99,7 +101,7 @@ public class SpaceWars extends Game
         {
             returnToHomePlanet();
         }
-        
+
         // select
         select();
         
@@ -349,6 +351,15 @@ public class SpaceWars extends Game
         final int LINE_DELTA = 22;
         final int LINE_HEIGHT = 14;
         
+        // amount of res
+       
+        for (Building mine : gameState.getBuildings()){
+        	if (mine instanceof Mine){
+        		player.setMinerals(((Mine) mine).getResPerMin());     		
+        	}         
+        }
+           
+        
         g.setColor(Color.WHITE);
         g.drawString("FPS: " + getGameTime().getFrameRate(), 10, 0 * LINE_HEIGHT + LINE_DELTA);
         g.drawString("Mouse: " + Mouse.getState().getX() + ", " + Mouse.getState().getX(), 10, 1 * LINE_HEIGHT + LINE_DELTA);
@@ -356,5 +367,6 @@ public class SpaceWars extends Game
         g.drawString("Viewport origin: " + Screen.getInstance().getViewport().getOriginPosition().x + ", " + Screen.getInstance().getViewport().getOriginPosition().y, 10, 3 * LINE_HEIGHT + LINE_DELTA);
         g.drawString("Viewport central: " + Screen.getInstance().getViewport().getCentralPosition().x + ", " + Screen.getInstance().getViewport().getCentralPosition().y, 10, 4 * LINE_HEIGHT + LINE_DELTA);
         g.drawString("Buildingtype: " + buildingType, 10, 5 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("Amount of Minerals: " + player.getMinerals(), 10, 6 * LINE_HEIGHT + LINE_DELTA);
     }
 }

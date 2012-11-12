@@ -15,7 +15,7 @@ public abstract class Building extends GameElement
     /**
      * The upgrade level of the building
      */
-    protected int             level;
+    protected int             level = 1;
     protected boolean         placeable;
     protected boolean         placed;
     
@@ -57,5 +57,9 @@ public abstract class Building extends GameElement
             g.setColor(isPlaceable() ? Color.WHITE : Color.RED);
             g.drawOval(p.x - r, p.y - r, 2 * r, 2 * r);
         }
+    }
+    
+    public int getLevel(){
+    	return this.level;
     }
 }

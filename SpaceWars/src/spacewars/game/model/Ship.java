@@ -21,7 +21,7 @@ public class Ship extends GameElement
     {
         super(position, 5, 100);
     }
-    
+        
     @Override
     public void render(Graphics2D g)
     {

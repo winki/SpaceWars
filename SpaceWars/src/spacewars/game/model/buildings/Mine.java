@@ -12,6 +12,8 @@ public class Mine extends Building
      */
     private static final long serialVersionUID = 1L;
     
+    protected int 	mineralsPerMin = 100;
+    
     public Mine(Vector position)
     {
         super(position, 10, 100);
@@ -29,5 +31,10 @@ public class Mine extends Building
         g.setColor(isPlaceable() ? Color.WHITE : Color.RED);
         g.fillOval(p.x - r, p.y - r, 2 * r, 2 * r);
         g.drawString("Mine", p.x + r + 2, p.y + 4);
+    }
+    
+    public int getResPerMin(){
+    	
+    	return super.level * mineralsPerMin;
     }
 }

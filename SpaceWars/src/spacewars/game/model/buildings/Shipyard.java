@@ -3,7 +3,6 @@ package spacewars.game.model.buildings;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Ship;
 import spacewars.gamelib.Button;
@@ -20,11 +19,11 @@ public class Shipyard extends Building
     private static final long serialVersionUID = 1L;
     
     private int ships = 0;
-    
+    private static int costs = 500;
     
     public Shipyard(Vector position)
     {
-        super(position, 15, 1000);
+        super(position, 15, 1000, costs);
     }
     
     @Override
@@ -39,6 +38,8 @@ public class Shipyard extends Building
         int innerX = 0;
         int innerY = 0;
         int innerR = r - 3;
+        
+        
         
         Ship ship = new Ship(new Vector());
         GameState gameState = new GameState();

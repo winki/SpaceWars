@@ -13,10 +13,11 @@ public class Mine extends Building
     private static final long serialVersionUID = 1L;
     
     protected int 	mineralsPerMin = 100;
+    private static int costs = 100;
     
     public Mine(Vector position)
     {
-        super(position, 10, 100);
+        super(position, 10, 100, costs);
     }
     
     @Override

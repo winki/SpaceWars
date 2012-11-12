@@ -11,10 +11,11 @@ public class Relay extends Building
      * Id for serialization
      */
     private static final long serialVersionUID = 1L;
+    private static int costs = 200;
     
     public Relay(Vector position)
     {
-        super(position, 5, 100);
+        super(position, 5, 100, costs);
     }
     
     @Override

@@ -12,9 +12,11 @@ public class SolarStation extends Building
      */
     private static final long serialVersionUID = 1L;
     
+    private static int costs = 400;
+    
     public SolarStation(Vector position)
     {
-        super(position, 15, 100);
+        super(position, 15, 100, costs);
     }
     
     @Override

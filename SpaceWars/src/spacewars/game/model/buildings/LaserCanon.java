@@ -14,10 +14,11 @@ public class LaserCanon extends Building
     
     public int power;
     public int health;
+    private static int costs = 300;
     
     public LaserCanon(Vector position)
     {
-        super(position, 15, 200);
+        super(position, 15, 200, costs);
     }
     
     @Override

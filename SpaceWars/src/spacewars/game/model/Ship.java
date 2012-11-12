@@ -12,14 +12,14 @@ public class Ship extends GameElement
      */
     private static final long serialVersionUID = 1L;
     
-    public int costs;
+    public static int costs = 100;
     public int power;
     public int speed;
     public int health;
     
     public Ship(Vector position)
     {
-        super(position, 5, 100);
+        super(position, 5, 100, costs);
     }
         
     @Override
@@ -31,5 +31,9 @@ public class Ship extends GameElement
         
         g.setColor(Color.BLUE);
         g.fillOval(p.x - r, p.y - r, 2 * r, 2 * r);
+    }
+    
+    public void moveTo(Vector vector){
+    	
     }
 }

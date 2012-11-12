@@ -16,11 +16,14 @@ public abstract class GameElement implements IRenderable, Serializable
     protected int sizeRadius;
     protected int reachRadius;
     
-    public GameElement(Vector position, int sizeRadius, int viewRadius)
+    private int costs;
+    
+    public GameElement(Vector position, int sizeRadius, int viewRadius, int costs)
     {
         this.position = position;
         this.sizeRadius = sizeRadius;
         this.reachRadius = viewRadius;
+        this.costs = costs;
     }
     
     public Vector getPosition()
@@ -41,6 +44,10 @@ public abstract class GameElement implements IRenderable, Serializable
     public int getViewRadius()
     {
         return reachRadius;
+    }
+    
+    public int getCosts(){
+    	return this.costs;
     }
     
     public boolean isHit(Vector other)

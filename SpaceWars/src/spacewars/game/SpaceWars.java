@@ -248,6 +248,7 @@ public class SpaceWars extends Game
             
             final boolean placeable = !checkCollision(toBuild);
             toBuild.setPlaceable(placeable);
+            player.removeMinerals(toBuild.getCosts());
             
             if (toBuild.isPlaceable() && Mouse.getState().isButtonReleased(Button.LEFT))
             {
@@ -355,7 +356,7 @@ public class SpaceWars extends Game
        
         for (Building mine : gameState.getBuildings()){
         	if (mine instanceof Mine){
-        		player.setMinerals(((Mine) mine).getResPerMin());     		
+        		player.addMinerals(((Mine) mine).getResPerMin());     		
         	}         
         }
            

@@ -51,8 +51,12 @@ public class Player implements Serializable
         return homePlanet;
     }
     
-    public void setMinerals(int mineralsToAdd){
+    public void addMinerals(int mineralsToAdd){
     	this.minerals += mineralsToAdd;
+    }
+    
+    public void removeMinerals(int mineralsToRemove){
+    	this.minerals -= mineralsToRemove;
     }
     
     public int getMinerals(){

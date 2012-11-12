@@ -19,9 +19,11 @@ public abstract class Building extends GameElement
     protected boolean         placeable;
     protected boolean         placed;
     
-    public Building(Vector position, int sizeRadius, int viewRadius)
+    
+    
+    public Building(Vector position, int sizeRadius, int viewRadius, int costs)
     {
-        super(position, sizeRadius, viewRadius);
+        super(position, sizeRadius, viewRadius, costs);
         this.placeable = true;
     }
     

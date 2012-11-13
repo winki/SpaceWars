@@ -3,13 +3,9 @@ package spacewars.game.model;
 import java.io.Serializable;
 import spacewars.game.model.planets.HomePlanet;
 
+@SuppressWarnings("serial")
 public class Player implements Serializable
-{      
-    /**
-     * Id for serialization
-     */
-    private static final long serialVersionUID = 1L;
-    
+{
     /**
      * which homeplanet does he have
      */

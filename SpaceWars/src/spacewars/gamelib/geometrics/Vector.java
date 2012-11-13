@@ -2,18 +2,19 @@ package spacewars.gamelib.geometrics;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class Vector implements Serializable
 {
-    /**
-     * Id for serialization
-     */
-    private static final long serialVersionUID = 1L;
-    
     public int x;
     public int y;
     
     public Vector()
     {}
+    
+    public Vector(Vector vector)
+    {
+        this(vector.x, vector.y);
+    }
     
     public Vector(int x, int y)
     {

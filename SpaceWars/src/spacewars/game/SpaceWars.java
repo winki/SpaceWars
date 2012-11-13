@@ -5,11 +5,15 @@ import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
+import java.util.List;
+import java.util.Random;
 import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Map;
 import spacewars.game.model.Player;
+import spacewars.game.model.Ship;
 import spacewars.game.model.buildings.Building;
 import spacewars.game.model.buildings.BuildingType;
 import spacewars.game.model.buildings.LaserCanon;
@@ -37,14 +41,15 @@ public class SpaceWars extends Game
     private GameState           gameState;
     private BuildingType        buildingType;
     private Building            toBuild;
-    // private GameElement selected;
-    
-    private Vector              scrollPosition;
+    private GameElement         selected;    
+    private Vector              scrollPosition;    
+    private final Random        random;
     
     private SpaceWars()
     {
         this.buildingType = BuildingType.NOTHING;
         this.scrollPosition = new Vector();
+        this.random = new Random();
     }
     
     public static SpaceWars getInstance()
@@ -54,6 +59,11 @@ public class SpaceWars extends Game
             instance = new SpaceWars();
         }
         return instance;
+    }
+    
+    public GameElement getSelected()
+    {
+        return selected;
     }
     
     @Override
@@ -69,6 +79,7 @@ public class SpaceWars extends Game
         // init game state
         createMap();
         createPlayers();
+        createShips();
         
         returnToHomePlanet();
         
@@ -84,10 +95,24 @@ public class SpaceWars extends Game
     
     private void createPlayers()
     {
+        final List<Player> players = gameState.getPlayers();
+        
         player = new Player(1, gameState.getMap());
         
-        gameState.getPlayers().add(player);
-        gameState.getPlayers().add(new Player(2, gameState.getMap()));
+        players.add(player);
+        players.add(new Player(2, gameState.getMap()));
+    }
+    
+    private void createShips()
+    {
+        final int NUM_SHIPS = 100;
+        final List<Ship> ships = gameState.getShips();
+        final Vector home = gameState.getMap().getHomePlanetPosition(player.getId());
+        
+        for (int i = 0; i < NUM_SHIPS; i++)
+        {
+            ships.add(new Ship(new Vector(home), random.nextDouble() * Math.PI * 2));
+        }
     }
     
     @Override
@@ -98,6 +123,12 @@ public class SpaceWars extends Game
         if (Keyboard.getState().isKeyPressed(Key.H))
         {
             returnToHomePlanet();
+        }
+        
+        // move ships
+        for (Ship ship : gameState.getShips())
+        {
+            ship.update(gameTime);
         }
         
         // select
@@ -203,8 +234,7 @@ public class SpaceWars extends Game
                 
                 if (element.isHit(mouse.sub(origin)))
                 {
-                    // TODO
-                    // selected = element;
+                    selected = element;
                 }
             }
         }
@@ -291,7 +321,30 @@ public class SpaceWars extends Game
     @Override
     public void render(Graphics2D g)
     {
-        // draw connection lines between the buildings
+        final AffineTransform transform = g.getTransform();
+        
+        // add viewport translation to the whole rendering
+        final Vector origin = Screen.getInstance().getViewport().getOriginPosition();
+        final AffineTransform viewport = AffineTransform.getTranslateInstance(origin.x, origin.y);
+        g.setTransform(viewport);
+        
+        // render world relative to viewport
+        renderWorld(g);
+        
+        // reset transform
+        g.setTransform(transform);
+        
+        renderHud(g);
+        
+        if (DEBUG)
+        {
+            renderDebug(g);
+        }
+    }
+    
+    private void renderWorld(Graphics2D g)
+    {
+        // render connection lines between the buildings
         if (toBuild != null && DEBUG)
         {
             g.setColor(Color.RED);
@@ -299,27 +352,19 @@ public class SpaceWars extends Game
             {
                 if (building.isReachableFrom(toBuild))
                 {
-                    final Vector o = Screen.getInstance().getViewport().getOriginPosition();
-                    final Vector p1 = toBuild.getPosition().add(o);
-                    final Vector p2 = building.getPosition().add(o);
-                    
-                    Line2D line = new Line2D.Double(toBuild.getPosition().x, toBuild.getPosition().y, building.getPosition().x, building.getPosition().y);
-                    if (checkCollision(line, building))
-                    {
-                        g.setColor(Color.RED);
-                    }
-                    else
-                    {
-                        g.setColor(Color.WHITE);
-                    }
-                    g.drawLine(p1.x, p1.y, p2.x, p2.y);
+                    final Vector p1 = toBuild.getPosition();
+                    final Vector p2 = building.getPosition();
+                    Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+                    g.setColor(checkCollision(line, building) ? Color.red : Color.WHITE);
+                    g.draw(line);
                 }
             }
         }
         
+        // render game state
         gameState.render(g);
         
-        // draw building thats should be built
+        // render building thats should be built
         if (toBuild != null)
         {
             final float TRANSPARENCY = 0.4f;
@@ -329,32 +374,38 @@ public class SpaceWars extends Game
             toBuild.render(g);
             g.setComposite(original);
         }
-        
-        renderHud(g);
-        
-        if (DEBUG)
-        {
-            renderDebugInfo(g);
-        }
     }
     
+    /**
+     * Renders the heads up display.
+     * 
+     * @param g the {@code Graphics2D} object
+     */
     private void renderHud(Graphics2D g)
     {   
         
     }
     
-    private void renderDebugInfo(Graphics2D g)
+    /**
+     * Renders the debug information.
+     * 
+     * @param g the {@code Graphics2D} object
+     */
+    private void renderDebug(Graphics2D g)
     {
         // render debug info
-        final int LINE_DELTA = 22;
+        final int DX = 10;
+        final int DY = 22;
         final int LINE_HEIGHT = 14;
         
         g.setColor(Color.WHITE);
-        g.drawString("FPS: " + getGameTime().getFrameRate(), 10, 0 * LINE_HEIGHT + LINE_DELTA);
-        g.drawString("Mouse: " + Mouse.getState().getX() + ", " + Mouse.getState().getX(), 10, 1 * LINE_HEIGHT + LINE_DELTA);
-        g.drawString("Mouse delta: " + Mouse.getState().getDeltaX() + ", " + Mouse.getState().getDeltaY(), 10, 2 * LINE_HEIGHT + LINE_DELTA);
-        g.drawString("Viewport origin: " + Screen.getInstance().getViewport().getOriginPosition().x + ", " + Screen.getInstance().getViewport().getOriginPosition().y, 10, 3 * LINE_HEIGHT + LINE_DELTA);
-        g.drawString("Viewport central: " + Screen.getInstance().getViewport().getCentralPosition().x + ", " + Screen.getInstance().getViewport().getCentralPosition().y, 10, 4 * LINE_HEIGHT + LINE_DELTA);
-        g.drawString("Buildingtype: " + buildingType, 10, 5 * LINE_HEIGHT + LINE_DELTA);
+        g.drawString("FPS: " + getGameTime().getFrameRate(), DX, 0 * LINE_HEIGHT + DY);
+        g.drawString("Mouse: " + Mouse.getState().getX() + ", " + Mouse.getState().getX(), DX, 1 * LINE_HEIGHT + DY);
+        g.drawString("Mouse delta: " + Mouse.getState().getDeltaX() + ", " + Mouse.getState().getDeltaY(), DX, 2 * LINE_HEIGHT + DY);
+        g.drawString("Viewport origin: " + Screen.getInstance().getViewport().getOriginPosition().x + ", " + Screen.getInstance().getViewport().getOriginPosition().y, DX, 3 * LINE_HEIGHT + DY);
+        g.drawString("Viewport central: " + Screen.getInstance().getViewport().getCentralPosition().x + ", " + Screen.getInstance().getViewport().getCentralPosition().y, DX, 4 * LINE_HEIGHT + DY);
+        g.drawString("Buildingtype: " + buildingType, 10, 5 * LINE_HEIGHT + DY);
+        g.drawString("Running slowly: " + getGameTime().isRunningSlowly(), DX, 6 * LINE_HEIGHT + DY);
+        g.drawString("Ticks: " + getGameTime().getTicks(), DX, 7 * LINE_HEIGHT + DY);
     }
 }

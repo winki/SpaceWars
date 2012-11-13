@@ -79,7 +79,7 @@ public abstract class Game implements Runnable, IUpdateable, IRenderable
     }
     
     protected abstract void initialize();
-
+    
     protected void terminate()
     {}
     

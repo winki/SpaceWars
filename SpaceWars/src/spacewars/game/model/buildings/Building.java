@@ -3,21 +3,17 @@ package spacewars.game.model.buildings;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import spacewars.game.model.GameElement;
-import spacewars.gamelib.Screen;
 import spacewars.gamelib.geometrics.Vector;
 
+@SuppressWarnings("serial")
 public abstract class Building extends GameElement
 {
     /**
-     * Id for serialization
-     */
-    private static final long serialVersionUID = 1L;
-    /**
      * The upgrade level of the building
      */
-    protected int             level;
-    protected boolean         placeable;
-    protected boolean         placed;
+    protected int     level;
+    protected boolean placeable;
+    protected boolean placed;
     
     public Building(Vector position, int sizeRadius, int viewRadius)
     {
@@ -45,17 +41,21 @@ public abstract class Building extends GameElement
         this.placed = true;
     }
     
+    /**
+     * Gets the building name of the derrived subclass.
+     * 
+     * @return the building name
+     */
+    public abstract String getName();
+    
     @Override
     public void render(Graphics2D g)
     {
-        if (!isPlaced())
-        {
-            final Vector o = Screen.getInstance().getViewport().getOriginPosition();
-            final Vector p = getPosition().add(o);
-            final int r = getViewRadius();
-            
-            g.setColor(isPlaceable() ? Color.WHITE : Color.RED);
-            g.drawOval(p.x - r, p.y - r, 2 * r, 2 * r);
-        }
+        g.setColor(isPlaceable() ? Color.GRAY : Color.RED);
+        g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
+        g.setColor(isPlaceable() ? Color.WHITE : Color.RED);
+        g.drawString(getName(), position.x + radius + 2, position.y + 4);
+        
+        super.render(g);
     }
 }

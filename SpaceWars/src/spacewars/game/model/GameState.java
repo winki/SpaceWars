@@ -7,13 +7,9 @@ import java.util.List;
 import spacewars.game.model.buildings.Building;
 import spacewars.gamelib.IRenderable;
 
+@SuppressWarnings("serial")
 public class GameState implements IRenderable, Serializable
 {
-    /**
-     * Id for serialization
-     */
-    private static final long serialVersionUID = 1L;
-    
     private Map                  map;
     private final List<Player>   players;
     private final List<Building> buildings;
@@ -63,6 +59,12 @@ public class GameState implements IRenderable, Serializable
         for (GameElement element : buildings)
         {
             element.render(g);
+        }
+        
+        // render ships
+        for (Ship ship : ships)
+        {
+            ship.render(g);
         }
     }
 }

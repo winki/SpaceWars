@@ -23,10 +23,8 @@ public class MapFactory
     
     /**
      * Loads a map from a path. Example:
-     * 
-     * <pre>
-     * Map map = MapFactory.loadMap(&quot;map.png&quot;);
-     * </pre>
+     * <p>
+     * {@code Map map = MapFactory.loadMap("map.png");}
      * 
      * @param path the path relative to the directory "/res/maps/"
      * @return the loaded map

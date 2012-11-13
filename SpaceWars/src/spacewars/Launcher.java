@@ -1,6 +1,7 @@
 package spacewars;
 
 import spacewars.game.SpaceWars;
+import spacewars.network.Network;
 
 public class Launcher
 {
@@ -10,22 +11,31 @@ public class Launcher
      * This method will be called if we are testing.
      */
     private static void testing()
-    {   
+    {
         SpaceWars.getInstance().run();
         
         /*
-        Network.runServer();
-        Network.runClient("127.0.0.1");
-        */
+         * Network.runServer(); Network.runClient("127.0.0.1");
+         */
     }
     
     /**
      * If the program is started with the parameter "serveronly" then only the
-     * server will be started. If the program is started with the ip from the
-     * server as parameter then a client will be started that will connect to
-     * the server. If the program is started with no parameter then first a
-     * server will be started and then a client will be started that will
-     * connect to the server.
+     * server will be started.
+     * <p>
+     * {@code spacewars.jar serveronly}
+     * <p>
+     * If the program is started with the ip from the server as parameter then a
+     * client will be started that will connect to the server.
+     * <p>
+     * {@code spacewars.jar 127.0.0.1}
+     * <p>
+     * If the program is started with no parameter then first a server will be
+     * started and then a client will be started that will connect to the
+     * server.
+     * <p>
+     * {@code spacewars.jar}
+     * <p>
      * 
      * @param args program arguments
      */
@@ -41,18 +51,23 @@ public class Launcher
         {
             if (args[0].equals("serveronly"))
             {
-                // TODO: only start server
+                // only start server
+                Network.runServer();
             }
             else
             {
-                // TODO: start client and connect to given ip address
-                // String serverIp = args[0];
+                // start client and connect to given ip address
+                String serverIp = args[0];
+                Network.runClient(serverIp);
             }
         }
         else
         {
-            // TODO: start server and connect to it
-            // String serverIp = "127.0.0.1";
+            // start server and connect to it
+            Network.runServer();
+            
+            String serverIp = "127.0.0.1";
+            Network.runClient(serverIp);
         }
     }
 }

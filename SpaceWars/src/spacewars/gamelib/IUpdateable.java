@@ -1,6 +1,6 @@
 package spacewars.gamelib;
 
-interface IUpdateable
+public interface IUpdateable
 {
     /**
      * Is called, when the game element has to be upgraded.

@@ -46,7 +46,7 @@ public class Server implements IServer
         // 100 ships
         for (int i = 0; i < 100; i++)
         {
-            gameState.getShips().add(new Ship(new Vector(3454, 345)));
+            gameState.getShips().add(new Ship(new Vector(3454, 345), 0.5));
         } 
         
         return gameState;

@@ -11,48 +11,47 @@ import javax.imageio.ImageIO;
 
 public class Ressources
 {
-    public static final String                     PATH_RES       = "res/";
-    public static final String                     PATH_IMG       = "img/";
+    public static final String               PATH_RES = "res/";
+    public static final String               PATH_IMG = "img/";
     
-    public static final Map<String, Image>         images         = new HashMap<>();
-    public static final Map<String, BufferedImage> bufferedImages = new HashMap<>();
+    private static final Map<String, Object> cache    = new HashMap<>();
     
     /**
      * Loads an <code>Image</code> from the path relative to the directory
-     * "res/img/".
+     * "res/img/". The image will be cached in memory.
      * 
      * @param path the path to the image
      * @return the image
      */
     public static Image loadImage(String path)
     {
-        if (!images.containsKey(path))
+        if (!cache.containsKey(path))
         {
             Image image = Toolkit.getDefaultToolkit().getImage(PATH_RES + PATH_IMG + path);
-            images.put(path, image);
+            cache.put(path, image);
             return image;
         }
         else
         {
-            return images.get(path);
+            return (Image) cache.get(path);
         }
     }
     
     /**
      * Loads a <code>BufferedImage</code> from the path relative to the
-     * directory "res/img/".
+     * directory "res/img/". The image will be cached in memory.
      * 
      * @param path the path to the image
      * @return the image
      */
     public static BufferedImage loadBufferedImage(String path)
     {
-        if (!bufferedImages.containsKey(path))
+        if (!cache.containsKey(path))
         {
             try
             {
                 BufferedImage image = ImageIO.read(new File(PATH_RES + PATH_IMG + path));
-                bufferedImages.put(path, image);
+                cache.put(path, image);
                 return image;
             }
             catch (IOException ex)
@@ -63,7 +62,7 @@ public class Ressources
         }
         else
         {
-            return bufferedImages.get(path);
+            return (BufferedImage) cache.get(path);
         }
     }
 }

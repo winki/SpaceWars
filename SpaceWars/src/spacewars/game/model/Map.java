@@ -4,6 +4,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,13 +15,9 @@ import spacewars.gamelib.IRenderable;
 import spacewars.gamelib.Screen;
 import spacewars.gamelib.geometrics.Vector;
 
+@SuppressWarnings("serial")
 public class Map implements IRenderable, Serializable
 {
-    /**
-     * Id for serialization
-     */
-    private static final long serialVersionUID = 1L;
-    
     private int                 width;
     private int                 height;
     private List<MineralPlanet> mineralPlanets;
@@ -78,17 +75,13 @@ public class Map implements IRenderable, Serializable
     @Override
     public void render(Graphics2D g)
     {
-        if (SpaceWars.DEBUG)
-        {
-            // render map bounds
-            g.setColor(Color.RED);
-            g.drawRect(Screen.getInstance().getViewport().getOriginPosition().x, Screen.getInstance().getViewport().getOriginPosition().y, width, height);
-        }
-        
         // render stars
-        final float TRANSPARENCY = 0.4f;        
-        Composite original = g.getComposite();
+        final float TRANSPARENCY = 0.4f;
+        final AffineTransform transform = g.getTransform();
+        final AffineTransform starTransform = AffineTransform.getTranslateInstance(0, 0);
+        final Composite original = g.getComposite();
         g.setColor(Color.WHITE);
+        g.setTransform(starTransform);
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
         for (Star star : stars)
         {
@@ -109,6 +102,7 @@ public class Map implements IRenderable, Serializable
             g.fillOval(x, y, SIZE, SIZE);
         }
         g.setComposite(original);
+        g.setTransform(transform);
         
         // render mineral planets
         for (MineralPlanet planet : mineralPlanets)
@@ -118,15 +112,16 @@ public class Map implements IRenderable, Serializable
         
         if (SpaceWars.DEBUG)
         {
+            g.setColor(Color.RED);
+            
+            // render map bounds
+            g.drawRect(0, 0, width, height);
+            
             // render home planet positions
             for (Vector position : homePlanetPositions)
             {
-                final Vector o = Screen.getInstance().getViewport().getOriginPosition();
-                final Vector p = position.add(o);
-                final int r = 39;
-                
-                g.setColor(Color.RED);
-                g.drawOval(p.x - r, p.y - r, 2 * r, 2 * r);
+                final int radius = 39;
+                g.drawOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
             }
         }
     }

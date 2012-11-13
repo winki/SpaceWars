@@ -24,6 +24,7 @@ public class Ship extends GameElement implements IUpdateable
     
     protected double     anglediff;
     private final Random random;
+
     
     public Ship(final Vector position, final double angle)
     {
@@ -61,5 +62,9 @@ public class Ship extends GameElement implements IUpdateable
         g.fill(ship);
         
         g.setTransform(viewport);
+    }
+    
+    public void moveTo(Vector vector){
+    	
     }
 }

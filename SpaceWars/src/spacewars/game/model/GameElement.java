@@ -17,7 +17,9 @@ public class GameElement implements IRenderable, Serializable
     protected int                     radius;
     protected int                     sight;    
     protected int                     health;
-    protected int                     power;    
+    protected int                     power;  
+    protected int costs;
+      
     protected final List<GameElement> links;
     
     public GameElement(Vector position, int radius, int sight)

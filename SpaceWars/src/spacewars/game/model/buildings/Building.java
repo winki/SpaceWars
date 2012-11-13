@@ -14,8 +14,9 @@ public abstract class Building extends GameElement
     protected int     level;
     protected boolean placeable;
     protected boolean placed;
+    protected int     costs;
     
-    public Building(Vector position, int sizeRadius, int viewRadius)
+    public Building(Vector position, int sizeRadius, int viewRadius, int costs)
     {
         super(position, sizeRadius, viewRadius);
         this.placeable = true;
@@ -47,6 +48,11 @@ public abstract class Building extends GameElement
      * @return the building name
      */
     public abstract String getName();
+    
+    public int getLevel()
+    {
+        return this.level;
+    }
     
     @Override
     public void render(Graphics2D g)

@@ -9,7 +9,7 @@ public class Relay extends Building
     
     public Relay(Vector position)
     {
-        super(position, 5, 100);
+        super(position, 5, 100, 200);
     }
     
     @Override

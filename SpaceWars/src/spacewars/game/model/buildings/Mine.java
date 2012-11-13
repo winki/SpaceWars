@@ -7,14 +7,27 @@ public class Mine extends Building
 {
     private static final String NAME = "Mine";
     
+    protected int 	mineralsPerMin = 100;
+    private static int costs = 100;
+    private int energyConsum = 20;
+    
     public Mine(Vector position)
     {
-        super(position, 10, 100);
+        super(position, 10, 100, costs);
     }
     
     @Override
     public String getName()
     {
         return NAME;
+    }
+    
+    public int getResPerMin(){
+    	
+    	return super.level * mineralsPerMin;
+    }
+    
+    public int getEnergyConsumPerMin(){
+    	return energyConsum;
     }
 }

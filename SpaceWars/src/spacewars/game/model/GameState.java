@@ -23,6 +23,13 @@ public class GameState implements IRenderable, Serializable
         this.ships = new LinkedList<>();        
     }
     
+    public GameState()
+    {
+        this.players = new LinkedList<>();
+        this.buildings = new LinkedList<>();
+        this.ships = new LinkedList<>();        
+    }
+    
     public Map getMap()
     {
         return map;

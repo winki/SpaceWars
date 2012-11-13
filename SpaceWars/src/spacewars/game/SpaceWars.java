@@ -128,6 +128,53 @@ public class SpaceWars extends Game
         // move ships
         for (Ship ship : gameState.getShips())
         {
+           /*
+            if (this.isPlaced() && Mouse.getState().getX() >= p.x - r && Mouse.getState().getX() <= p.x + r && Mouse.getState().getY() >= p.y - r && Mouse.getState().getY() <= p.y + r)
+            {
+                g.drawString("Build ship with left click | attack with right click", p.x + r + 20, p.y + 20);
+                if (Mouse.getState().isButtonPressed(Button.LEFT))
+                {
+                    if (ships <= 16)
+                    {
+                        ships += 1;
+                        innerY = (int) (innerR * Math.sin(2 * Math.PI / 16 * ships));
+                        innerX = (int) Math.sqrt(innerR * innerR - innerY * innerY);
+                        
+                        if (ships <= 4)
+                        {
+                            ship.setPosition(new Vector(p.x - innerX, p.y - innerY));
+                            gameState.getShips().add(ship);
+                        }
+                        else if (ships <= 8)
+                        {
+                            ship.setPosition(new Vector(p.x - innerX, p.y + innerY));
+                            gameState.getShips().add(ship);
+                        }
+                        else if (ships <= 12)
+                        {
+                            ship.setPosition(new Vector(p.x + innerX, p.y + innerY));
+                            gameState.getShips().add(ship);
+                        }
+                        else
+                        {
+                            ship.setPosition(new Vector(p.x + innerX, p.y - innerY));
+                            gameState.getShips().add(ship);
+                        }
+                    }
+                    else
+                    {
+                        g.drawString("no space left in hangar", p.x, p.y - 40);
+                    }
+                }
+                
+                else if (Mouse.getState().isButtonPressed(Button.RIGHT))
+                {
+                    // send ships to attack!
+                }
+            }
+            
+            
+            */
             ship.update(gameTime);
         }
         
@@ -398,6 +445,22 @@ public class SpaceWars extends Game
         final int DY = 22;
         final int LINE_HEIGHT = 14;
         
+        // amount of res and energy
+       
+        for (Building building : gameState.getBuildings()){
+        	if (building.isPlaced()){
+        		if (building instanceof Mine){
+            		player.addMinerals(((Mine) building).getResPerMin()); 
+            		player.removeEnergy(((Mine) building).getEnergyConsumPerMin());
+            	}
+            	
+            	if (building instanceof SolarStation){
+            		player.addEnergy(((SolarStation) building).getEnergyPerMin());
+            	}
+        	}
+        }
+           
+        
         g.setColor(Color.WHITE);
         g.drawString("FPS: " + getGameTime().getFrameRate(), DX, 0 * LINE_HEIGHT + DY);
         g.drawString("Mouse: " + Mouse.getState().getX() + ", " + Mouse.getState().getX(), DX, 1 * LINE_HEIGHT + DY);
@@ -407,5 +470,7 @@ public class SpaceWars extends Game
         g.drawString("Buildingtype: " + buildingType, 10, 5 * LINE_HEIGHT + DY);
         g.drawString("Running slowly: " + getGameTime().isRunningSlowly(), DX, 6 * LINE_HEIGHT + DY);
         g.drawString("Ticks: " + getGameTime().getTicks(), DX, 7 * LINE_HEIGHT + DY);
+        g.drawString("Amount of Minerals: " + player.getMinerals(), 10, 8 * LINE_HEIGHT + DY);
+        g.drawString("Amount of Energy: " + player.getEnergy(), 10, 9 * LINE_HEIGHT + DY);
     }
 }

@@ -57,10 +57,16 @@ public abstract class Building extends GameElement
     @Override
     public void render(Graphics2D g)
     {
-        g.setColor(isPlaceable() ? Color.GRAY : Color.RED);
+        g.setColor(isPlaceable() ? (isPlaced() ? Color.MAGENTA : Color.WHITE) : Color.RED);
         g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
-        g.setColor(isPlaceable() ? Color.WHITE : Color.RED);
-        g.drawString(getName(), position.x + radius + 2, position.y + 4);
+        
+        if (!isPlaced())
+        {
+            g.setColor(isPlaceable() ? Color.WHITE : Color.RED);
+            g.drawString(getName(), position.x + radius + 2, position.y + 4);
+            
+            g.drawOval(position.x - sight, position.y - sight, 2 * sight, 2 * sight);
+        }
         
         super.render(g);
     }

@@ -6,6 +6,8 @@ import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.Random;
+import spacewars.game.SpaceWars;
+import spacewars.game.model.planets.HomePlanet;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.IUpdateable;
 import spacewars.gamelib.geometrics.Vector;
@@ -13,7 +15,6 @@ import spacewars.gamelib.geometrics.Vector;
 @SuppressWarnings("serial")
 public class Ship extends GameElement implements IUpdateable
 {
-    protected int        costs;
     protected int        power;
     protected int        health;
     
@@ -24,7 +25,6 @@ public class Ship extends GameElement implements IUpdateable
     
     protected double     anglediff;
     private final Random random;
-
     
     public Ship(final Vector position, final double angle)
     {
@@ -39,11 +39,32 @@ public class Ship extends GameElement implements IUpdateable
     @Override
     public void update(GameTime gameTime)
     {
-        final double MAX_ANGLE_DIFF = 0.05;
+        // direction: enemy's home planet
+        final HomePlanet target = SpaceWars.getInstance().getGameState().getPlayers().get(1).getHomePlanet();
+        final Vector dir = target.getPosition().sub(position);
         
-        anglediff += (random.nextDouble() - (0.5 + anglediff)) / 100;
-        if (anglediff > MAX_ANGLE_DIFF) anglediff = MAX_ANGLE_DIFF;
-        angle += anglediff;
+        // flight in the direction of the vector
+        final double targetangle = Math.atan((double) dir.y / dir.x);
+        
+        // angle difference
+        anglediff = targetangle - angle;
+        while (anglediff < 0)
+        {
+            anglediff += (2 * Math.PI);
+        }
+        anglediff %= (2 * Math.PI);
+        
+        final int TURN_SLOWMO = 300;
+        if (anglediff > Math.PI)
+        {
+            // turn left
+            angle -= anglediff / TURN_SLOWMO;
+        }
+        else
+        {
+            // turn right
+            angle += anglediff / TURN_SLOWMO;
+        }
         
         x += speed * Math.cos(angle);
         y += speed * Math.sin(angle);
@@ -62,9 +83,5 @@ public class Ship extends GameElement implements IUpdateable
         g.fill(ship);
         
         g.setTransform(viewport);
-    }
-    
-    public void moveTo(Vector vector){
-    	
     }
 }

@@ -59,6 +59,8 @@ public class MapFactory
             image.flush();
         }
         
+        // TODO: take stars out of the map, stars don't depend on the map but on
+        // the screen
         for (int i = 0; i < NUMBER_OF_STARS; i++)
         {
             final int x = random.nextInt(Screen.getInstance().getSize().width);

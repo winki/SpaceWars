@@ -1,12 +1,7 @@
 package spacewars.game;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Line2D;
+import java.awt.*;
+import java.awt.geom.*;
 import java.util.List;
 import java.util.Random;
 import spacewars.game.model.GameElement;
@@ -14,42 +9,66 @@ import spacewars.game.model.GameState;
 import spacewars.game.model.Map;
 import spacewars.game.model.Player;
 import spacewars.game.model.Ship;
-import spacewars.game.model.buildings.Building;
-import spacewars.game.model.buildings.BuildingType;
-import spacewars.game.model.buildings.LaserCanon;
-import spacewars.game.model.buildings.Mine;
-import spacewars.game.model.buildings.Relay;
-import spacewars.game.model.buildings.Shipyard;
-import spacewars.game.model.buildings.SolarStation;
-import spacewars.game.model.planets.MineralPlanet;
+import spacewars.game.model.buildings.*;
+import spacewars.game.model.planets.*;
 import spacewars.gamelib.Button;
-import spacewars.gamelib.Game;
-import spacewars.gamelib.GameTime;
-import spacewars.gamelib.Key;
-import spacewars.gamelib.Keyboard;
-import spacewars.gamelib.Mouse;
-import spacewars.gamelib.Screen;
+import spacewars.gamelib.*;
 import spacewars.gamelib.geometrics.Vector;
 
 public class SpaceWars extends Game
 {
     public static final boolean DEBUG = true;
     
+    /**
+     * Game instance
+     */
     private static SpaceWars    instance;
     
-    private Player              player;
-    private GameState           gameState;
-    private BuildingType        buildingType;
-    private Building            toBuild;
-    private GameElement         selected;    
-    private Vector              scrollPosition;    
+    /**
+     * Random object
+     */
     private final Random        random;
+    
+    /**
+     * The player
+     */
+    private Player              player;
+    
+    /**
+     * The game state
+     */
+    private GameState           gameState;
+    
+    /**
+     * Game element that is currently selected by players mouse
+     */
+    private GameElement         selected;
+    
+    /**
+     * The type of the building that will be built
+     */
+    private BuildingType        buildingType;
+    
+    /**
+     * Building object that will be built
+     */
+    private Building            buildingToBePlaced;
+    /**
+     * Can the building object object {@code toBuild} really be built? Or can't
+     * it because of collision
+     */
+    private boolean             buildingIsPlaceable;
+    
+    /**
+     * Current scroll position
+     */
+    private Vector              scrollPosition;
     
     private SpaceWars()
     {
+        this.random = new Random();
         this.buildingType = BuildingType.NOTHING;
         this.scrollPosition = new Vector();
-        this.random = new Random();
     }
     
     public static SpaceWars getInstance()
@@ -64,6 +83,11 @@ public class SpaceWars extends Game
     public GameElement getSelected()
     {
         return selected;
+    }
+    
+    public GameState getGameState()
+    {
+        return gameState;
     }
     
     @Override
@@ -105,7 +129,7 @@ public class SpaceWars extends Game
     
     private void createShips()
     {
-        final int NUM_SHIPS = 100;
+        final int NUM_SHIPS = 500;
         final List<Ship> ships = gameState.getShips();
         final Vector home = gameState.getMap().getHomePlanetPosition(player.getId());
         
@@ -120,6 +144,7 @@ public class SpaceWars extends Game
     {
         // navigate
         scroll();
+        
         if (Keyboard.getState().isKeyPressed(Key.H))
         {
             returnToHomePlanet();
@@ -128,9 +153,10 @@ public class SpaceWars extends Game
         // move ships
         for (Ship ship : gameState.getShips())
         {
-           /*
+            // TODO:
+            /*
             if (this.isPlaced() && Mouse.getState().getX() >= p.x - r && Mouse.getState().getX() <= p.x + r && Mouse.getState().getY() >= p.y - r && Mouse.getState().getY() <= p.y + r)
-            {
+            {                
                 g.drawString("Build ship with left click | attack with right click", p.x + r + 20, p.y + 20);
                 if (Mouse.getState().isButtonPressed(Button.LEFT))
                 {
@@ -139,7 +165,6 @@ public class SpaceWars extends Game
                         ships += 1;
                         innerY = (int) (innerR * Math.sin(2 * Math.PI / 16 * ships));
                         innerX = (int) Math.sqrt(innerR * innerR - innerY * innerY);
-                        
                         if (ships <= 4)
                         {
                             ship.setPosition(new Vector(p.x - innerX, p.y - innerY));
@@ -166,14 +191,11 @@ public class SpaceWars extends Game
                         g.drawString("no space left in hangar", p.x, p.y - 40);
                     }
                 }
-                
                 else if (Mouse.getState().isButtonPressed(Button.RIGHT))
-                {
-                    // send ships to attack!
+                { 
+                // send ships to attack!
                 }
             }
-            
-            
             */
             ship.update(gameTime);
         }
@@ -184,6 +206,25 @@ public class SpaceWars extends Game
         // build
         setBuildMode();
         build();
+        
+        // TODO:
+        // amount of res and energy
+        for (Building building : gameState.getBuildings())
+        {
+            if (building.isPlaced())
+            {
+                if (building instanceof Mine)
+                {
+                    player.addMinerals(((Mine) building).getResPerMin());
+                    player.removeEnergy(((Mine) building).getEnergyConsumPerMin());
+                }
+                
+                if (building instanceof SolarStation)
+                {
+                    player.addEnergy(((SolarStation) building).getEnergyPerMin());
+                }
+            }
+        }
     }
     
     private boolean checkCollision(GameElement element)
@@ -192,6 +233,18 @@ public class SpaceWars extends Game
         for (Building b : gameState.getBuildings())
         {
             if (element.doesCollideWith(b)) { return true; }
+            
+            // check collision with links
+            for (GameElement linked : b.getLinks())
+            {
+                // TODO: only calculate the lines once, reuse them in
+                // rendering part
+                final Vector p1 = b.getPosition();
+                final Vector p2 = linked.getPosition();
+                final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+                
+                if (element.doesCollideWith(line)) { return true; }
+            }
         }
         
         // check collision with mineral planets
@@ -265,7 +318,8 @@ public class SpaceWars extends Game
         else if (Keyboard.getState().isKeyPressed(Key.ESCAPE))
         {
             buildingType = BuildingType.NOTHING;
-            toBuild = null;
+            buildingToBePlaced = null;
+            selected = null;
         }
     }
     
@@ -274,15 +328,32 @@ public class SpaceWars extends Game
         // check if mouse is on building/planet
         if (Mouse.getState().isButtonPressed(Button.LEFT))
         {
-            for (GameElement element : gameState.getMap().getMineralPlanets())
+            final Vector mousescreen = Mouse.getState().getVector();
+            final Vector mouseworld = Screen.getInstance().getViewport().transformScreenToWorld(mousescreen);
+            
+            for (GameElement element : gameState.getBuildings())
             {
-                final Vector origin = Screen.getInstance().getViewport().getOriginPosition();
-                final Vector mouse = Mouse.getState().getVector();
-                
-                if (element.isHit(mouse.sub(origin)))
+                if (element.isHit(mouseworld))
                 {
                     selected = element;
+                    return;
                 }
+            }
+            
+            for (GameElement element : gameState.getMap().getMineralPlanets())
+            {
+                if (element.isHit(mouseworld))
+                {
+                    selected = element;
+                    return;
+                }
+            }
+            
+            HomePlanet homePlanet = player.getHomePlanet();
+            if (homePlanet.isHit(mouseworld))
+            {
+                selected = homePlanet;
+                return;
             }
         }
     }
@@ -291,6 +362,9 @@ public class SpaceWars extends Game
     {
         if (buildingType != BuildingType.NOTHING)
         {
+            // deselect current selected game element
+            selected = null;
+            
             final Vector origin = Screen.getInstance().getViewport().getOriginPosition();
             final Vector mouse = Mouse.getState().getVector();
             final Vector p = mouse.sub(origin);
@@ -298,40 +372,59 @@ public class SpaceWars extends Game
             switch (buildingType)
             {
                 case RELAY:
-                    toBuild = new Relay(p);
+                    buildingToBePlaced = new Relay(p);
                     break;
                 
                 case MINE:
-                    toBuild = new Mine(p);
+                    buildingToBePlaced = new Mine(p);
                     break;
                 
                 case SOLAR:
-                    toBuild = new SolarStation(p);
+                    buildingToBePlaced = new SolarStation(p);
                     break;
                 
                 case LASER_CANON:
-                    toBuild = new LaserCanon(p);
+                    buildingToBePlaced = new LaserCanon(p);
                     break;
                 
                 case SHIPYARD:
-                    toBuild = new Shipyard(p);
+                    buildingToBePlaced = new Shipyard(p);
                     break;
                 
                 default:
                     break;
             }
             
-            final boolean placeable = !checkCollision(toBuild);
-            toBuild.setPlaceable(placeable);
+            // check collisions
+            buildingIsPlaceable = !checkCollision(buildingToBePlaced);
+            buildingToBePlaced.setPlaceable(buildingIsPlaceable);
             
-            if (toBuild.isPlaceable() && Mouse.getState().isButtonReleased(Button.LEFT))
+            if (buildingIsPlaceable && Mouse.getState().isButtonReleased(Button.LEFT))
             {
-                toBuild.place();
-                gameState.getBuildings().add(toBuild);
-                toBuild = null;
+                // create links to other buildings that are reachable
+                for (Building building : gameState.getBuildings())
+                {
+                    // TODO: only calculate the lines once, reuse them in
+                    // rendering part
+                    
+                    final Vector p1 = buildingToBePlaced.getPosition();
+                    final Vector p2 = building.getPosition();
+                    Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+                    
+                    if (building.isReachableFrom(buildingToBePlaced) && !checkCollision(line, building))
+                    {
+                        // connect them
+                        buildingToBePlaced.getLinks().add(building);
+                        building.getLinks().add(buildingToBePlaced);
+                    }
+                }
+                
+                // place this building
+                buildingToBePlaced.place();
+                gameState.getBuildings().add(buildingToBePlaced);
+                buildingToBePlaced = null;
             }
         }
-        
     }
     
     private void scroll()
@@ -342,10 +435,8 @@ public class SpaceWars extends Game
         {
             final int dx = Mouse.getState().getDeltaX();
             final int dy = Mouse.getState().getDeltaY();
-            final int x = Screen.getInstance().getViewport().getOriginPosition().x + dx;
-            final int y = Screen.getInstance().getViewport().getOriginPosition().y + dy;
             
-            Screen.getInstance().getViewport().setOriginPosition(x, y);
+            Screen.getInstance().getViewport().move(dx, dy);
         }
         else if (Mouse.getState().isButtonDown(Button.RIGHT))
         {
@@ -358,28 +449,29 @@ public class SpaceWars extends Game
             final Vector delta = m.sub(scrollPosition);
             final int dx = delta.x / DIVISOR;
             final int dy = delta.y / DIVISOR;
-            final int x = Screen.getInstance().getViewport().getOriginPosition().x - dx;
-            final int y = Screen.getInstance().getViewport().getOriginPosition().y - dy;
             
-            Screen.getInstance().getViewport().setOriginPosition(x, y);
+            Screen.getInstance().getViewport().move(-dx, -dy);
         }
     }
     
+    // TODO: make a copy of the gamestate before rendering. If not, there can
+    // appear ConcurrentModificationExceptions because two threads (game thread
+    // and awt thread) iterate over the same list at the same time
     @Override
     public void render(Graphics2D g)
     {
-        final AffineTransform transform = g.getTransform();
+        final AffineTransform original = g.getTransform();
         
-        // add viewport translation to the whole rendering
-        final Vector origin = Screen.getInstance().getViewport().getOriginPosition();
-        final AffineTransform viewport = AffineTransform.getTranslateInstance(origin.x, origin.y);
+        // add viewport translation and scale to the world rendering
+        final AffineTransform viewport = Screen.getInstance().getViewport().getWorldToScreenTransform();
+        
         g.setTransform(viewport);
         
         // render world relative to viewport
         renderWorld(g);
         
         // reset transform
-        g.setTransform(transform);
+        g.setTransform(original);
         
         renderHud(g);
         
@@ -392,14 +484,14 @@ public class SpaceWars extends Game
     private void renderWorld(Graphics2D g)
     {
         // render connection lines between the buildings
-        if (toBuild != null && DEBUG)
+        if (buildingToBePlaced != null && buildingIsPlaceable)
         {
             g.setColor(Color.RED);
             for (Building building : gameState.getBuildings())
             {
-                if (building.isReachableFrom(toBuild))
+                if (building.isReachableFrom(buildingToBePlaced))
                 {
-                    final Vector p1 = toBuild.getPosition();
+                    final Vector p1 = buildingToBePlaced.getPosition();
                     final Vector p2 = building.getPosition();
                     Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
                     g.setColor(checkCollision(line, building) ? Color.red : Color.WHITE);
@@ -412,13 +504,13 @@ public class SpaceWars extends Game
         gameState.render(g);
         
         // render building thats should be built
-        if (toBuild != null)
+        if (buildingToBePlaced != null)
         {
             final float TRANSPARENCY = 0.4f;
             
             Composite original = g.getComposite();
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
-            toBuild.render(g);
+            buildingToBePlaced.render(g);
             g.setComposite(original);
         }
     }
@@ -444,22 +536,6 @@ public class SpaceWars extends Game
         final int DX = 10;
         final int DY = 22;
         final int LINE_HEIGHT = 14;
-        
-        // amount of res and energy
-       
-        for (Building building : gameState.getBuildings()){
-        	if (building.isPlaced()){
-        		if (building instanceof Mine){
-            		player.addMinerals(((Mine) building).getResPerMin()); 
-            		player.removeEnergy(((Mine) building).getEnergyConsumPerMin());
-            	}
-            	
-            	if (building instanceof SolarStation){
-            		player.addEnergy(((SolarStation) building).getEnergyPerMin());
-            	}
-        	}
-        }
-           
         
         g.setColor(Color.WHITE);
         g.drawString("FPS: " + getGameTime().getFrameRate(), DX, 0 * LINE_HEIGHT + DY);

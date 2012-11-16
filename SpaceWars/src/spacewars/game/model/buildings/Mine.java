@@ -31,4 +31,11 @@ public class Mine extends Building
     {
         return energyConsum;
     }
+    
+    @Override
+    public void upgrade()
+    {
+        // TODO Auto-generated method stub
+        super.upgrade();
+    }
 }

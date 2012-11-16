@@ -8,6 +8,7 @@ public class SolarStation extends Building
     private static final String NAME = "Solar";
     
     protected int energyPerMin = 100;
+    protected int maxEnergy = 10;
     
     public SolarStation(Vector position)
     {
@@ -24,4 +25,23 @@ public class SolarStation extends Building
     public int getEnergyPerMin(){
     	return energyPerMin;
     }
+    
+    public int getMaxEnergy()
+    {
+        return maxEnergy;
+    }
+    
+    public void setMaxEnergy(int maxEnergy)
+    {
+        this.maxEnergy = maxEnergy;
+    }
+    
+    
+    @Override
+    public void upgrade()
+    {
+        // TODO Auto-generated method stub
+        super.upgrade();
+    }
+    
 }

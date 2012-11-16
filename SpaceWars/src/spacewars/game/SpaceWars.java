@@ -142,6 +142,13 @@ public class SpaceWars extends Game
     @Override
     public void update(GameTime gameTime)
     {
+        /*
+         * TODO: winki
+         * 
+         * - Gebäude korrekt miteinander verbinden
+         * - Korrekter Energiefluss
+         */
+        
         // navigate
         scroll();
         
@@ -153,7 +160,7 @@ public class SpaceWars extends Game
         // move ships
         for (Ship ship : gameState.getShips())
         {
-            // TODO:
+            // TODO: kai
             /*
             if (this.isPlaced() && Mouse.getState().getX() >= p.x - r && Mouse.getState().getX() <= p.x + r && Mouse.getState().getY() >= p.y - r && Mouse.getState().getY() <= p.y + r)
             {                
@@ -207,7 +214,7 @@ public class SpaceWars extends Game
         setBuildMode();
         build();
         
-        // TODO:
+        // TODO: kai
         // amount of res and energy
         for (Building building : gameState.getBuildings())
         {
@@ -522,6 +529,14 @@ public class SpaceWars extends Game
      */
     private void renderHud(Graphics2D g)
     {   
+        /*
+         *  TODO: kai
+         *  
+         *  - Anzeige der Ressourcen: Energie, Mineralien
+         *  - Anzeige des aktuell ausgewählten GameElements (Tipp: getSelected())
+         *  - Siehe The Space Game
+         *  
+         */
         
     }
     

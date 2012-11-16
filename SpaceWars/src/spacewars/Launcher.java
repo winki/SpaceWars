@@ -15,8 +15,11 @@ public class Launcher
         SpaceWars.getInstance().run();
         
         /*
-         * Network.runServer(); Network.runClient("127.0.0.1");
+         Network.runServer();
+         System.out.println("hello");
+         Network.runClient("127.0.0.1");
          */
+         
     }
     
     /**

@@ -14,6 +14,7 @@ public class MapFactory
 {
     public static final int     NUMBER_OF_LAYERS          = 10;
     private static final int    NUMBER_OF_STARS           = 500;
+    
     private static final int    UNIT_SIZE                 = 10;
     
     private static final int    MINERAL_PLANET_MIN_RADIUS = 5;

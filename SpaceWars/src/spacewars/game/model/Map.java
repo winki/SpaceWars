@@ -18,10 +18,22 @@ import spacewars.gamelib.geometrics.Vector;
 @SuppressWarnings("serial")
 public class Map implements IRenderable, Serializable
 {
+    /*
+     * TODO: winki
+     * 
+     * - Stars aus Map auslagern
+     */
+    
     private int                 width;
     private int                 height;
+    
     private List<MineralPlanet> mineralPlanets;
     private List<Vector>        homePlanetPositions;
+    
+    private int numStars;
+    public static final int     NUMBER_OF_LAYERS          = 10;
+    private static final int    NUMBER_OF_STARS           = 500;
+    
     private List<Star>          stars;
     
     public Map(int width, int height)

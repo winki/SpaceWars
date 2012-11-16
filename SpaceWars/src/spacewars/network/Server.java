@@ -11,6 +11,19 @@ import de.root1.simon.annotation.SimonRemote;
 @SimonRemote(value = { IServer.class })
 public class Server implements IServer
 {
+    /*
+     * TODO: kai
+     * 
+     * - GameState minimieren 
+     * - Clients können sich beim Server registrieren
+     * - Server informiert Clients, wann das Spiel startet
+     *
+     * - Client holt neuen GameState
+     * - Client ruft Methoden auf, wenn er z.B. bauen will, oder upgraden
+     * - Server muss im Update loop die Anfragen berücksichtigen
+     * 
+     */
+    
     @Override
     public byte[] testNetworkSpeed(int bytes)
     {
@@ -21,33 +34,33 @@ public class Server implements IServer
         }
         return data;
     }
-
+    
     @Override
     public GameState getGameState(ClientInput input)
     {
         Map map = new Map(100, 100);
-        map.addHomePlanetPosition(new Vector(1, 2));        
+        map.addHomePlanetPosition(new Vector(1, 2));
         map.addHomePlanetPosition(new Vector(6, 7));
         
-        GameState gameState = new GameState(map); 
+        GameState gameState = new GameState(map);
         
         // 2 players
         for (int i = 0; i < 2; i++)
         {
             gameState.getPlayers().add(new Player(i, map));
-        } 
+        }
         
         // 500 buildings
         for (int i = 0; i < 500; i++)
         {
             gameState.getBuildings().add(new Mine(new Vector(1, 4)));
-        } 
+        }
         
         // 100 ships
         for (int i = 0; i < 100; i++)
         {
             gameState.getShips().add(new Ship(new Vector(3454, 345), 0.5));
-        } 
+        }
         
         return gameState;
     }

@@ -16,6 +16,11 @@ public abstract class Building extends GameElement
     protected boolean placed;
     protected int     costs;
     
+    /*
+     * TODO: kai
+     * - Baustatus
+     */
+    
     public Building(Vector position, int sizeRadius, int viewRadius, int costs)
     {
         super(position, sizeRadius, viewRadius);

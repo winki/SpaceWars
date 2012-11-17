@@ -605,8 +605,8 @@ public class SpaceWars extends Game
        
         g.drawRect(hudX, hudY, 500, 100);
         
-        g.drawRect(hudX + 100, hudY + 10, 100, 20);
-        g.fillRect(hudX + 100, hudY + 10, 100/maxEnergy*energy, 20);        
+        //g.drawRect(hudX + 100, hudY + 10, 100, 20);
+        //g.fillRect(hudX + 100, hudY + 10, 100/maxEnergy*energy, 20);        
     }
     
     /**

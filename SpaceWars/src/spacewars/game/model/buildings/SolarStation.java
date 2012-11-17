@@ -6,9 +6,11 @@ import spacewars.gamelib.geometrics.Vector;
 public class SolarStation extends Building
 {
     private static final String NAME = "Solar";
+    private static int[] maxEnergy = {10, 12, 15, 20, 27};
+    
     
     protected int energyPerMin = 100;
-    protected int maxEnergy = 10;
+    
     
     public SolarStation(Vector position)
     {
@@ -28,14 +30,9 @@ public class SolarStation extends Building
     
     public int getMaxEnergy()
     {
-        return maxEnergy;
+        return maxEnergy[level];
     }
-    
-    public void setMaxEnergy(int maxEnergy)
-    {
-        this.maxEnergy = maxEnergy;
-    }
-    
+        
     
     @Override
     public void upgrade()

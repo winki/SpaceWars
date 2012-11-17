@@ -530,25 +530,6 @@ public class SpaceWars extends Game
      */
     private void renderHud(Graphics2D g)
     {   
-        Dimension dimension = Screen.getInstance().getSize();
-       // int energy = player.getEnergy();
-        int energy = 4;
-        int minerals = player.getMinerals();
-        int score = player.getScore();
-        
-        int maxEnergy = 10;
-        
-        g.setColor(Color.white);
-        int hudX = (int) dimension.getWidth() - 501;
-        int hudY = (int) dimension.getHeight() - 101;
-       
-        g.drawRect(hudX, hudY, 500, 100);
-        
-        g.drawRect(hudX + 100, hudY + 10, 100, 20);
-        g.fillRect(hudX + 100, hudY + 10, 100/maxEnergy*energy, 20);
-        
-        
-        
         /*
          *  TODO: kai
          *  
@@ -557,6 +538,27 @@ public class SpaceWars extends Game
          *  - Siehe The Space Game
          *  
          */
+        
+        Dimension dimension = Screen.getInstance().getSize();
+       // int energy = player.getEnergy();
+        int energy = 4;
+        int minerals = player.getMinerals();
+        int score = player.getScore();
+        
+        //int maxEnergy = 
+        
+        g.setColor(Color.white);
+        int hudX = (int) dimension.getWidth() - 501;
+        int hudY = (int) dimension.getHeight() - 101;
+       
+        g.drawRect(hudX, hudY, 500, 100);
+        
+        g.drawRect(hudX + 100, hudY + 10, 100, 20);
+       // g.fillRect(hudX + 100, hudY + 10, 100/maxEnergy*energy, 20);
+        
+        
+        
+      
         
     }
     

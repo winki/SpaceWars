@@ -7,8 +7,8 @@ public class Mine extends Building
 {
     private static final String NAME           = "Mine";
     
-    protected int               mineralsPerMin = 100;
-    private int                 energyConsum   = 20;
+    protected int               mineralsPerMin = 30;
+    private int                 energyConsum   = 6;
     
     public Mine(Vector position)
     {

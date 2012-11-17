@@ -11,10 +11,11 @@ public abstract class Building extends GameElement
     /**
      * The upgrade level of the building
      */
-    protected int     level;
+    protected int     level = 1;
     protected boolean placeable;
     protected boolean placed;
     protected int     costs;
+    protected boolean hasEnergy = false;
     
     /*
      * TODO: kai
@@ -42,6 +43,14 @@ public abstract class Building extends GameElement
         return placed;
     }
     
+    public boolean hasEnergy(){
+        return hasEnergy;
+    }
+    
+    public void setHasEnergy(boolean hasEnergy){
+        this.hasEnergy = hasEnergy;
+    }
+    
     public void place()
     {
         this.placed = true;
@@ -62,7 +71,7 @@ public abstract class Building extends GameElement
     @Override
     public void render(Graphics2D g)
     {
-        g.setColor(isPlaceable() ? (isPlaced() ? Color.MAGENTA : Color.WHITE) : Color.RED);
+        g.setColor(isPlaceable() ? (isPlaced() ? (hasEnergy ? Color.MAGENTA : Color.cyan): Color.WHITE) : Color.RED);
         g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
         
         if (!isPlaced())

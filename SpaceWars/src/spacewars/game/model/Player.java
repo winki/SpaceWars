@@ -1,6 +1,8 @@
 package spacewars.game.model;
 
 import java.io.Serializable;
+import spacewars.game.model.buildings.Building;
+import spacewars.game.model.buildings.SolarStation;
 import spacewars.game.model.planets.HomePlanet;
 
 @SuppressWarnings("serial")
@@ -30,7 +32,8 @@ public class Player implements Serializable
      * The enable energy
      */
     protected int        energy;
-
+    
+    protected int        maxEnergy;
     
     public Player(int id, Map map)
     {
@@ -70,12 +73,28 @@ public class Player implements Serializable
     
     public void addEnergy(int energy)
     {
-        this.energy += energy;
+        if (this.energy + energy >= maxEnergy)
+        {
+            this.energy = maxEnergy;
+        }
+        else
+        {   
+            this.energy += energy;
+        }
+
     }
     
-    public void removeEnergy(int energy)
+    public boolean removeEnergy(int energy)
     {
-        this.energy -= energy;
+        if (this.energy - energy < 0)
+        {
+            return false;
+        }
+        else
+        {
+            this.energy -= energy;
+            return true;
+        }
     }
     
     public int getEnergy()
@@ -86,5 +105,13 @@ public class Player implements Serializable
     public int getMinerals()
     {
         return this.minerals;
+    }
+    
+    public int getMaxEnergy(){
+        return maxEnergy;
+    }
+    
+    public void setMaxEnergy(int maxEnergy){
+        this.maxEnergy = maxEnergy;
     }
 }

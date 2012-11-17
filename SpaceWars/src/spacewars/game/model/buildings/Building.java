@@ -2,7 +2,9 @@ package spacewars.game.model.buildings;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 import spacewars.game.model.GameElement;
+import spacewars.game.model.Player;
 import spacewars.gamelib.geometrics.Vector;
 
 @SuppressWarnings("serial")
@@ -47,8 +49,17 @@ public abstract class Building extends GameElement
         return hasEnergy;
     }
     
-    public void setHasEnergy(boolean hasEnergy){
-        this.hasEnergy = hasEnergy;
+    public void setHasEnergy(){
+        for(GameElement building : getLinks()){
+            if(building instanceof SolarStation || building instanceof Relay){
+                
+                
+                
+                
+                //if()
+            }
+        }
+        
     }
     
     public void place()

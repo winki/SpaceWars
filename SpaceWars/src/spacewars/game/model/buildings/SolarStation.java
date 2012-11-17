@@ -15,6 +15,7 @@ public class SolarStation extends Building
     {
         super(position, 15, 100, 100);
         this.energyPerMin = level * energyPerMin;
+        this.hasEnergy = true;
     }
 
     @Override

@@ -176,7 +176,7 @@ public class SpaceWars extends Game
             // TODO: kai
             /*
             if (this.isPlaced() && Mouse.getState().getX() >= p.x - r && Mouse.getState().getX() <= p.x + r && Mouse.getState().getY() >= p.y - r && Mouse.getState().getY() <= p.y + r)
-            {
+            {                
                 g.drawString("Build ship with left click | attack with right click", p.x + r + 20, p.y + 20);
                 if (Mouse.getState().isButtonPressed(Button.LEFT))
                 {
@@ -211,14 +211,11 @@ public class SpaceWars extends Game
                         g.drawString("no space left in hangar", p.x, p.y - 40);
                     }
                 }
-                
                 else if (Mouse.getState().isButtonPressed(Button.RIGHT))
-                {
-                    // send ships to attack!
+                { 
+                // send ships to attack!
                 }
             }
-            
-            
             */
             ship.update(gameTime);
         }
@@ -448,7 +445,6 @@ public class SpaceWars extends Game
                 buildingToBePlaced = null;
             }
         }
-        
     }
     
     private void scroll()
@@ -459,7 +455,7 @@ public class SpaceWars extends Game
         {
             final int dx = Mouse.getState().getDeltaX();
             final int dy = Mouse.getState().getDeltaY();
-           
+            
             Screen.getInstance().getViewport().move(dx, dy);
         }
         else if (Mouse.getState().isButtonDown(Button.RIGHT))
@@ -491,7 +487,7 @@ public class SpaceWars extends Game
         // add viewport translation and scale to the world rendering
         final AffineTransform viewport = Screen.getInstance().getViewport().getWorldToScreenTransform();
         
-       g.setTransform(viewport);
+        g.setTransform(viewport);
         
         // render world relative to viewport
         renderWorld(g);
@@ -586,18 +582,12 @@ public class SpaceWars extends Game
          */
         
         Dimension dimension = Screen.getInstance().getSize();
-        int energy = player.getEnergy();
+       // int energy = player.getEnergy();
+        int energy = 4;
         int minerals = player.getMinerals();
         int score = player.getScore();
-        //nicht so souverän 1 zu setzen obwohl 0, aber mit 0 fehler weil später 100/0
-        int maxEnergy = 1; 
         
-        for (Building building : getGameState().getBuildings()){
-            if(building instanceof SolarStation){
-                maxEnergy += ((SolarStation) building).getMaxEnergy();
-            }
-        }
-        
+        //int maxEnergy = 
         
         g.setColor(Color.white);
         int hudX = (int) dimension.getWidth() - 501;
@@ -605,8 +595,13 @@ public class SpaceWars extends Game
        
         g.drawRect(hudX, hudY, 500, 100);
         
-        //g.drawRect(hudX + 100, hudY + 10, 100, 20);
-        //g.fillRect(hudX + 100, hudY + 10, 100/maxEnergy*energy, 20);        
+        g.drawRect(hudX + 100, hudY + 10, 100, 20);
+       // g.fillRect(hudX + 100, hudY + 10, 100/maxEnergy*energy, 20);
+        
+        
+        
+      
+        
     }
     
     /**
@@ -620,22 +615,6 @@ public class SpaceWars extends Game
         final int DX = 10;
         final int DY = 22;
         final int LINE_HEIGHT = 14;
-        
-        // amount of res and energy
-       
-        for (Building building : gameState.getBuildings()){
-        	if (building.isPlaced()){
-        		if (building instanceof Mine){
-            		player.addMinerals(((Mine) building).getResPerMin()); 
-            		player.removeEnergy(((Mine) building).getEnergyConsumPerMin());
-            	}
-            	
-            	if (building instanceof SolarStation){
-            		player.addEnergy(((SolarStation) building).getEnergyPerMin());
-            	}
-        	}
-        }
-           
         
         g.setColor(Color.WHITE);
         g.drawString("FPS: " + getGameTime().getFrameRate(), DX, 0 * LINE_HEIGHT + DY);

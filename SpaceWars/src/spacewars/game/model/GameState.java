@@ -1,11 +1,14 @@
 package spacewars.game.model;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Line2D;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import spacewars.game.model.buildings.Building;
 import spacewars.gamelib.IRenderable;
+import spacewars.gamelib.geometrics.Vector;
 
 @SuppressWarnings("serial")
 public class GameState implements IRenderable, Serializable
@@ -56,6 +59,19 @@ public class GameState implements IRenderable, Serializable
         // render map
         map.render(g);
         
+        // render connection lines
+        g.setColor(Color.MAGENTA);
+        for (Building element : buildings)
+        {
+            for (GameElement linked : element.getLinks())
+            {
+                final Vector p1 = element.getPosition();
+                final Vector p2 = linked.getPosition();
+                Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+                g.draw(line);
+            }            
+        }
+        
         // render players
         for (Player player : players)
         {
@@ -63,7 +79,7 @@ public class GameState implements IRenderable, Serializable
         }
         
         // render building elements
-        for (GameElement element : buildings)
+        for (Building element : buildings)
         {
             element.render(g);
         }

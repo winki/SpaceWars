@@ -8,7 +8,7 @@ import spacewars.gamelib.geometrics.Vector;
 
 public class Viewport
 {
-    public final Rectangle viewport;
+    private final Rectangle       viewport;
     
     public Viewport()
     {
@@ -20,7 +20,7 @@ public class Viewport
      * <code>Vector</code> object.
      * 
      * @return origin position
-     */   
+     */
     public Vector getOriginPosition()
     {
         return new Vector(viewport.x, viewport.y);
@@ -46,7 +46,7 @@ public class Viewport
     {
         viewport.setLocation(viewport.width / 2 - x, viewport.height / 2 - y);
     }
-        
+    
     public Dimension getSize()
     {
         return viewport.getSize();

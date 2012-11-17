@@ -20,4 +20,12 @@ public class LaserCanon extends Building
     {
         return NAME;
     }
+    
+    @Override
+    public void upgrade()
+    {
+        super.upgrade();
+        this.power += 10;
+        
+    }
 }

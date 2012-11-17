@@ -12,12 +12,16 @@ public class Launcher
      */
     private static void testing()
     {
-        SpaceWars.getInstance().run();
+         SpaceWars.getInstance().run();
         
         /*
-         * Network.runServer(); Network.runClient("127.0.0.1");
+         Network.runServer();
+         System.out.println("hello");
+         Network.runClient("127.0.0.1");
          */
+        
     }
+
     
     /**
      * If the program is started with the parameter "serveronly" then only the

@@ -9,12 +9,19 @@ public class Shipyard extends Building
     
     public Shipyard(Vector position)
     {
-        super(position, 15, 1000, 500);
+        super(position, 15, 200, 500);
     }
     
     @Override
     public String getName()
     {
         return NAME;        
+    }
+    
+    @Override
+    public void upgrade()
+    {
+        // TODO Auto-generated method stub
+        super.upgrade();
     }
 }

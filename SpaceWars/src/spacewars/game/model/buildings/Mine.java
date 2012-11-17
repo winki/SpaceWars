@@ -5,15 +5,14 @@ import spacewars.gamelib.geometrics.Vector;
 @SuppressWarnings("serial")
 public class Mine extends Building
 {
-    private static final String NAME = "Mine";
+    private static final String NAME           = "Mine";
     
-    protected int 	mineralsPerMin = 100;
-    private static int costs = 100;
-    private int energyConsum = 20;
+    protected int               mineralsPerMin = 100;
+    private int                 energyConsum   = 20;
     
     public Mine(Vector position)
     {
-        super(position, 10, 100, costs);
+        super(position, 10, 100, 100);
     }
     
     @Override
@@ -22,12 +21,21 @@ public class Mine extends Building
         return NAME;
     }
     
-    public int getResPerMin(){
-    	
-    	return super.level * mineralsPerMin;
+    public int getResPerMin()
+    {
+        
+        return super.level * mineralsPerMin;
     }
     
-    public int getEnergyConsumPerMin(){
-    	return energyConsum;
+    public int getEnergyConsumPerMin()
+    {
+        return energyConsum;
+    }
+    
+    @Override
+    public void upgrade()
+    {
+        // TODO Auto-generated method stub
+        super.upgrade();
     }
 }

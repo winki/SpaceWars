@@ -64,4 +64,8 @@ public abstract class Building extends GameElement
         
         super.render(g);
     }
+    
+    public void upgrade(){
+        level ++;
+    }
 }

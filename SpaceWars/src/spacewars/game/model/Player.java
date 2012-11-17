@@ -29,7 +29,7 @@ public class Player implements Serializable
     /**
      * The enable energy
      */
-    protected int        energy;
+    protected int        energy = 0;
     
     public Player(int id, Map map)
     {

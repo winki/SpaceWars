@@ -6,13 +6,12 @@ import spacewars.gamelib.geometrics.Vector;
 public class SolarStation extends Building
 {
     private static final String NAME = "Solar";
-    
-    protected int energyPerMin = 100;
+    private static int MAXENERGY = 5;
+    protected int energyPerMin = 50;
     
     public SolarStation(Vector position)
     {
         super(position, 15, 100, 100);
-        this.energyPerMin = level * energyPerMin;
     }
 
     @Override
@@ -23,5 +22,19 @@ public class SolarStation extends Building
     
     public int getEnergyPerMin(){
     	return energyPerMin;
+    }
+    
+    public int getMaxEnergy(){
+        return MAXENERGY;
+    }
+    
+    @Override
+    public void upgrade()
+    {
+        // TODO Auto-generated method stub
+        super.upgrade();
+        energyPerMin += 50;
+        MAXENERGY += 5;
+        costs += 50;
     }
 }

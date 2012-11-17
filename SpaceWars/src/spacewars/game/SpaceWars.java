@@ -586,12 +586,18 @@ public class SpaceWars extends Game
          */
         
         Dimension dimension = Screen.getInstance().getSize();
-       // int energy = player.getEnergy();
-        int energy = 4;
+        int energy = player.getEnergy();
         int minerals = player.getMinerals();
         int score = player.getScore();
+        //nicht so souverän 1 zu setzen obwohl 0, aber mit 0 fehler weil später 100/0
+        int maxEnergy = 1; 
         
-        //int maxEnergy = 
+        for (Building building : getGameState().getBuildings()){
+            if(building instanceof SolarStation){
+                maxEnergy += ((SolarStation) building).getMaxEnergy();
+            }
+        }
+        
         
         g.setColor(Color.white);
         int hudX = (int) dimension.getWidth() - 501;
@@ -600,12 +606,7 @@ public class SpaceWars extends Game
         g.drawRect(hudX, hudY, 500, 100);
         
         g.drawRect(hudX + 100, hudY + 10, 100, 20);
-       // g.fillRect(hudX + 100, hudY + 10, 100/maxEnergy*energy, 20);
-        
-        
-        
-      
-        
+        g.fillRect(hudX + 100, hudY + 10, 100/maxEnergy*energy, 20);        
     }
     
     /**

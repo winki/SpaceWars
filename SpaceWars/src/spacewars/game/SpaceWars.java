@@ -2,6 +2,7 @@ package spacewars.game;
 
 import java.awt.*;
 import java.awt.geom.*;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import javax.swing.JFrame;
@@ -10,6 +11,7 @@ import spacewars.game.model.GameState;
 import spacewars.game.model.Map;
 import spacewars.game.model.Player;
 import spacewars.game.model.Ship;
+import spacewars.game.model.Star;
 import spacewars.game.model.buildings.*;
 import spacewars.game.model.planets.*;
 import spacewars.gamelib.Button;
@@ -19,37 +21,34 @@ import spacewars.gamelib.geometrics.Vector;
 public class SpaceWars extends Game
 {
     public static final boolean DEBUG = true;
-    
     /**
      * Game instance
      */
     private static SpaceWars    instance;
-    
     /**
      * Random object
      */
     private final Random        random;
-    
+    /**
+     * The stars in the background
+     */
+    private final List<Star>          stars;
     /**
      * The player
      */
     private Player              player;
-    
     /**
      * The game state
      */
     private GameState           gameState;
-    
     /**
      * Game element that is currently selected by players mouse
      */
     private GameElement         selected;
-    
     /**
      * The type of the building that will be built
      */
     private BuildingType        buildingType;
-    
     /**
      * Building object that will be built
      */
@@ -59,7 +58,6 @@ public class SpaceWars extends Game
      * it because of collision
      */
     private boolean             buildingIsPlaceable;
-    
     /**
      * Current scroll position
      */
@@ -70,6 +68,7 @@ public class SpaceWars extends Game
         this.random = new Random();
         this.buildingType = BuildingType.NOTHING;
         this.scrollPosition = new Vector();
+        this.stars = new LinkedList<Star>();
     }
     
     public static SpaceWars getInstance()
@@ -103,6 +102,7 @@ public class SpaceWars extends Game
         
         // init game state
         createMap();
+        createStars();
         createPlayers();
         createShips();
         
@@ -118,6 +118,18 @@ public class SpaceWars extends Game
         gameState = new GameState(map);
     }
     
+    private void createStars()
+    {
+        for (int i = 0; i < gameState.getMap().getNumStars(); i++)
+        {
+            final int x = random.nextInt(Screen.getInstance().getSize().width);
+            final int y = random.nextInt(Screen.getInstance().getSize().height);
+            final int layer = random.nextInt(gameState.getMap().getNumLayers());
+            
+            stars.add(new Star(x, y, layer));
+        }
+    }
+
     private void createPlayers()
     {
         final List<Player> players = gameState.getPlayers();
@@ -132,7 +144,7 @@ public class SpaceWars extends Game
     {
         final int NUM_SHIPS = 500;
         final List<Ship> ships = gameState.getShips();
-        final Vector home = gameState.getMap().getHomePlanetPosition(player.getId());
+        final Vector home = gameState.getMap().getHomePlanetPositions().get(player.getId());
         
         for (int i = 0; i < NUM_SHIPS; i++)
         {
@@ -297,29 +309,29 @@ public class SpaceWars extends Game
     
     private void returnToHomePlanet()
     {
-        Vector p = gameState.getMap().getHomePlanetPosition(player.getId());
+        Vector p = gameState.getMap().getHomePlanetPositions().get(player.getId());
         Screen.getInstance().getViewport().setCentralPosition(p.x, p.y);
     }
     
     private void setBuildMode()
     {
-        if (Keyboard.getState().isKeyPressed(Key.M))
+        if (Keyboard.getState().isKeyPressed(Key.M) || Keyboard.getState().isKeyPressed(Key.D2))
         {
             buildingType = BuildingType.MINE;
         }
-        else if (Keyboard.getState().isKeyPressed(Key.S))
+        else if (Keyboard.getState().isKeyPressed(Key.S) || Keyboard.getState().isKeyPressed(Key.D3))
         {
             buildingType = BuildingType.SOLAR;
         }
-        else if (Keyboard.getState().isKeyPressed(Key.R))
+        else if (Keyboard.getState().isKeyPressed(Key.R) || Keyboard.getState().isKeyPressed(Key.D1))
         {
             buildingType = BuildingType.RELAY;
         }
-        else if (Keyboard.getState().isKeyPressed(Key.Y))
+        else if (Keyboard.getState().isKeyPressed(Key.Y) || Keyboard.getState().isKeyPressed(Key.D5))
         {
             buildingType = BuildingType.SHIPYARD;
         }
-        else if (Keyboard.getState().isKeyPressed(Key.L))
+        else if (Keyboard.getState().isKeyPressed(Key.L) || Keyboard.getState().isKeyPressed(Key.D4))
         {
             buildingType = BuildingType.LASER_CANON;
         }
@@ -468,6 +480,8 @@ public class SpaceWars extends Game
     @Override
     public void render(Graphics2D g)
     {
+        renderStars(g);
+        
         final AffineTransform original = g.getTransform();
         
         // add viewport translation and scale to the world rendering
@@ -487,6 +501,34 @@ public class SpaceWars extends Game
         {
             renderDebug(g);
         }
+    }
+    
+    private void renderStars(Graphics2D g)
+    {
+        // render stars
+        final float TRANSPARENCY = 0.4f;
+        final Composite original = g.getComposite();
+        g.setColor(Color.WHITE);
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
+        for (Star star : stars)
+        {
+            final int DEEP_DELTA = 2;
+            final int DEEP_FACTOR = 1;
+            final double FACTOR = 0.5;
+            final int SIZE = (int) ((gameState.getMap().getNumLayers() - star.getLayer()) * FACTOR);
+            
+            final Vector o = Screen.getInstance().getViewport().getOriginPosition();
+            final int screenw = Screen.getInstance().getSize().width;
+            final int screenh = Screen.getInstance().getSize().height;
+            
+            int x = (o.x / (1 + DEEP_DELTA + star.getLayer() * DEEP_FACTOR) + star.getPosititon().x - SIZE / 2) % screenw;
+            int y = (o.y / (1 + DEEP_DELTA + star.getLayer() * DEEP_FACTOR) + star.getPosititon().y - SIZE / 2) % screenh;
+            if (x < 0) x += screenw;
+            if (y < 0) y += screenh;
+            
+            g.fillOval(x, y, SIZE, SIZE);
+        }
+        g.setComposite(original);
     }
     
     private void renderWorld(Graphics2D g)
@@ -529,7 +571,7 @@ public class SpaceWars extends Game
      * @param g the {@code Graphics2D} object
      */
     private void renderHud(Graphics2D g)
-    {   
+    {
         /*
          *  TODO: kai
          *  

@@ -38,9 +38,9 @@ public class Server implements IServer
     @Override
     public GameState getGameState(ClientInput input)
     {
-        Map map = new Map(100, 100);
-        map.addHomePlanetPosition(new Vector(1, 2));
-        map.addHomePlanetPosition(new Vector(6, 7));
+        Map map = new Map(100, 100, 500, 10);
+        map.getHomePlanetPositions().add(new Vector(1, 2));
+        map.getHomePlanetPositions().add(new Vector(6, 7));
         
         GameState gameState = new GameState(map);
         

@@ -77,7 +77,7 @@ public class SpaceWars extends Game
      * Can the building object <code>toBuild</code> really be built? Or can't it
      * because of collision
      */
-    private boolean             buildingIsPlaceable;    
+    private boolean             buildingIsPlaceable;
     /**
      * The links of the building that will be built
      */
@@ -274,9 +274,9 @@ public class SpaceWars extends Game
     
     /**
      * Finds the connected buildings to the <code>buildingToBePlaced</code> and
-     * calculates the lines between.
+     * computes the lines between.
      */
-    private void calculateLinks()
+    private void computeLinks()
     {
         links.clear();
         
@@ -295,7 +295,8 @@ public class SpaceWars extends Game
         }
         
         // sort links by lenght
-        Collections.sort(links, new Comparator<Link>() {
+        Collections.sort(links, new Comparator<Link>()
+        {
             @Override
             public int compare(Link l1, Link l2)
             {
@@ -324,11 +325,11 @@ public class SpaceWars extends Game
                 else
                 {
                     remove = !link.isCollision();
-                }                
+                }
             }
         }
         else if (buildingToBePlaced instanceof Relay || buildingToBePlaced instanceof SolarStation)
-        {   
+        {
             // take every link to relays or solar stations
             for (Iterator<Link> iterator = links.iterator(); iterator.hasNext();)
             {
@@ -338,11 +339,11 @@ public class SpaceWars extends Game
                 if (!(building instanceof Relay || building instanceof SolarStation))
                 {
                     iterator.remove();
-                }               
+                }
             }
         }
         else if (buildingToBePlaced instanceof LaserCanon || buildingToBePlaced instanceof Shipyard)
-        { 
+        {
             // remove too long links
             boolean remove = false;
             for (Iterator<Link> iterator = links.iterator(); iterator.hasNext();)
@@ -357,7 +358,7 @@ public class SpaceWars extends Game
                 else
                 {
                     remove = !link.isCollision();
-                }                
+                }
             }
         }
     }
@@ -551,7 +552,7 @@ public class SpaceWars extends Game
             if (buildingIsPlaceable)
             {
                 // calculate connections
-                calculateLinks();
+                computeLinks();
                 
                 // effectively build
                 if (Mouse.getState().isButtonReleased(Button.LEFT))
@@ -581,7 +582,7 @@ public class SpaceWars extends Game
     {
         final Vector m = Mouse.getState().getVector();
         
-        if (/*buildingType == BuildingType.NOTHING &&*/ Mouse.getState().isButtonDragged(Button.LEFT))
+        if (/*buildingType == BuildingType.NOTHING &&*/Mouse.getState().isButtonDragged(Button.LEFT))
         {
             final int dx = Mouse.getState().getDeltaX();
             final int dy = Mouse.getState().getDeltaY();

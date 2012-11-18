@@ -1,5 +1,6 @@
 package spacewars.network;
 
+import java.awt.Color;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Map;
 import spacewars.game.model.Player;
@@ -47,19 +48,19 @@ public class Server implements IServer
         // 2 players
         for (int i = 0; i < 2; i++)
         {
-            gameState.getPlayers().add(new Player(i, map));
+            gameState.getPlayers().add(new Player(i, Color.WHITE, new Vector(1, 2)));
         }
         
         // 500 buildings
         for (int i = 0; i < 500; i++)
         {
-            gameState.getBuildings().add(new Mine(new Vector(1, 4)));
+            gameState.getBuildings().add(new Mine(gameState.getPlayers().get(0), new Vector(1, 4)));
         }
         
         // 100 ships
         for (int i = 0; i < 100; i++)
         {
-            gameState.getShips().add(new Ship(new Vector(3454, 345), 0.5));
+            gameState.getShips().add(new Ship(gameState.getPlayers().get(0), new Vector(3454, 345), 0.5));
         }
         
         return gameState;

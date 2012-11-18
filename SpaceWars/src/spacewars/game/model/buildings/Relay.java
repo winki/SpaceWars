@@ -1,5 +1,6 @@
 package spacewars.game.model.buildings;
 
+import spacewars.game.model.Player;
 import spacewars.gamelib.geometrics.Vector;
 
 @SuppressWarnings("serial")
@@ -7,9 +8,9 @@ public class Relay extends Building
 {
     private static final String NAME = "Relay";
     
-    public Relay(Vector position)
+    public Relay(final Player player, final Vector position)
     {
-        super(position, 5, 100, 200);
+        super(player, position, 5, 100, 200);
     }
     
     @Override

@@ -13,7 +13,7 @@ import spacewars.gamelib.IUpdateable;
 import spacewars.gamelib.geometrics.Vector;
 
 @SuppressWarnings("serial")
-public class Ship extends GameElement implements IUpdateable
+public class Ship extends PlayerElement implements IUpdateable
 {
     protected int        power;
     protected int        health;
@@ -26,9 +26,9 @@ public class Ship extends GameElement implements IUpdateable
     protected double     anglediff;
     private final Random random;
     
-    public Ship(final Vector position, final double angle)
+    public Ship(final Player player, final Vector position, final double angle)
     {
-        super(position, 5, 100);
+        super(player, position, 5, 100);
         this.random = new Random();
         this.x = position.x;
         this.y = position.y;
@@ -79,7 +79,7 @@ public class Ship extends GameElement implements IUpdateable
         
         Shape ship = new Polygon(new int[] { position.x + 8, position.x - 4, position.x - 4 }, new int[] { position.y, position.y + 4, position.y - 4 }, 3);
         g.rotate(angle, x, y);
-        g.setColor(Color.MAGENTA);
+        g.setColor(player.getColor());
         g.fill(ship);
         
         g.setTransform(viewport);

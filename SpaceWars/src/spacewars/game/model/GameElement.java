@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
 import spacewars.game.SpaceWars;
 import spacewars.gamelib.IRenderable;
 import spacewars.gamelib.geometrics.Vector;
@@ -13,35 +11,42 @@ import spacewars.gamelib.geometrics.Vector;
 @SuppressWarnings("serial")
 public class GameElement implements IRenderable, Serializable
 {
-    protected Vector                  position;
-    protected int                     radius;
-    protected int                     sight;
-    protected int                     health;
-    protected int                     power;
+    /**
+     * The position
+     */
+    protected final Vector position;
+    /**
+     * The size radius
+     */
+    protected int          radius;
+    /**
+     * The sight radius
+     */
+    protected int          sight;
+    /**
+     * The health
+     */
+    protected int          health;
+    /**
+     * The power
+     */
+    protected int          power;
     
     /*
      * TODO: kai
      * - Leben
      */
     
-    protected final List<GameElement> links;
-    
-    public GameElement(Vector position, int radius, int sight)
+    public GameElement(final Vector position, final int radius, final int sight)
     {
         this.position = position;
         this.radius = radius;
         this.sight = sight;
-        this.links = new LinkedList<>();
     }
     
     public Vector getPosition()
     {
         return position;
-    }
-    
-    public void setPosition(Vector position)
-    {
-        this.position = position;
     }
     
     public int getSizeRadius()
@@ -77,11 +82,6 @@ public class GameElement implements IRenderable, Serializable
     public boolean isReachableFrom(GameElement element)
     {
         return position.distance(element.getPosition()) < element.getViewRadius();
-    }
-    
-    public List<GameElement> getLinks()
-    {
-        return links;
     }
     
     @Override

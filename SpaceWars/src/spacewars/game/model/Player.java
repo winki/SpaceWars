@@ -1,7 +1,9 @@
 package spacewars.game.model;
 
+import java.awt.Color;
 import java.io.Serializable;
 import spacewars.game.model.planets.HomePlanet;
+import spacewars.gamelib.geometrics.Vector;
 
 @SuppressWarnings("serial")
 public class Player implements Serializable
@@ -10,6 +12,10 @@ public class Player implements Serializable
      * Which homeplanet does he have
      */
     protected int        id;
+    /**
+     * The players color
+     */
+    protected Color color;    
     /**
      * The score
      */
@@ -25,7 +31,7 @@ public class Player implements Serializable
     /**
      * The players home planet
      */
-    protected HomePlanet homePlanet;
+    protected HomePlanet homePlanet;    
     /**
      * The enable energy
      */
@@ -33,10 +39,11 @@ public class Player implements Serializable
     
     protected int        maxEnergy;
     
-    public Player(int id, Map map)
+    public Player(int id, Color color, Vector homePlanetPosition)
     {
         this.id = id;
-        this.homePlanet = new HomePlanet(map.getHomePlanetPositions().get(id));
+        this.color = color;
+        this.homePlanet = new HomePlanet(homePlanetPosition);
     }
     
     public int getScore()
@@ -52,6 +59,11 @@ public class Player implements Serializable
     public int getId()
     {
         return id;
+    }
+    
+    public Color getColor()
+    {
+        return color;
     }
     
     public HomePlanet getHomePlanet()

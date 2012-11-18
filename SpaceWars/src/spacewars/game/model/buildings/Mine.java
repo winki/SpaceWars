@@ -1,5 +1,6 @@
 package spacewars.game.model.buildings;
 
+import spacewars.game.model.Player;
 import spacewars.gamelib.geometrics.Vector;
 
 @SuppressWarnings("serial")
@@ -10,9 +11,9 @@ public class Mine extends Building
     protected int               mineralsPerMin = 30;
     private int                 energyConsum   = 6;
     
-    public Mine(Vector position)
+    public Mine(final Player player, final Vector position)
     {
-        super(position, 10, 100, 100);
+        super(player, position, 10, 100, 100);
     }
     
     @Override

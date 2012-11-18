@@ -1,5 +1,6 @@
 package spacewars.game.model.buildings;
 
+import spacewars.game.model.Player;
 import spacewars.gamelib.geometrics.Vector;
 
 @SuppressWarnings("serial")
@@ -10,9 +11,9 @@ public class LaserCanon extends Building
     public int                  power;
     public int                  health;
     
-    public LaserCanon(Vector position)
+    public LaserCanon(final Player player, final Vector position)
     {
-        super(position, 15, 200, 300);
+        super(player, position, 15, 200, 300);
     }
     
     @Override
@@ -25,7 +26,6 @@ public class LaserCanon extends Building
     public void upgrade()
     {
         super.upgrade();
-        this.power += 10;
-        
+        this.power += 10;        
     }
 }

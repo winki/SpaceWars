@@ -19,11 +19,9 @@ public class GameState implements IRenderable, Serializable
     private final List<Ship>     ships;
     
     public GameState(Map map)
-    {
+    {        
+        this();
         this.map = map;
-        this.players = new LinkedList<>();
-        this.buildings = new LinkedList<>();
-        this.ships = new LinkedList<>();        
     }
     
     public GameState()
@@ -60,11 +58,13 @@ public class GameState implements IRenderable, Serializable
         map.render(g);
         
         // render connection lines
-        g.setColor(Color.MAGENTA);
         for (Building building : buildings)
         {
-            for (GameElement linked : building.getLinks())
-            {
+            final Player player = building.getPlayer();
+            g.setColor(player.getColor());
+            
+            for (Building linked : building.getLinks())
+            {                
                 final Vector p1 = building.getPosition();
                 final Vector p2 = linked.getPosition();
                 final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);

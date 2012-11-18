@@ -159,10 +159,10 @@ public class SpaceWars extends Game
     {
         final List<Player> players = gameState.getPlayers();
         
-        player = new Player(1, gameState.getMap());
+        players.add(new Player(1, Color.BLUE, getGameState().getMap().getHomePlanetPositions().get(1)));
+        players.add(new Player(2, Color.MAGENTA, getGameState().getMap().getHomePlanetPositions().get(2)));
         
-        players.add(player);
-        players.add(new Player(2, gameState.getMap()));
+        player = players.get(0);
     }
     
     private void createShips()
@@ -173,7 +173,7 @@ public class SpaceWars extends Game
         
         for (int i = 0; i < NUM_SHIPS; i++)
         {
-            ships.add(new Ship(new Vector(home), random.nextDouble() * Math.PI * 2));
+            ships.add(new Ship(player, new Vector(home), random.nextDouble() * Math.PI * 2));
         }
     }
     
@@ -248,6 +248,12 @@ public class SpaceWars extends Game
         // select
         select();
         
+        if (DEBUG)
+        {
+            // change player (only debug)
+            changePlayer();
+        }
+        
         // build
         setBuildMode();
         build();
@@ -261,7 +267,8 @@ public class SpaceWars extends Game
                 if (building instanceof Mine)
                 {
                     building.setHasEnergy();
-                    if (building.hasEnergy()){
+                    if (building.hasEnergy())
+                    {
                         player.removeEnergy(((Mine) building).getEnergyConsumPerMin());
                         player.addMinerals(((Mine) building).getResPerMin());
                     }
@@ -448,6 +455,21 @@ public class SpaceWars extends Game
         Screen.getInstance().getViewport().setCentralPosition(p.x, p.y);
     }
     
+    /**
+     * This method is only to test multiplayer behaviour
+     */
+    private void changePlayer()
+    {
+        if (Keyboard.getState().isKeyPressed(Key.F1))
+        {
+            player = gameState.getPlayers().get(0);
+        }
+        else if (Keyboard.getState().isKeyPressed(Key.F2))
+        {
+            player = gameState.getPlayers().get(1);
+        }
+    }
+    
     private void setBuildMode()
     {
         if (Keyboard.getState().isKeyPressed(Key.R) || Keyboard.getState().isKeyPressed(Key.D1))
@@ -510,6 +532,9 @@ public class SpaceWars extends Game
                 selected = homePlanet;
                 return;
             }
+            
+            // select nothing
+            selected = null;
         }
     }
     
@@ -527,23 +552,23 @@ public class SpaceWars extends Game
             switch (buildingType)
             {
                 case RELAY:
-                    buildingToBePlaced = new Relay(position);
+                    buildingToBePlaced = new Relay(player, position);
                     break;
                 
                 case MINE:
-                    buildingToBePlaced = new Mine(position);
+                    buildingToBePlaced = new Mine(player, position);
                     break;
                 
                 case SOLAR:
-                    buildingToBePlaced = new SolarStation(position);
+                    buildingToBePlaced = new SolarStation(player, position);
                     break;
                 
                 case LASER_CANON:
-                    buildingToBePlaced = new LaserCanon(position);
+                    buildingToBePlaced = new LaserCanon(player, position);
                     break;
                 
                 case SHIPYARD:
-                    buildingToBePlaced = new Shipyard(position);
+                    buildingToBePlaced = new Shipyard(player, position);
                     break;
                 
                 default:
@@ -721,8 +746,10 @@ public class SpaceWars extends Game
         int hudY = (int) dimension.getHeight() - 101;
         int maxEnergy = 0;
         
-        for (Building building : getGameState().getBuildings()){
-            if(building instanceof SolarStation){
+        for (Building building : getGameState().getBuildings())
+        {
+            if (building instanceof SolarStation)
+            {
                 maxEnergy += ((SolarStation) building).getMaxEnergy();
                 System.out.println(player.getEnergy());
                 System.out.println("player max ener " + player.getMaxEnergy());
@@ -731,21 +758,15 @@ public class SpaceWars extends Game
         
         player.setMaxEnergy(maxEnergy);
         
-        
         g.setColor(Color.white);
-
-       
+        
         g.drawRect(hudX, hudY, 500, 100);
-        g.drawRect(hudX+10, hudY+10, 95, 20);
-        if (maxEnergy != 0){
-            //wieso funktioniert 100/maxenergy*energy nicht?!
-            g.fillRect(hudX+10, hudY+10, 100*(player.getEnergy()/maxEnergy), 20);
+        g.drawRect(hudX + 10, hudY + 10, 95, 20);
+        if (maxEnergy != 0)
+        {
+            // wieso funktioniert 100/maxenergy*energy nicht?!
+            g.fillRect(hudX + 10, hudY + 10, 100 * (player.getEnergy() / maxEnergy), 20);
         }
-      
-
-        
-        
-      
         
     }
     

@@ -61,13 +61,14 @@ public class GameState implements IRenderable, Serializable
         
         // render connection lines
         g.setColor(Color.MAGENTA);
-        for (Building element : buildings)
+        for (Building building : buildings)
         {
-            for (GameElement linked : element.getLinks())
+            for (GameElement linked : building.getLinks())
             {
-                final Vector p1 = element.getPosition();
+                final Vector p1 = building.getPosition();
                 final Vector p2 = linked.getPosition();
-                Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+                final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+                
                 g.draw(line);
             }            
         }

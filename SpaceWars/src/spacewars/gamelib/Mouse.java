@@ -92,7 +92,7 @@ public class Mouse
         {
             // TODO: test synchronization side effects
             lastState = state;
-            state = new MouseState(buffer, lastState);            
+            state = new MouseState(buffer, lastState);
             buffer.clean();
         }
     }

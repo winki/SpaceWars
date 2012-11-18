@@ -1,20 +1,41 @@
 package spacewars.game;
 
-import java.awt.*;
-import java.awt.geom.*;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Composite;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
+import spacewars.game.model.Link;
 import spacewars.game.model.Map;
 import spacewars.game.model.Player;
 import spacewars.game.model.Ship;
 import spacewars.game.model.Star;
-import spacewars.game.model.buildings.*;
-import spacewars.game.model.planets.*;
+import spacewars.game.model.buildings.Building;
+import spacewars.game.model.buildings.BuildingType;
+import spacewars.game.model.buildings.LaserCanon;
+import spacewars.game.model.buildings.Mine;
+import spacewars.game.model.buildings.Relay;
+import spacewars.game.model.buildings.Shipyard;
+import spacewars.game.model.buildings.SolarStation;
+import spacewars.game.model.planets.HomePlanet;
+import spacewars.game.model.planets.MineralPlanet;
 import spacewars.gamelib.Button;
-import spacewars.gamelib.*;
+import spacewars.gamelib.Game;
+import spacewars.gamelib.GameTime;
+import spacewars.gamelib.Key;
+import spacewars.gamelib.Keyboard;
+import spacewars.gamelib.Mouse;
+import spacewars.gamelib.Screen;
 import spacewars.gamelib.geometrics.Vector;
 
 public class SpaceWars extends Game
@@ -31,7 +52,7 @@ public class SpaceWars extends Game
     /**
      * The stars in the background
      */
-    private final List<Star>          stars;
+    private final List<Star>    stars;
     /**
      * The player
      */
@@ -53,10 +74,14 @@ public class SpaceWars extends Game
      */
     private Building            buildingToBePlaced;
     /**
-     * Can the building object object {@code toBuild} really be built? Or can't
-     * it because of collision
+     * Can the building object <code>toBuild</code> really be built? Or can't it
+     * because of collision
      */
-    private boolean             buildingIsPlaceable;
+    private boolean             buildingIsPlaceable;    
+    /**
+     * The links of the building that will be built
+     */
+    private final List<Link>    links;
     /**
      * Current scroll position
      */
@@ -68,6 +93,7 @@ public class SpaceWars extends Game
         this.buildingType = BuildingType.NOTHING;
         this.scrollPosition = new Vector();
         this.stars = new LinkedList<Star>();
+        this.links = new LinkedList<>();
     }
     
     public static SpaceWars getInstance()
@@ -97,7 +123,7 @@ public class SpaceWars extends Game
         screen.setTitle("Space Wars");
         screen.setIcon("icon.png");
         screen.setSize(new Dimension(800, 600));
-        screen.setSize(null);
+        // screen.setSize(null);
         
         // init game state
         createMap();
@@ -128,7 +154,7 @@ public class SpaceWars extends Game
             stars.add(new Star(x, y, layer));
         }
     }
-
+    
     private void createPlayers()
     {
         final List<Player> players = gameState.getPlayers();
@@ -246,8 +272,116 @@ public class SpaceWars extends Game
         }
     }
     
+    /**
+     * Finds the connected buildings to the <code>buildingToBePlaced</code> and
+     * calculates the lines between.
+     */
+    private void calculateLinks()
+    {
+        links.clear();
+        
+        // create links to other buildings that are reachable
+        for (Building building : gameState.getBuildings())
+        {
+            if (building.isReachableFrom(buildingToBePlaced))
+            {
+                final Vector p1 = buildingToBePlaced.getPosition();
+                final Vector p2 = building.getPosition();
+                final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+                final boolean collision = checkCollision(line, building);
+                
+                links.add(new Link(building, line, collision));
+            }
+        }
+        
+        // sort links by lenght
+        Collections.sort(links, new Comparator<Link>() {
+            @Override
+            public int compare(Link l1, Link l2)
+            {
+                final double distance1 = l1.getLinkedBuilding().getPosition().distance(buildingToBePlaced.getPosition());
+                final double distance2 = l2.getLinkedBuilding().getPosition().distance(buildingToBePlaced.getPosition());
+                if (distance1 > distance2) return 1;
+                if (distance1 < distance2) return -1;
+                return 0;
+            }
+        });
+        
+        // filter links
+        if (buildingToBePlaced instanceof Mine)
+        {
+            // remove too long links
+            boolean remove = false;
+            for (Iterator<Link> iterator = links.iterator(); iterator.hasNext();)
+            {
+                final Link link = (Link) iterator.next();
+                final Building building = link.getLinkedBuilding();
+                
+                if (remove || !(building instanceof Relay || building instanceof SolarStation))
+                {
+                    iterator.remove();
+                }
+                else
+                {
+                    remove = !link.isCollision();
+                }                
+            }
+        }
+        else if (buildingToBePlaced instanceof Relay || buildingToBePlaced instanceof SolarStation)
+        {   
+            // take every link to relays or solar stations
+            for (Iterator<Link> iterator = links.iterator(); iterator.hasNext();)
+            {
+                final Link link = (Link) iterator.next();
+                final Building building = link.getLinkedBuilding();
+                
+                if (!(building instanceof Relay || building instanceof SolarStation))
+                {
+                    iterator.remove();
+                }               
+            }
+        }
+        else if (buildingToBePlaced instanceof LaserCanon || buildingToBePlaced instanceof Shipyard)
+        { 
+            // remove too long links
+            boolean remove = false;
+            for (Iterator<Link> iterator = links.iterator(); iterator.hasNext();)
+            {
+                final Link link = (Link) iterator.next();
+                final Building building = link.getLinkedBuilding();
+                
+                if (remove || !(building instanceof Relay || building instanceof SolarStation))
+                {
+                    iterator.remove();
+                }
+                else
+                {
+                    remove = !link.isCollision();
+                }                
+            }
+        }
+    }
+    
+    /**
+     * Checks whether a specified element collides with another game element.
+     * 
+     * @param element element that should be tested on collisions
+     * @return <code>true</code> if there was a collision
+     */
     private boolean checkCollision(GameElement element)
     {
+        // check collision with mineral planets
+        for (MineralPlanet m : gameState.getMap().getMineralPlanets())
+        {
+            if (element.doesCollideWith(m)) { return true; }
+        }
+        
+        // check collision with home planets
+        for (Player p : gameState.getPlayers())
+        {
+            if (element.doesCollideWith(p.getHomePlanet())) { return true; }
+        }
+        
         // check collision with buildings
         for (Building b : gameState.getBuildings())
         {
@@ -266,22 +400,18 @@ public class SpaceWars extends Game
             }
         }
         
-        // check collision with mineral planets
-        for (MineralPlanet m : gameState.getMap().getMineralPlanets())
-        {
-            if (element.doesCollideWith(m)) { return true; }
-        }
-        
-        // check collision with home planets
-        for (Player p : gameState.getPlayers())
-        {
-            if (element.doesCollideWith(p.getHomePlanet())) { return true; }
-        }
-        
         // no collision
         return false;
     }
     
+    /**
+     * Checks whether a specified line collides with another game element. The
+     * building the line is connected with is an exception.
+     * 
+     * @param line the line
+     * @param reachableBuilding the building the line is connected with
+     * @return <code>true</code> if there was a collision
+     */
     private boolean checkCollision(Line2D line, Building reachableBuilding)
     {
         // check collision with buildings
@@ -314,7 +444,11 @@ public class SpaceWars extends Game
     
     private void setBuildMode()
     {
-        if (Keyboard.getState().isKeyPressed(Key.M) || Keyboard.getState().isKeyPressed(Key.D2))
+        if (Keyboard.getState().isKeyPressed(Key.R) || Keyboard.getState().isKeyPressed(Key.D1))
+        {
+            buildingType = BuildingType.RELAY;
+        }
+        else if (Keyboard.getState().isKeyPressed(Key.M) || Keyboard.getState().isKeyPressed(Key.D2))
         {
             buildingType = BuildingType.MINE;
         }
@@ -322,17 +456,13 @@ public class SpaceWars extends Game
         {
             buildingType = BuildingType.SOLAR;
         }
-        else if (Keyboard.getState().isKeyPressed(Key.R) || Keyboard.getState().isKeyPressed(Key.D1))
+        else if (Keyboard.getState().isKeyPressed(Key.L) || Keyboard.getState().isKeyPressed(Key.D4))
         {
-            buildingType = BuildingType.RELAY;
+            buildingType = BuildingType.LASER_CANON;
         }
         else if (Keyboard.getState().isKeyPressed(Key.Y) || Keyboard.getState().isKeyPressed(Key.D5))
         {
             buildingType = BuildingType.SHIPYARD;
-        }
-        else if (Keyboard.getState().isKeyPressed(Key.L) || Keyboard.getState().isKeyPressed(Key.D4))
-        {
-            buildingType = BuildingType.LASER_CANON;
         }
         else if (Keyboard.getState().isKeyPressed(Key.ESCAPE))
         {
@@ -381,33 +511,33 @@ public class SpaceWars extends Game
     {
         if (buildingType != BuildingType.NOTHING)
         {
-            // deselect current selected game element
+            // deselct
             selected = null;
             
-            final Vector origin = Screen.getInstance().getViewport().getOriginPosition();
             final Vector mouse = Mouse.getState().getVector();
-            final Vector p = mouse.sub(origin);
+            final Vector position = Screen.getInstance().getViewport().transformScreenToWorld(mouse);
             
+            // prebuild object that should be placed
             switch (buildingType)
             {
                 case RELAY:
-                    buildingToBePlaced = new Relay(p);
+                    buildingToBePlaced = new Relay(position);
                     break;
                 
                 case MINE:
-                    buildingToBePlaced = new Mine(p);
+                    buildingToBePlaced = new Mine(position);
                     break;
                 
                 case SOLAR:
-                    buildingToBePlaced = new SolarStation(p);
+                    buildingToBePlaced = new SolarStation(position);
                     break;
                 
                 case LASER_CANON:
-                    buildingToBePlaced = new LaserCanon(p);
+                    buildingToBePlaced = new LaserCanon(position);
                     break;
                 
                 case SHIPYARD:
-                    buildingToBePlaced = new Shipyard(p);
+                    buildingToBePlaced = new Shipyard(position);
                     break;
                 
                 default:
@@ -418,30 +548,31 @@ public class SpaceWars extends Game
             buildingIsPlaceable = !checkCollision(buildingToBePlaced);
             buildingToBePlaced.setPlaceable(buildingIsPlaceable);
             
-            if (buildingIsPlaceable && Mouse.getState().isButtonReleased(Button.LEFT))
+            if (buildingIsPlaceable)
             {
-                // create links to other buildings that are reachable
-                for (Building building : gameState.getBuildings())
-                {
-                    // TODO: only calculate the lines once, reuse them in
-                    // rendering part
-                    
-                    final Vector p1 = buildingToBePlaced.getPosition();
-                    final Vector p2 = building.getPosition();
-                    Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
-                    
-                    if (building.isReachableFrom(buildingToBePlaced) && !checkCollision(line, building))
-                    {
-                        // connect them
-                        buildingToBePlaced.getLinks().add(building);
-                        building.getLinks().add(buildingToBePlaced);
-                    }
-                }
+                // calculate connections
+                calculateLinks();
                 
-                // place this building
-                buildingToBePlaced.place();
-                gameState.getBuildings().add(buildingToBePlaced);
-                buildingToBePlaced = null;
+                // effectively build
+                if (Mouse.getState().isButtonReleased(Button.LEFT))
+                {
+                    // place this building
+                    buildingToBePlaced.place();
+                    gameState.getBuildings().add(buildingToBePlaced);
+                    
+                    // add links
+                    for (Link link : links)
+                    {
+                        if (!link.isCollision())
+                        {
+                            final Building building = link.getLinkedBuilding();
+                            buildingToBePlaced.getLinks().add(building);
+                            building.getLinks().add(buildingToBePlaced);
+                        }
+                    }
+                    
+                    buildingToBePlaced = null;
+                }
             }
         }
     }
@@ -450,7 +581,7 @@ public class SpaceWars extends Game
     {
         final Vector m = Mouse.getState().getVector();
         
-        if (buildingType == BuildingType.NOTHING && Mouse.getState().isButtonDragged(Button.LEFT))
+        if (/*buildingType == BuildingType.NOTHING &&*/ Mouse.getState().isButtonDragged(Button.LEFT))
         {
             final int dx = Mouse.getState().getDeltaX();
             final int dy = Mouse.getState().getDeltaY();
@@ -479,26 +610,27 @@ public class SpaceWars extends Game
     @Override
     public void render(Graphics2D g)
     {
-        renderStars(g);
-        
-        final AffineTransform original = g.getTransform();
-        
+        {
+            // render stars in the background
+            renderStars(g);
+        }
         // add viewport translation and scale to the world rendering
         final AffineTransform viewport = Screen.getInstance().getViewport().getWorldToScreenTransform();
-        
-        g.setTransform(viewport);
-        
-        // render world relative to viewport
-        renderWorld(g);
-        
-        // reset transform
-        g.setTransform(original);
-        
-        renderHud(g);
-        
-        if (DEBUG)
+        final AffineTransform original = g.getTransform();
+        g.setTransform(viewport); // render world relative to viewport
         {
-            renderDebug(g);
+            // render world (game state, map...)
+            renderWorld(g);
+        }
+        g.setTransform(original); // reset transform
+        {
+            // render heads up display
+            renderHud(g);
+            
+            if (DEBUG)
+            {
+                renderDebug(g);
+            }
         }
     }
     
@@ -536,16 +668,12 @@ public class SpaceWars extends Game
         if (buildingToBePlaced != null && buildingIsPlaceable)
         {
             g.setColor(Color.RED);
-            for (Building building : gameState.getBuildings())
+            for (Link link : links)
             {
-                if (building.isReachableFrom(buildingToBePlaced))
-                {
-                    final Vector p1 = buildingToBePlaced.getPosition();
-                    final Vector p2 = building.getPosition();
-                    Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
-                    g.setColor(checkCollision(line, building) ? Color.red : Color.WHITE);
-                    g.draw(line);
-                }
+                final Line2D line = link.getLine();
+                
+                g.setColor(link.isCollision() ? Color.RED : Color.WHITE);
+                g.draw(line);
             }
         }
         

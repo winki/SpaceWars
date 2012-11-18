@@ -1,9 +1,7 @@
 package spacewars.game.model;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -89,24 +87,23 @@ public class GameElement implements IRenderable, Serializable
     @Override
     public void render(Graphics2D g)
     {
-        if (SpaceWars.getInstance().getSelected() == this)
-        {
-            final Stroke original = g.getStroke();
-            
-            final int OVERLAY = 3;
-            final int STROKE_WIDTH = 6;
-            
-            g.setColor(Color.WHITE);
-            g.setStroke(new BasicStroke(STROKE_WIDTH));
-            g.drawOval(position.x - radius - OVERLAY, position.y - radius - OVERLAY, 2 * (radius + OVERLAY), 2 * (radius + OVERLAY));
-            
-            g.setStroke(original);
-        }
-        
         if (SpaceWars.DEBUG)
         {
             g.setColor(Color.RED);
             g.drawOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
+        }
+        
+        if (SpaceWars.getInstance().getSelected() == this)
+        {
+            final int OVERLAY = 3;
+            final int SERIF = 5;
+            
+            g.setColor(Color.WHITE);
+            g.drawOval(position.x - radius - OVERLAY, position.y - radius - OVERLAY, 2 * (radius + OVERLAY), 2 * (radius + OVERLAY));
+            g.drawLine(position.x, position.y - radius - OVERLAY - SERIF, position.x, position.y - radius - OVERLAY + SERIF);
+            g.drawLine(position.x + radius + OVERLAY - SERIF, position.y, position.x + radius + OVERLAY + SERIF, position.y);
+            g.drawLine(position.x, position.y + radius + OVERLAY - SERIF, position.x, position.y + radius + OVERLAY + SERIF);
+            g.drawLine(position.x - radius - OVERLAY - SERIF, position.y, position.x - radius - OVERLAY + SERIF, position.y);
         }
     }
 }

@@ -5,9 +5,9 @@ import java.awt.event.KeyListener;
 
 public class Keyboard
 {
-    private static KeyboardState     buffer = new KeyboardState();
-    private static KeyboardState     state  = new KeyboardState();
-    private static KeyboardState     lastState  = new KeyboardState();
+    private static KeyboardState     buffer    = new KeyboardState();
+    private static KeyboardState     state     = new KeyboardState();
+    private static KeyboardState     lastState = new KeyboardState();
     private static final KeyListener listener;
     
     static

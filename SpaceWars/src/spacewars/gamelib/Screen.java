@@ -50,7 +50,7 @@ public class Screen
             {
                 Graphics2D g = (Graphics2D) graphics;
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                                
+                
                 if (owner != null)
                 {
                     owner.render(g);

@@ -1,8 +1,6 @@
 package spacewars.game.model;
 
 import java.io.Serializable;
-import spacewars.game.model.buildings.Building;
-import spacewars.game.model.buildings.SolarStation;
 import spacewars.game.model.planets.HomePlanet;
 
 @SuppressWarnings("serial")

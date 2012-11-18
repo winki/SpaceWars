@@ -2,9 +2,7 @@ package spacewars.game.model.buildings;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 import spacewars.game.model.GameElement;
-import spacewars.game.model.Player;
 import spacewars.gamelib.geometrics.Vector;
 
 @SuppressWarnings("serial")

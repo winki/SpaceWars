@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import javax.swing.JFrame;
 import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Link;
@@ -260,13 +261,18 @@ public class SpaceWars extends Game
             {
                 if (building instanceof Mine)
                 {
-                    player.addMinerals(((Mine) building).getResPerMin());
-                    player.removeEnergy(((Mine) building).getEnergyConsumPerMin());
+                    building.setHasEnergy();
+                    if (building.hasEnergy()){
+                        player.removeEnergy(((Mine) building).getEnergyConsumPerMin());
+                        player.addMinerals(((Mine) building).getResPerMin());
+                    }
+                    
                 }
                 
                 if (building instanceof SolarStation)
                 {
-                    player.addEnergy(((SolarStation) building).getEnergyPerMin());
+                    ((SolarStation) building).update();
+                    player.addEnergy(((SolarStation) building).getEnergy());
                 }
             }
         }
@@ -708,6 +714,39 @@ public class SpaceWars extends Game
          *  - Siehe The Space Game
          *  
          */
+        
+        Dimension dimension = Screen.getInstance().getSize();
+        int minerals = player.getMinerals();
+        int score = player.getScore();
+        int hudX = (int) dimension.getWidth() - 501;
+        int hudY = (int) dimension.getHeight() - 101;
+        int maxEnergy = 0;
+        
+        for (Building building : getGameState().getBuildings()){
+            if(building instanceof SolarStation){
+                maxEnergy += ((SolarStation) building).getMaxEnergy();
+                System.out.println(player.getEnergy());
+                System.out.println("player max ener " + player.getMaxEnergy());
+            }
+        }
+        
+        player.setMaxEnergy(maxEnergy);
+        
+        
+        g.setColor(Color.white);
+
+       
+        g.drawRect(hudX, hudY, 500, 100);
+        g.drawRect(hudX+10, hudY+10, 95, 20);
+        if (maxEnergy != 0){
+            //wieso funktioniert 100/maxenergy*energy nicht?!
+            g.fillRect(hudX+10, hudY+10, 100*(player.getEnergy()/maxEnergy), 20);
+        }
+      
+
+        
+        
+      
         
     }
     

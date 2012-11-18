@@ -17,4 +17,11 @@ public class Shipyard extends Building
     {
         return NAME;        
     }
+    
+    @Override
+    public void upgrade()
+    {
+        // TODO Auto-generated method stub
+        super.upgrade();
+    }
 }

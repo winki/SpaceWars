@@ -237,10 +237,12 @@ public class SpaceWars extends Game
                     if (building.hasEnergy())
                     {
                         // building.setHasEnergy();
-                        if (building.hasEnergy())
+                        if (building instanceof Mine)
                         {
-                            player.removeEnergy(((Mine) building).getEnergyConsumPerMin() / 60);
-                            player.addMinerals(((Mine) building).getResPerMin() / 60);
+                            final Mine mine = (Mine) building;
+                            
+                            player.removeEnergy(mine.getEnergyConsumPerMin() / 60);
+                            player.addMinerals(mine.getResPerMin() / 60);
                         }
                     }
                     

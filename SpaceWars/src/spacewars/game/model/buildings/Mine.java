@@ -45,11 +45,4 @@ public class Mine extends Building
     {
         return position.distance(planet.getPosition()) - planet.getSizeRadius() < getMineRange();
     }
-    
-    @Override
-    public void upgrade()
-    {
-        // TODO Auto-generated method stub
-        super.upgrade();
-    }
 }

@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.LinkedList;
 import java.util.List;
-import spacewars.game.model.GameElement;
 import spacewars.game.model.Player;
 import spacewars.game.model.PlayerElement;
 import spacewars.gamelib.geometrics.Vector;
@@ -15,12 +14,20 @@ public abstract class Building extends PlayerElement
     /**
      * The upgrade level of the building
      */
-    protected int            level     = 1;
-    protected boolean        placeable;
-    protected boolean        placed;
-    protected int            costs;
-    protected boolean        hasEnergy = false;
-    protected List<Building> linkedBuildings;
+    protected int              level     = 1;
+    protected boolean          placeable;
+    protected boolean          placed;
+    protected int              costs;
+    /**
+     * Helper flag to check if a building has already been check for energy
+     * availability
+     */
+    protected volatile boolean isCheckedForEngery = false;
+    /**
+     * Is the building on the energy net
+     */
+    protected boolean          hasEnergy = false;
+    protected List<Building>   linkedBuildings;
     
     /*
      * TODO: kai
@@ -54,17 +61,19 @@ public abstract class Building extends PlayerElement
         return hasEnergy;
     }
     
-    public void setHasEnergy()
+    public boolean isCheckedForEngery()
     {
-        for (GameElement building : getLinks())
-        {
-            if (building instanceof SolarStation || building instanceof Relay)
-            {   
-                
-                // if()
-            }
-        }
-        
+        return isCheckedForEngery;
+    }
+    
+    public void setCheckedForEngery(boolean isCheckedForEngery)
+    {
+        this.isCheckedForEngery = isCheckedForEngery;
+    }
+    
+    public void setHasEnergy(boolean hasEnergy)
+    {
+        this.hasEnergy = hasEnergy;
     }
     
     public void place()

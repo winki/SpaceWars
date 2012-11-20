@@ -186,12 +186,7 @@ public class SpaceWars extends Game
     
     @Override
     public void update(GameTime gameTime)
-    {
-        /*
-         * TODO: winki
-         * - Korrekter Energiefluss
-         */
-        
+    {        
         // navigate
         scroll();
         
@@ -203,50 +198,6 @@ public class SpaceWars extends Game
         // move ships
         for (Ship ship : gameState.getShips())
         {
-            // TODO: kai
-            /*
-            if (this.isPlaced() && Mouse.getState().getX() >= p.x - r && Mouse.getState().getX() <= p.x + r && Mouse.getState().getY() >= p.y - r && Mouse.getState().getY() <= p.y + r)
-            {                
-                g.drawString("Build ship with left click | attack with right click", p.x + r + 20, p.y + 20);
-                if (Mouse.getState().isButtonPressed(Button.LEFT))
-                {
-                    if (ships <= 16)
-                    {
-                        ships += 1;
-                        innerY = (int) (innerR * Math.sin(2 * Math.PI / 16 * ships));
-                        innerX = (int) Math.sqrt(innerR * innerR - innerY * innerY);
-                        if (ships <= 4)
-                        {
-                            ship.setPosition(new Vector(p.x - innerX, p.y - innerY));
-                            gameState.getShips().add(ship);
-                        }
-                        else if (ships <= 8)
-                        {
-                            ship.setPosition(new Vector(p.x - innerX, p.y + innerY));
-                            gameState.getShips().add(ship);
-                        }
-                        else if (ships <= 12)
-                        {
-                            ship.setPosition(new Vector(p.x + innerX, p.y + innerY));
-                            gameState.getShips().add(ship);
-                        }
-                        else
-                        {
-                            ship.setPosition(new Vector(p.x + innerX, p.y - innerY));
-                            gameState.getShips().add(ship);
-                        }
-                    }
-                    else
-                    {
-                        g.drawString("no space left in hangar", p.x, p.y - 40);
-                    }
-                }
-                else if (Mouse.getState().isButtonPressed(Button.RIGHT))
-                { 
-                // send ships to attack!
-                }
-            }
-            */
             ship.update(gameTime);
         }
         
@@ -261,7 +212,17 @@ public class SpaceWars extends Game
         
         // build
         setBuildMode();
-        build();
+        build();        
+        
+        // check which buildings are on the energy net
+        checkEnergyAvailability();
+        
+        // update energy flow every 20th frame
+        final int UPDATE_RATE = 20;
+        if (gameTime.getTicks() % UPDATE_RATE == 0)
+        {            
+            updateEnergyFlow();
+        }
         
         // TODO: kai
         // amount of res and energy
@@ -271,7 +232,7 @@ public class SpaceWars extends Game
             {
                 if (building instanceof Mine)
                 {
-                    building.setHasEnergy();
+                    //building.setHasEnergy(true);
                     if (building.hasEnergy())
                     {
                         player.removeEnergy(((Mine) building).getEnergyConsumPerMin());
@@ -488,6 +449,59 @@ public class SpaceWars extends Game
         
         // no collision
         return false;
+    }
+    
+    /**
+     * Check for every building if it is on the energy net
+     */
+    private void checkEnergyAvailability()
+    {
+        final List<SolarStation> solars = new LinkedList<>();
+        
+        // reset checked for energy flag
+        for (Building building : getGameState().getBuildings())
+        {
+            building.setCheckedForEngery(false);
+            
+            // collect solars
+            if (building instanceof SolarStation)
+            {
+                final SolarStation solar = (SolarStation) building;
+                solars.add(solar);
+            }
+        }
+        
+        // checks recursively
+        for (SolarStation solar : solars)
+        {
+            checkEnergyAvailability(solar);
+        }
+    }
+    
+    /**
+     * Checks recursively if a building is somehow connected to a solar station.
+     * 
+     * @param check the building to check
+     */
+    private void checkEnergyAvailability(Building check)
+    {
+        if (!check.isCheckedForEngery())
+        {
+            check.setCheckedForEngery(true);
+            for (Building linked : check.getLinks())
+            {
+                linked.setHasEnergy(true);
+                checkEnergyAvailability(linked);
+            }
+        }
+    }
+    
+    private void updateEnergyFlow()
+    {   
+        /*
+         * TODO: winki
+         * - Korrekter Energiefluss
+         */
     }
     
     private void returnToHomePlanet()

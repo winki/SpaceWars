@@ -1,5 +1,6 @@
 package spacewars.game.model.buildings;
 
+import java.awt.Graphics2D;
 import spacewars.game.model.Player;
 import spacewars.gamelib.geometrics.Vector;
 
@@ -59,5 +60,56 @@ public class SolarStation extends Building
     public int getEnergy()
     {
         return energyReserves;
+    }
+    
+    @Override
+    public void render(Graphics2D g)
+    {
+        super.render(g);
+        
+        // TODO: kai
+        /*
+        if (this.isPlaced() && Mouse.getState().getX() >= p.x - r && Mouse.getState().getX() <= p.x + r && Mouse.getState().getY() >= p.y - r && Mouse.getState().getY() <= p.y + r)
+        {                
+            g.drawString("Build ship with left click | attack with right click", p.x + r + 20, p.y + 20);
+            if (Mouse.getState().isButtonPressed(Button.LEFT))
+            {
+                if (ships <= 16)
+                {
+                    ships += 1;
+                    innerY = (int) (innerR * Math.sin(2 * Math.PI / 16 * ships));
+                    innerX = (int) Math.sqrt(innerR * innerR - innerY * innerY);
+                    if (ships <= 4)
+                    {
+                        ship.setPosition(new Vector(p.x - innerX, p.y - innerY));
+                        gameState.getShips().add(ship);
+                    }
+                    else if (ships <= 8)
+                    {
+                        ship.setPosition(new Vector(p.x - innerX, p.y + innerY));
+                        gameState.getShips().add(ship);
+                    }
+                    else if (ships <= 12)
+                    {
+                        ship.setPosition(new Vector(p.x + innerX, p.y + innerY));
+                        gameState.getShips().add(ship);
+                    }
+                    else
+                    {
+                        ship.setPosition(new Vector(p.x + innerX, p.y - innerY));
+                        gameState.getShips().add(ship);
+                    }
+                }
+                else
+                {
+                    g.drawString("no space left in hangar", p.x, p.y - 40);
+                }
+            }
+            else if (Mouse.getState().isButtonPressed(Button.RIGHT))
+            { 
+            // send ships to attack!
+            }
+        }
+        */
     }
 }

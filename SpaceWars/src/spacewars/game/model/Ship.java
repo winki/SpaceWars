@@ -65,8 +65,8 @@ public class Ship extends PlayerElement implements IUpdateable
             angle += anglediff / TURN_SLOWMO;
         }
         
-        x += speed * Math.cos(angle);
-        y += speed * Math.sin(angle);
+        x += speed * Math.cos(angle) * gameTime.getElapsedGameTime() / 10000000;
+        y += speed * Math.sin(angle) * gameTime.getElapsedGameTime() / 10000000;
         position.x = (int) x;
         position.y = (int) y;
     }

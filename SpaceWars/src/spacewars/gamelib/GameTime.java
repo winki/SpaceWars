@@ -7,6 +7,7 @@ public class GameTime
     private long    elapsedGameTime;
     private int     frameRate;
     private boolean runningSlowly;
+    private long    sinceLastResGet;
     
     protected GameTime()
     {}
@@ -39,6 +40,17 @@ public class GameTime
     public long getElapsedGameTime()
     {
         return elapsedGameTime;
+    }
+    
+    public boolean isSecond(){
+        if(sinceLastResGet >= 600000000L){
+            sinceLastResGet = 0;
+            return true;
+        }else{
+            sinceLastResGet += elapsedGameTime;
+            System.out.println(sinceLastResGet);
+            return false;
+        }
     }
     
     protected void setElapsedGameTime(long elapsedGameTime)

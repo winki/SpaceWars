@@ -186,7 +186,7 @@ public class SpaceWars extends Game
     
     @Override
     public void update(GameTime gameTime)
-    {        
+    {
         // navigate
         scroll();
         
@@ -212,7 +212,7 @@ public class SpaceWars extends Game
         
         // build
         setBuildMode();
-        build();        
+        build();
         
         // check which buildings are on the energy net
         checkEnergyAvailability();
@@ -220,31 +220,35 @@ public class SpaceWars extends Game
         // update energy flow every 20th frame
         final int UPDATE_RATE = 20;
         if (gameTime.getTicks() % UPDATE_RATE == 0)
-        {            
+        {
             updateEnergyFlow();
         }
         
         // TODO: kai
         // amount of res and energy
-        for (Building building : gameState.getBuildings())
+        if (gameTime.isSecond())
         {
-            if (building.isPlaced())
+            System.out.println("true");
+            for (Building building : gameState.getBuildings())
             {
-                if (building instanceof Mine)
+                if (building.isPlaced())
                 {
-                    //building.setHasEnergy(true);
+                    // building.setHasEnergy(true);
                     if (building.hasEnergy())
                     {
-                        player.removeEnergy(((Mine) building).getEnergyConsumPerMin());
-                        player.addMinerals(((Mine) building).getResPerMin());
+                        // building.setHasEnergy();
+                        if (building.hasEnergy())
+                        {
+                            player.removeEnergy(((Mine) building).getEnergyConsumPerMin() / 60);
+                            player.addMinerals(((Mine) building).getResPerMin() / 60);
+                        }
                     }
                     
-                }
-                
-                if (building instanceof SolarStation)
-                {
-                    ((SolarStation) building).update();
-                    player.addEnergy(((SolarStation) building).getEnergy());
+                    if (building instanceof SolarStation)
+                    {
+                        ((SolarStation) building).update();
+                        player.addEnergy(((SolarStation) building).getEnergyPerMin() / 60);
+                    }
                 }
             }
         }
@@ -497,7 +501,7 @@ public class SpaceWars extends Game
     }
     
     private void updateEnergyFlow()
-    {   
+    {
         /*
          * TODO: winki
          * - Korrekter Energiefluss
@@ -819,7 +823,9 @@ public class SpaceWars extends Game
          */
         
         Dimension dimension = Screen.getInstance().getSize();
+        @SuppressWarnings("unused")
         int minerals = player.getMinerals();
+        @SuppressWarnings("unused")
         int score = player.getScore();
         int hudX = (int) dimension.getWidth() - 501;
         int hudY = (int) dimension.getHeight() - 101;
@@ -843,8 +849,7 @@ public class SpaceWars extends Game
         g.drawRect(hudX + 10, hudY + 10, 95, 20);
         if (maxEnergy != 0)
         {
-            // wieso funktioniert 100/maxenergy*energy nicht?!
-            g.fillRect(hudX + 10, hudY + 10, 100 * (player.getEnergy() / maxEnergy), 20);
+            g.fillRect(hudX + 10, hudY + 10, (int) (100.0 / maxEnergy * player.getEnergy()), 20);
         }
         
     }

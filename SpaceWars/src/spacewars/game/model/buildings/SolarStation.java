@@ -9,7 +9,7 @@ public class SolarStation extends Building
     private static final String NAME           = "Solar";
     private static int[]        maxEnergy      = { 0, 12, 15, 20, 27 };
     
-    protected int               energyPerMin   = 12;
+    protected int               energyPerMin   = 60;
     private int                 energyReserves = 0;
     
     public SolarStation(final Player player, final Vector position)

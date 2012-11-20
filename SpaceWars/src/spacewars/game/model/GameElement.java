@@ -32,6 +32,8 @@ public class GameElement implements IRenderable, Serializable
      */
     protected int          power;
     
+    
+    
     /*
      * TODO: kai
      * - Leben

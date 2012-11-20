@@ -12,7 +12,7 @@ public class Mine extends Building
      * The range in which the mine can collect minerals
      */
     protected int               mineRange      = sight / 2;
-    protected int               mineralsPerMin = 30;
+    protected int               mineralsPerMin = 60;
     private int                 energyConsum   = 6;
     
     public Mine(final Player player, final Vector position)

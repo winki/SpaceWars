@@ -265,25 +265,28 @@ public class SpaceWars extends Game
         
         // TODO: kai
         // amount of res and energy
-        for (Building building : gameState.getBuildings())
-        {
-            if (building.isPlaced())
+        if (gameTime.isSecond()){
+            System.out.println("true");
+            for (Building building : gameState.getBuildings())
             {
-                if (building instanceof Mine)
+                if (building.isPlaced())
                 {
-                    building.setHasEnergy();
-                    if (building.hasEnergy())
+                    if (building instanceof Mine)
                     {
-                        player.removeEnergy(((Mine) building).getEnergyConsumPerMin());
-                        player.addMinerals(((Mine) building).getResPerMin());
+                        building.setHasEnergy();
+                        if (building.hasEnergy())
+                        {
+                            player.removeEnergy(((Mine) building).getEnergyConsumPerMin()/60);
+                            player.addMinerals(((Mine) building).getResPerMin()/60);
+                        }
+                        
                     }
                     
-                }
-                
-                if (building instanceof SolarStation)
-                {
-                    ((SolarStation) building).update();
-                    player.addEnergy(((SolarStation) building).getEnergy());
+                    if (building instanceof SolarStation)
+                    {
+                        ((SolarStation) building).update();
+                        player.addEnergy(((SolarStation) building).getEnergyPerMin()/60);
+                    }
                 }
             }
         }
@@ -829,8 +832,7 @@ public class SpaceWars extends Game
         g.drawRect(hudX + 10, hudY + 10, 95, 20);
         if (maxEnergy != 0)
         {
-            // wieso funktioniert 100/maxenergy*energy nicht?!
-            g.fillRect(hudX + 10, hudY + 10, 100 * (player.getEnergy() / maxEnergy), 20);
+            g.fillRect(hudX + 10, hudY + 10,  (int)(100.0 / maxEnergy * player.getEnergy()), 20);
         }
         
     }

@@ -1,10 +1,12 @@
 package spacewars.game;
 
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.util.Collections;
@@ -40,52 +42,56 @@ import spacewars.gamelib.geometrics.Vector;
 
 public class SpaceWars extends Game
 {
-    public static final boolean DEBUG = true;
+    public static final boolean             DEBUG = true;
     /**
      * Game instance
      */
-    private static SpaceWars    instance;
+    private static SpaceWars                instance;
     /**
      * Random object
      */
-    private final Random        random;
+    private final Random                    random;
     /**
      * The stars in the background
      */
-    private final List<Star>    stars;
+    private final List<Star>                stars;
     /**
      * The player
      */
-    private Player              player;
+    private Player                          player;
     /**
      * The game state
      */
-    private GameState           gameState;
+    private GameState                       gameState;
     /**
      * Game element that is currently selected by players mouse
      */
-    private GameElement         selected;
+    private GameElement                     selected;
     /**
      * The type of the building that will be built
      */
-    private BuildingType        buildingType;
+    private BuildingType                    buildingType;
     /**
      * Building object that will be built
      */
-    private Building            buildingToBePlaced;
+    private Building                        buildingToBePlaced;
     /**
      * Can the building object <code>toBuild</code> really be built? Or can't it
      * because of collision
      */
-    private boolean             buildingIsPlaceable;
+    private boolean                         buildingIsPlaceable;
     /**
      * The links of the building that will be built
      */
-    private final List<Link>    links;
+    private final List<Link<Building>>      linksToBuildings;
+    /**
+     * The links of a mine to reachable mineral planets
+     */
+    private final List<Link<MineralPlanet>> linksToMineralPlanets;
     /**
      * Current scroll position
      */
-    private Vector              scrollPosition;
+    private Vector                          scrollPosition;
     
     private SpaceWars()
     {
@@ -93,7 +99,8 @@ public class SpaceWars extends Game
         this.buildingType = BuildingType.NOTHING;
         this.scrollPosition = new Vector();
         this.stars = new LinkedList<Star>();
-        this.links = new LinkedList<>();
+        this.linksToBuildings = new LinkedList<>();
+        this.linksToMineralPlanets = new LinkedList<>();
     }
     
     public static SpaceWars getInstance()
@@ -182,8 +189,6 @@ public class SpaceWars extends Game
     {
         /*
          * TODO: winki
-         * 
-         * - Gebäude korrekt miteinander verbinden
          * - Korrekter Energiefluss
          */
         
@@ -288,9 +293,10 @@ public class SpaceWars extends Game
      * Finds the connected buildings to the <code>buildingToBePlaced</code> and
      * computes the lines between.
      */
-    private void computeLinks()
+    private void computeLinksToBuildings()
     {
-        links.clear();
+        linksToBuildings.clear();
+        linksToMineralPlanets.clear();
         
         // create links to other buildings that are reachable
         for (Building building : gameState.getBuildings())
@@ -302,18 +308,18 @@ public class SpaceWars extends Game
                 final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
                 final boolean collision = checkCollision(line, building);
                 
-                links.add(new Link(building, line, collision));
+                linksToBuildings.add(new Link<>(building, line, collision));
             }
         }
         
-        // sort links by lenght
-        Collections.sort(links, new Comparator<Link>()
+        // sort links by by lenght
+        Collections.sort(linksToBuildings, new Comparator<Link<Building>>()
         {
             @Override
-            public int compare(Link l1, Link l2)
+            public int compare(Link<Building> l1, Link<Building> l2)
             {
-                final double distance1 = l1.getLinkedBuilding().getPosition().distance(buildingToBePlaced.getPosition());
-                final double distance2 = l2.getLinkedBuilding().getPosition().distance(buildingToBePlaced.getPosition());
+                final double distance1 = l1.getLinkedElement().getPosition().distance(buildingToBePlaced.getPosition());
+                final double distance2 = l2.getLinkedElement().getPosition().distance(buildingToBePlaced.getPosition());
                 if (distance1 > distance2) return 1;
                 if (distance1 < distance2) return -1;
                 return 0;
@@ -323,54 +329,91 @@ public class SpaceWars extends Game
         // filter links
         if (buildingToBePlaced instanceof Mine)
         {
+            // compute links to reachable mineral planets
+            computeLinksToMineralPlanets();
+            
             // remove too long links
-            boolean remove = false;
-            for (Iterator<Link> iterator = links.iterator(); iterator.hasNext();)
+            boolean removeRest = false;
+            for (Iterator<Link<Building>> iterator = linksToBuildings.iterator(); iterator.hasNext();)
             {
-                final Link link = (Link) iterator.next();
-                final Building building = link.getLinkedBuilding();
+                final Link<Building> link = iterator.next();
+                final Building building = link.getLinkedElement();
                 
-                if (remove || !(building instanceof Relay || building instanceof SolarStation))
+                // only treat the players building
+                if (!removeRest && building.getPlayer() == player)
                 {
-                    iterator.remove();
+                    // take every link to relays, solar stations or buildings
+                    // with no links
+                    if (building instanceof Relay || building instanceof SolarStation)
+                    {
+                        removeRest = !link.isCollision();
+                        continue;
+                    }
                 }
-                else
-                {
-                    remove = !link.isCollision();
-                }
+                
+                iterator.remove();
             }
         }
         else if (buildingToBePlaced instanceof Relay || buildingToBePlaced instanceof SolarStation)
         {
-            // take every link to relays or solar stations
-            for (Iterator<Link> iterator = links.iterator(); iterator.hasNext();)
+            for (Iterator<Link<Building>> iterator = linksToBuildings.iterator(); iterator.hasNext();)
             {
-                final Link link = (Link) iterator.next();
-                final Building building = link.getLinkedBuilding();
+                final Building building = iterator.next().getLinkedElement();
                 
-                if (!(building instanceof Relay || building instanceof SolarStation))
+                // only treat the players building
+                if (building.getPlayer() == player)
                 {
-                    iterator.remove();
+                    // take every link to relays, solar stations or buildings
+                    // with no links
+                    if (building instanceof Relay) continue;
+                    if (building instanceof SolarStation) continue;
+                    if (building.getLinks().isEmpty()) continue;
                 }
+                
+                iterator.remove();
             }
         }
         else if (buildingToBePlaced instanceof LaserCanon || buildingToBePlaced instanceof Shipyard)
         {
             // remove too long links
-            boolean remove = false;
-            for (Iterator<Link> iterator = links.iterator(); iterator.hasNext();)
+            boolean removeRest = false;
+            for (Iterator<Link<Building>> iterator = linksToBuildings.iterator(); iterator.hasNext();)
             {
-                final Link link = (Link) iterator.next();
-                final Building building = link.getLinkedBuilding();
+                final Link<Building> link = iterator.next();
+                final Building building = link.getLinkedElement();
                 
-                if (remove || !(building instanceof Relay || building instanceof SolarStation))
+                // only treat the players building
+                if (!removeRest && building.getPlayer() == player)
                 {
-                    iterator.remove();
+                    // take every link to relays, solar stations or buildings
+                    // with no links
+                    if (building instanceof Relay || building instanceof SolarStation)
+                    {
+                        removeRest = !link.isCollision();
+                        continue;
+                    }
                 }
-                else
-                {
-                    remove = !link.isCollision();
-                }
+                
+                iterator.remove();
+            }
+        }
+    }
+    
+    private void computeLinksToMineralPlanets()
+    {
+        final Mine mine = (Mine) buildingToBePlaced;
+        
+        // create links to mineral planets that are reachable
+        for (MineralPlanet planet : gameState.getMap().getMineralPlanets())
+        {
+            if (mine.canMine(planet))
+            {
+                final Vector p1 = buildingToBePlaced.getPosition();
+                final Vector p2 = planet.getPosition();
+                final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+                final boolean collision = checkCollision(line, planet);
+                
+                linksToMineralPlanets.add(new Link<>(planet, line, collision));
             }
         }
     }
@@ -403,8 +446,6 @@ public class SpaceWars extends Game
             // check collision with links
             for (GameElement linked : b.getLinks())
             {
-                // TODO: only calculate the lines once, reuse them in
-                // rendering part
                 final Vector p1 = b.getPosition();
                 final Vector p2 = linked.getPosition();
                 final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
@@ -419,18 +460,18 @@ public class SpaceWars extends Game
     
     /**
      * Checks whether a specified line collides with another game element. The
-     * building the line is connected with is an exception.
+     * game element the line is connected with is an exception.
      * 
      * @param line the line
-     * @param reachableBuilding the building the line is connected with
+     * @param reachableElement the game element the line is connected with
      * @return <code>true</code> if there was a collision
      */
-    private boolean checkCollision(Line2D line, Building reachableBuilding)
+    private boolean checkCollision(Line2D line, GameElement reachableElement)
     {
         // check collision with buildings
         for (Building b : gameState.getBuildings())
         {
-            if (b != reachableBuilding && b.doesCollideWith(line)) { return true; }
+            if (b != reachableElement && b.doesCollideWith(line)) { return true; }
         }
         
         // check collision with planets
@@ -582,7 +623,16 @@ public class SpaceWars extends Game
             if (buildingIsPlaceable)
             {
                 // calculate connections
-                computeLinks();
+                computeLinksToBuildings();
+                
+                // can build mines only if there is minimum one mineral planet
+                // reachable
+                if (buildingToBePlaced instanceof Mine && linksToMineralPlanets.isEmpty())
+                {
+                    buildingIsPlaceable = false;
+                    buildingToBePlaced.setPlaceable(buildingIsPlaceable);
+                    return;
+                }
                 
                 // effectively build
                 if (Mouse.getState().isButtonReleased(Button.LEFT))
@@ -592,11 +642,11 @@ public class SpaceWars extends Game
                     gameState.getBuildings().add(buildingToBePlaced);
                     
                     // add links
-                    for (Link link : links)
+                    for (Link<Building> link : linksToBuildings)
                     {
                         if (!link.isCollision())
                         {
-                            final Building building = link.getLinkedBuilding();
+                            final Building building = link.getLinkedElement();
                             buildingToBePlaced.getLinks().add(building);
                             building.getLinks().add(buildingToBePlaced);
                         }
@@ -699,12 +749,27 @@ public class SpaceWars extends Game
         if (buildingToBePlaced != null && buildingIsPlaceable)
         {
             g.setColor(Color.RED);
-            for (Link link : links)
+            for (Link<Building> link : linksToBuildings)
             {
                 final Line2D line = link.getLine();
                 
                 g.setColor(link.isCollision() ? Color.RED : Color.WHITE);
                 g.draw(line);
+            }
+            
+            if (!linksToMineralPlanets.isEmpty())
+            {
+                final int STROKE_WIDTH = 2;
+                final Stroke stroke = g.getStroke();
+                g.setStroke(new BasicStroke(STROKE_WIDTH));
+                g.setColor(Color.GREEN);
+                for (Link<MineralPlanet> link : linksToMineralPlanets)
+                {
+                    final Line2D line = link.getLine();
+                    
+                    g.draw(line);
+                }
+                g.setStroke(stroke);
             }
         }
         

@@ -1,21 +1,20 @@
 package spacewars.game.model;
 
 import java.awt.geom.Line2D;
-import spacewars.game.model.buildings.Building;
 
 /**
  * This class represents a connection between the building that will be built
  * and another building that is already built.
  */
-public class Link
+public class Link<T>
 {
-    private Building linkedBuilding;
+    private T linkedElement;
     private Line2D   line;
     private boolean  collision;
     
-    public Link(Building linkedBuilding, Line2D line, boolean collision)
+    public Link(T linkedElement, Line2D line, boolean collision)
     {
-        this.linkedBuilding = linkedBuilding;
+        this.linkedElement = linkedElement;
         this.line = line;
         this.collision = collision;
     }
@@ -25,9 +24,9 @@ public class Link
         return line;
     }
     
-    public Building getLinkedBuilding()
+    public T getLinkedElement()
     {
-        return linkedBuilding;
+        return linkedElement;
     }
     
     public boolean isCollision()

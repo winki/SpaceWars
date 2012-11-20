@@ -1,6 +1,5 @@
 package spacewars.game.model;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.io.Serializable;

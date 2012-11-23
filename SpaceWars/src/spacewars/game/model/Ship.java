@@ -5,7 +5,7 @@ import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.Random;
-import spacewars.game.SpaceWars;
+import spacewars.game.ClientGame;
 import spacewars.game.model.planets.HomePlanet;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.IUpdateable;
@@ -23,15 +23,14 @@ public class Ship extends PlayerElement implements IUpdateable
     protected double     angle;
     
     protected double     anglediff;
-    private final Random random;
     
     public Ship(final Player player, final Vector position, final double angle)
     {
         super(player, position, 5, 100);
-        this.random = new Random();
+        this.health = 100;
         this.x = position.x;
         this.y = position.y;
-        this.speed = random.nextDouble() + 0.4;
+        this.speed = 0.5;
         this.angle = angle;
     }
     
@@ -39,7 +38,7 @@ public class Ship extends PlayerElement implements IUpdateable
     public void update(GameTime gameTime)
     {
         // direction: enemy's home planet
-        final HomePlanet target = SpaceWars.getInstance().getGameState().getPlayers().get(1).getHomePlanet();
+        final HomePlanet target = ClientGame.getInstance().getGameState().getPlayers().get(1).getHomePlanet();
         final Vector dir = target.getPosition().sub(position);
         
         // flight in the direction of the vector

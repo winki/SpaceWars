@@ -8,15 +8,15 @@ import spacewars.game.model.Player;
 import spacewars.game.model.PlayerElement;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.IUpdateable;
-import spacewars.gamelib.geometrics.Vector;
+import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
 public abstract class Building extends PlayerElement implements IUpdateable
 {
    /**
-    * The upgrade level of the building
+    * The upgrade level (zero-based) of the building
     */
-   protected int              level              = 1;
+   protected int              level;
    protected boolean          placeable;
    protected boolean          placed;
    protected int              costs;
@@ -36,9 +36,10 @@ public abstract class Building extends PlayerElement implements IUpdateable
     * - Baustatus
     */
    
-   public Building(final Player player, final Vector position, int sizeRadius, int viewRadius, int costs)
+   public Building(final Vector position, final int radius, final int sight, final Player player, final int costs)
    {
-      super(player, position, sizeRadius, viewRadius);
+      super(position, radius, sight, player, 100);
+      
       this.placeable = true;
       this.linkedBuildings = new LinkedList<>();
    }
@@ -100,6 +101,14 @@ public abstract class Building extends PlayerElement implements IUpdateable
       return linkedBuildings;
    }
    
+   /**
+    * Upgrade building
+    */
+   public void upgrade()
+   {
+      this.level++;
+   }
+
    @Override
    public void update(GameTime gameTime)
    {
@@ -108,25 +117,33 @@ public abstract class Building extends PlayerElement implements IUpdateable
    }
    
    @Override
-   public void render(Graphics2D g)
+   protected boolean renderHealth()
    {
-      g.setColor(isPlaceable() ? (isPlaced() ? player.getColor() : Color.WHITE) : Color.RED);
-      g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
+      // render health only if building is placed
+      return isPlaced();
+   }
+   
+   @Override
+   public final void render(Graphics2D g)
+   {
+      renderBuilding(g);
       
       if (isPlaced())
       {
          // no energy, render red point
-         if (!hasEnergy)
+         if (!hasEnergy())
          {
+            final int POINT_RADIUS = 3;
             g.setColor(Color.RED);
-            g.fillOval(position.x - radius / 2, position.y - radius / 2, radius, radius);
+            g.fillOval(position.x - POINT_RADIUS, position.y - POINT_RADIUS, 2 * POINT_RADIUS, 2 * POINT_RADIUS);
          }
       }
       else
       {
          g.setColor(isPlaceable() ? Color.WHITE : Color.RED);
+         // draw name
          g.drawString(getName(), position.x + radius + 2, position.y + 4);
-         
+         // draw view radius
          g.drawOval(position.x - sight, position.y - sight, 2 * sight, 2 * sight);
       }
       
@@ -134,11 +151,13 @@ public abstract class Building extends PlayerElement implements IUpdateable
    }
    
    /**
-    * upgrade building
+    * Draw the building itself.
     * 
+    * @param g graphics object
     */
-   public void upgrade()
+   protected void renderBuilding(Graphics2D g)
    {
-      this.level++;
+      g.setColor(isPlaceable() ? (isPlaced() ? player.getColor() : Color.WHITE) : Color.RED);
+      g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
    }
 }

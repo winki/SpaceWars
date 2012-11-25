@@ -1,6 +1,5 @@
 package spacewars.gamelib;
 
-import spacewars.gamelib.geometrics.Vector;
 
 public class MouseState
 {

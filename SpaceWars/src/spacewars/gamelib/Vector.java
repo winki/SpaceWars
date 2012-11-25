@@ -1,4 +1,4 @@
-package spacewars.gamelib.geometrics;
+package spacewars.gamelib;
 
 import java.io.Serializable;
 

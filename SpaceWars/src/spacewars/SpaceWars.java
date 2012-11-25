@@ -1,7 +1,8 @@
 package spacewars;
 
-import spacewars.game.ClientGame;
-import spacewars.network.Network;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import spacewars.game.SpaceWarsGame;
 
 public class SpaceWars
 {
@@ -12,13 +13,16 @@ public class SpaceWars
     */
    private static void testing()
    {
-      ClientGame.getInstance().run();
+      // set logging
+      Logger.getGlobal().setLevel(Level.ALL);
+      
+      // run game
+      SpaceWarsGame.getInstance().run();
       
       /*
        Network.runServer();
-       System.out.println("hello");
        Network.runClient("127.0.0.1");
-       */      
+       */
    }
    
    /**
@@ -30,7 +34,7 @@ public class SpaceWars
     * If the program is started with the ip from the server as parameter then a
     * client will be started that will connect to the server.
     * <p>
-    * <code>spacewars.jar 127.0.0.1</code>
+    * <code>spacewars.jar 192.168.30.100</code>
     * <p>
     * If the program is started with no parameter then first a server will be
     * started and then a client will be started that will connect to the server.
@@ -53,22 +57,37 @@ public class SpaceWars
          if (args[0].equals("serveronly"))
          {
             // only start server
-            Network.runServer();
+            runServer();
          }
          else
          {
             // start client and connect to given ip address
-            String serverIp = args[0];
-            Network.runClient(serverIp);
+            runClient(args[0]);
          }
       }
       else
       {
          // start server and connect to it
-         Network.runServer();
-         
-         String serverIp = "127.0.0.1";
-         Network.runClient(serverIp);
+         runServer();
+         runClient("127.0.0.1");
       }
+   }
+   
+   /**
+    * Run a server instance.
+    */
+   private static void runServer()
+   {
+      // TODO: run server
+   }
+   
+   /**
+    * Run a client instance that connects to the server.
+    * 
+    * @param serverAddress server address
+    */
+   private static void runClient(String serverAddress)
+   {
+      // TODO: run client, connect to server
    }
 }

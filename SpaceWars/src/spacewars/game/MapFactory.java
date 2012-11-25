@@ -5,15 +5,15 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 import spacewars.game.model.Map;
 import spacewars.game.model.planets.MineralPlanet;
-import spacewars.gamelib.geometrics.Vector;
+import spacewars.gamelib.Vector;
 import spacewars.util.Ressources;
 
 public class MapFactory
 {
    private static final int    UNIT_SIZE                 = 10;
    
-   private static final int    MINERAL_PLANET_MIN_RADIUS = 5;
-   private static final int    MINERAL_PLANET_MAX_RADIUS = 30;
+   private static final int    MINERAL_PLANET_MIN_RADIUS = 4;
+   private static final int    MINERAL_PLANET_MAX_RADIUS = 26;
    
    private static final Random random                    = new Random(0);
    
@@ -34,7 +34,7 @@ public class MapFactory
       
       if (image != null)
       {
-         map = new Map(image.getWidth() * UNIT_SIZE, image.getHeight() * UNIT_SIZE, NUM_STARS, NUM_LAYERS);
+         map = new Map("Testmap", image.getWidth() * UNIT_SIZE, image.getHeight() * UNIT_SIZE, NUM_STARS, NUM_LAYERS);
          for (int x = 0; x < image.getWidth(); x++)
          {
             for (int y = 0; y < image.getHeight(); y++)

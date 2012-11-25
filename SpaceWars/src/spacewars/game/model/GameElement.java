@@ -4,12 +4,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.io.Serializable;
-import spacewars.game.ClientGame;
+import spacewars.game.SpaceWarsGame;
 import spacewars.gamelib.IRenderable;
-import spacewars.gamelib.geometrics.Vector;
+import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
-public class GameElement implements IRenderable, Serializable
+public abstract class GameElement implements IRenderable, Serializable
 {
    /**
     * The position
@@ -23,19 +23,11 @@ public class GameElement implements IRenderable, Serializable
     * The sight radius
     */
    protected int          sight;
-   /**
-    * The health
-    */
-   protected int          health;
+
    /**
     * The power
     */
    protected int          power;
-   
-   /*
-    * TODO: kai
-    * - Leben
-    */
    
    public GameElement(final Vector position, final int radius, final int sight)
    {
@@ -44,57 +36,91 @@ public class GameElement implements IRenderable, Serializable
       this.sight = sight;
    }
    
+   /**
+    * Gets the position.
+    * 
+    * @return position vector
+    */
    public Vector getPosition()
    {
       return position;
    }
    
+   /**
+    * Gets the size radius.
+    * 
+    * @return size radius in pixel
+    */
    public int getSizeRadius()
    {
       return radius;
    }
    
+   /**
+    * Gets the view radius.
+    * 
+    * @return view radius in pixel
+    */
    public int getViewRadius()
    {
       return sight;
    }
    
-   public int getHealth()
+   /**
+    * Checks, whether a point collides with this element.
+    * 
+    * @param point point to check
+    * @return <code>true</code> if point collides with this element
+    */
+   public boolean collidesWith(Vector point)
    {
-      return health;
+      return position.distance(point) < radius;
    }
    
-   public boolean isHit(Vector other)
-   {
-      return position.distance(other) < radius;
-   }
-   
-   public boolean isReachableFrom(GameElement element)
-   {
-      return position.distance(element.getPosition()) < element.getViewRadius();
-   }
-   
-   public boolean doesCollideWith(GameElement element)
-   {
-      return position.distance(element.getPosition()) < getSizeRadius() + element.getSizeRadius();
-   }
-   
-   public boolean doesCollideWith(Line2D line)
+   /**
+    * Checks, whether a line collides with this element.
+    * 
+    * @param line line to check
+    * @return <code>true</code> if line collides with this element
+    */
+   public boolean collidesWith(Line2D line)
    {
       return line.ptSegDist(position.x, position.y) < radius;
    }
    
+   /**
+    * Checks, whether another element collides with this element.
+    * 
+    * @param element another element
+    * @return <code>true</code> if element collides with this element
+    */
+   public boolean collidesWith(GameElement element)
+   {
+      return position.distance(element.getPosition()) < getSizeRadius() + element.getSizeRadius();
+   }
+   
+   /**
+    * Checks, whether another element is in the view radius of this element.
+    * 
+    * @param element another element
+    * @return <code>true</code> if element is in the view radius of this element
+    */
+   public boolean isReachableFrom(GameElement element)
+   {
+      return position.distance(element.getPosition()) < element.getViewRadius();
+   }
+
    @Override
    public void render(Graphics2D g)
    {
-      if (ClientGame.DEBUG)
+      if (SpaceWarsGame.DEBUG)
       {
          g.setColor(Color.RED);
          g.drawOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
       }
       
       // draw selection
-      if (ClientGame.getInstance().getSelected() == this)
+      if (SpaceWarsGame.getInstance().getSelected() == this)
       {
          final int OVERLAY = 3;
          final int SERIF = 5;

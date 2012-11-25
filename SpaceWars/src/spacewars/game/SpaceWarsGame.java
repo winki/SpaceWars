@@ -24,12 +24,12 @@ import spacewars.game.model.Ship;
 import spacewars.game.model.Star;
 import spacewars.game.model.buildings.Building;
 import spacewars.game.model.buildings.BuildingType;
+import spacewars.game.model.buildings.HomePlanet;
 import spacewars.game.model.buildings.LaserCanon;
 import spacewars.game.model.buildings.Mine;
 import spacewars.game.model.buildings.Relay;
 import spacewars.game.model.buildings.Shipyard;
 import spacewars.game.model.buildings.SolarStation;
-import spacewars.game.model.planets.HomePlanet;
 import spacewars.game.model.planets.MineralPlanet;
 import spacewars.gamelib.Button;
 import spacewars.gamelib.Game;
@@ -38,15 +38,16 @@ import spacewars.gamelib.Key;
 import spacewars.gamelib.Keyboard;
 import spacewars.gamelib.Mouse;
 import spacewars.gamelib.Screen;
-import spacewars.gamelib.geometrics.Vector;
+import spacewars.gamelib.Vector;
 
-public class ClientGame extends Game
+public class SpaceWarsGame extends Game
 {
-   public static final boolean             DEBUG = true;
+   public static final boolean             DEBUG             = false;
+   public static final boolean             CAN_CHANGE_PLAYER = true;
    /**
     * Game instance
     */
-   private static ClientGame               instance;
+   private static SpaceWarsGame            instance;
    /**
     * Random object
     */
@@ -93,7 +94,7 @@ public class ClientGame extends Game
     */
    private Vector                          scrollPosition;
    
-   private ClientGame()
+   private SpaceWarsGame()
    {
       this.random = new Random();
       this.buildingType = BuildingType.NOTHING;
@@ -103,11 +104,11 @@ public class ClientGame extends Game
       this.linksToMineralPlanets = new LinkedList<>();
    }
    
-   public static ClientGame getInstance()
+   public static SpaceWarsGame getInstance()
    {
       if (instance == null)
       {
-         instance = new ClientGame();
+         instance = new SpaceWarsGame();
       }
       return instance;
    }
@@ -130,7 +131,7 @@ public class ClientGame extends Game
       screen.setTitle("Space Wars");
       screen.setIcon("icon.png");
       screen.setSize(new Dimension(800, 600));
-      // screen.setSize(null);
+      screen.setSize(null);
       
       // init game state
       createMap();
@@ -176,7 +177,7 @@ public class ClientGame extends Game
    {
       // navigate
       scroll();
-      if (Keyboard.getState().isKeyPressed(Key.H))
+      if (Keyboard.getState().isKeyPressed(Key.HOME))
       {
          returnToHomePlanet();
       }
@@ -184,7 +185,10 @@ public class ClientGame extends Game
       // select
       select();
       
-      if (DEBUG)
+      // delete and upgrade buildings
+      deleteOrUpgrade();
+      
+      if (CAN_CHANGE_PLAYER)
       {
          // change player (only debug)
          changePlayer();
@@ -200,65 +204,51 @@ public class ClientGame extends Game
    
    private void updateWorld(GameTime gameTime)
    {
-      // update buildings
-      for (Building building : getGameState().getBuildings())
-      {
-         building.update(gameTime);
-      }
+      // check which buildings are on the energy net
+      checkEnergyAvailability();
       
-      // ships
-      for (Iterator<Ship> iterator = getGameState().getShips().iterator(); iterator.hasNext();)
+      // update energy and mineral flow flow
+      updateEnergyAndMineralFlow();
+      
+      // war: defend, attack
+      for (Iterator<Building> iterator = getGameState().getBuildings().iterator(); iterator.hasNext();)
       {
-         Ship ship = (Ship) iterator.next();
+         Building building = (Building) iterator.next();
          
-         // move ship
-         ship.update(gameTime);
-         
-         // remove if dead
-         if (ship.getHealth() <= 0)
+         if (building instanceof LaserCanon || building instanceof Shipyard)
          {
+            // defend, attack
+            building.update(gameTime);
+         }
+         
+         if (building.isDead())
+         {
+            // TODO: implement method for removing building clean
+            
+            // remove all links
+            for (Iterator<Building> iteratorLinked = building.getLinks().iterator(); iteratorLinked.hasNext();)
+            {
+               Building linked = (Building) iteratorLinked.next();
+               linked.getLinks().remove(building);
+            }
+            
+            // remove from list
             iterator.remove();
          }
       }
       
-      // check which buildings are on the energy net
-      checkEnergyAvailability();
-      
-      // update energy flow every 20th frame
-      final int UPDATE_RATE = 20;
-      if (gameTime.getTicks() % UPDATE_RATE == 0)
+      // update ships
+      for (Iterator<Ship> iterator = getGameState().getShips().iterator(); iterator.hasNext();)
       {
-         updateEnergyAndMineralFlow();
-      }
-      
-      // TODO: kai
-      // amount of res and energy
-      if (gameTime.isSecond())
-      {
-         System.out.println("true");
-         for (Building building : gameState.getBuildings())
+         Ship ship = (Ship) iterator.next();
+         ship.update(gameTime); // move
+         
+         if (ship.isDead())
          {
-            if (building.isPlaced())
-            {
-               // building.setHasEnergy(true);
-               if (building.hasEnergy())
-               {
-                  // building.setHasEnergy();
-                  if (building instanceof Mine)
-                  {
-                     final Mine mine = (Mine) building;
-                     
-                     player.removeEnergy(mine.getEnergyConsumPerMin() / 60);
-                     player.addMinerals(mine.getResPerMin() / 60);
-                  }
-               }
-               
-               if (building instanceof SolarStation)
-               {
-                  ((SolarStation) building).update();
-                  player.addEnergy(((SolarStation) building).getEnergyPerMin() / 60);
-               }
-            }
+            // TODO: implement method for removing ship clean
+            
+            // remove remove from list
+            iterator.remove();
          }
       }
    }
@@ -271,6 +261,18 @@ public class ClientGame extends Game
    {
       linksToBuildings.clear();
       linksToMineralPlanets.clear();
+      
+      // treat home planet as a building/solar station
+      Building home = (SolarStation) player.getHomePlanet();
+      if (home.isReachableFrom(buildingToBePlaced))
+      {
+         final Vector p1 = buildingToBePlaced.getPosition();
+         final Vector p2 = home.getPosition();
+         final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+         final boolean collision = checkCollision(line, home);
+         
+         linksToBuildings.add(new Link<>(home, line, collision));
+      }
       
       // create links to other buildings that are reachable
       for (Building building : gameState.getBuildings())
@@ -403,19 +405,19 @@ public class ClientGame extends Game
       // check collision with mineral planets
       for (MineralPlanet m : gameState.getMap().getMineralPlanets())
       {
-         if (element.doesCollideWith(m)) { return true; }
+         if (element.collidesWith(m)) { return true; }
       }
       
       // check collision with home planets
       for (Player p : gameState.getPlayers())
       {
-         if (element.doesCollideWith(p.getHomePlanet())) { return true; }
+         if (element.collidesWith(p.getHomePlanet())) { return true; }
       }
       
       // check collision with buildings
       for (Building b : gameState.getBuildings())
       {
-         if (element.doesCollideWith(b)) { return true; }
+         if (element.collidesWith(b)) { return true; }
          
          // check collision with links
          for (GameElement linked : b.getLinks())
@@ -424,7 +426,7 @@ public class ClientGame extends Game
             final Vector p2 = linked.getPosition();
             final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
             
-            if (element.doesCollideWith(line)) { return true; }
+            if (element.collidesWith(line)) { return true; }
          }
       }
       
@@ -445,19 +447,21 @@ public class ClientGame extends Game
       // check collision with buildings
       for (Building b : gameState.getBuildings())
       {
-         if (b != reachableElement && b.doesCollideWith(line)) { return true; }
+         if (b != reachableElement && b.collidesWith(line)) { return true; }
       }
       
       // check collision with planets
       for (MineralPlanet m : gameState.getMap().getMineralPlanets())
       {
-         if (m.doesCollideWith(line)) { return true; }
+         if (m.collidesWith(line)) { return true; }
       }
       
       // check collision with home planets
       for (Player p : gameState.getPlayers())
       {
-         if (p.getHomePlanet().doesCollideWith(line)) { return true; }
+         // TODO: add home planet to buildings?
+         final HomePlanet planet = p.getHomePlanet();
+         if (planet != reachableElement && planet.collidesWith(line)) { return true; }
       }
       
       // no collision
@@ -475,6 +479,10 @@ public class ClientGame extends Game
       for (Building building : getGameState().getBuildings())
       {
          building.setCheckedForEngery(false);
+         if (!(building instanceof SolarStation))
+         {
+            building.setHasEnergy(false);
+         }
          
          // collect solars
          if (building instanceof SolarStation)
@@ -483,6 +491,12 @@ public class ClientGame extends Game
             solars.add(solar);
          }
       }
+      
+      // add home planet as energy source
+      // TODO: add home planet to buildings?
+      final HomePlanet home = player.getHomePlanet();
+      home.setCheckedForEngery(false);
+      solars.add(home);
       
       // checks recursively
       for (SolarStation solar : solars)
@@ -515,6 +529,38 @@ public class ClientGame extends Game
        * TODO: winki
        * - Korrekter Energiefluss
        */
+      
+      // once a second
+      if (getGameTime().timesPerSecond(1))
+      {
+         // produce energy
+         for (Building building : getGameState().getBuildings())
+         {
+            if (building instanceof SolarStation)
+            {
+               final SolarStation solar = (SolarStation) building;
+               solar.update(getGameTime());
+               
+               // TODO
+               player.addEnergy(1);
+            }
+         }
+         
+         // mine minerals
+         for (Building building : getGameState().getBuildings())
+         {
+            if (building instanceof Mine)
+            {
+               final Mine mine = (Mine) building;
+               mine.update(getGameTime());
+               
+               // TODO:
+               player.addMinerals(1);
+               // player.removeEnergy(mine.getEnergyConsumPerMin() / 60);
+               // player.addMinerals(mine.getResPerMin() / 60);
+            }
+         }
+      }
    }
    
    private void returnToHomePlanet()
@@ -578,7 +624,7 @@ public class ClientGame extends Game
          
          for (GameElement element : gameState.getBuildings())
          {
-            if (element.isHit(mouseworld))
+            if (element.collidesWith(mouseworld))
             {
                selected = element;
                return;
@@ -587,7 +633,7 @@ public class ClientGame extends Game
          
          for (GameElement element : gameState.getMap().getMineralPlanets())
          {
-            if (element.isHit(mouseworld))
+            if (element.collidesWith(mouseworld))
             {
                selected = element;
                return;
@@ -595,7 +641,7 @@ public class ClientGame extends Game
          }
          
          HomePlanet homePlanet = player.getHomePlanet();
-         if (homePlanet.isHit(mouseworld))
+         if (homePlanet.collidesWith(mouseworld))
          {
             selected = homePlanet;
             return;
@@ -620,23 +666,23 @@ public class ClientGame extends Game
          switch (buildingType)
          {
             case RELAY:
-               buildingToBePlaced = new Relay(player, position);
+               buildingToBePlaced = new Relay(position, player);
                break;
             
             case MINE:
-               buildingToBePlaced = new Mine(player, position);
+               buildingToBePlaced = new Mine(position, player);
                break;
             
             case SOLAR:
-               buildingToBePlaced = new SolarStation(player, position);
+               buildingToBePlaced = new SolarStation(position, player);
                break;
             
             case LASER_CANON:
-               buildingToBePlaced = new LaserCanon(player, position);
+               buildingToBePlaced = new LaserCanon(position, player);
                break;
             
             case SHIPYARD:
-               buildingToBePlaced = new Shipyard(player, position);
+               buildingToBePlaced = new Shipyard(position, player);
                break;
             
             default:
@@ -690,7 +736,43 @@ public class ClientGame extends Game
                }
                
                buildingToBePlaced = null;
+               
+               /*
+               // TODO: uncomment if shift down function is wished
+               if (!Keyboard.getState().isKeyDown(Key.SHIFT))
+               {
+                  // lose building type if shift is not pressed
+                  buildingType = BuildingType.NOTHING;               
+               }
+               */
             }
+         }
+      }
+   }
+   
+   /**
+    * Delete or upgrade selected building
+    */
+   private void deleteOrUpgrade()
+   {
+      if (selected != null && selected instanceof Building && !(selected instanceof HomePlanet))
+      {
+         Building selectedBuilding = (Building) selected;
+         
+         if (Keyboard.getState().isKeyPressed(Key.DELETE))
+         {
+            // delete
+            for (Building linked : selectedBuilding.getLinks())
+            {
+               linked.getLinks().remove(selectedBuilding);
+            }
+            getGameState().getBuildings().remove(selectedBuilding);
+         }
+         
+         if (Keyboard.getState().isKeyPressed(Key.PAGE_UP))
+         {
+            // upgrade
+            selectedBuilding.upgrade();
          }
       }
    }
@@ -846,6 +928,98 @@ public class ClientGame extends Game
        *  
        */
       
+      final int seconds = (int) (getGameTime().getTotalGameTime() / 1000000000);
+      
+      final int FONT_LINE = 15;
+      final int DX = 10;
+      final int DY = 24;
+      final int DY_SELECTED = 200;
+      final int HUD_WIDTH = 160;
+      final int BAR_HEIGHT = 5;
+      final float TRANSPARENCY = 0.8f;
+      final Dimension screen = Screen.getInstance().getSize();
+      
+      final Composite original = g.getComposite();
+      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
+      g.setColor(Color.BLACK);
+      g.fillRect(screen.width - HUD_WIDTH, 0, HUD_WIDTH, screen.height);
+      g.setComposite(original);
+      
+      // player informations
+      g.setColor(Color.WHITE);
+      g.drawString(String.format("\"%s\"", getGameState().getMap().getName()), screen.width - HUD_WIDTH + DX, 0 * FONT_LINE + DY);
+      g.drawString(String.format("Time taken: %02d:%02d", seconds / 60, seconds % 60), screen.width - HUD_WIDTH + DX, 1 * FONT_LINE + DY);
+      g.drawString(String.format("Score: %d", player.getScore()), screen.width - HUD_WIDTH + DX, 2 * FONT_LINE + DY);
+      
+      // minerals
+      g.setColor(Color.GREEN);
+      g.drawString(String.format("%d minerals", player.getMinerals()), screen.width - HUD_WIDTH + DX, 4 * FONT_LINE + DY);
+      g.drawString(String.format("%d minerals per minute", player.getMineralsPerMinute()), screen.width - HUD_WIDTH + DX, 5 * FONT_LINE + DY);
+      // energy
+      g.setColor(Color.DARK_GRAY);
+      g.fillRect(screen.width - HUD_WIDTH + DX, 8 * FONT_LINE + DY - BAR_HEIGHT, HUD_WIDTH - 2 * DX, BAR_HEIGHT);
+      g.setColor(Color.CYAN);
+      g.drawString(String.format("%d energy (%d%%)", player.getEnergy(), player.getEnergyEfficency()), screen.width - HUD_WIDTH + DX, 7 * FONT_LINE + DY);
+      g.fillRect(screen.width - HUD_WIDTH + DX, 8 * FONT_LINE + DY - BAR_HEIGHT, (int) (player.getEnergy() / (double) player.getMaxEnergy() * (HUD_WIDTH - 2 * DX)), BAR_HEIGHT);
+      
+      // selected object
+      if (selected != null)
+      {
+         if (selected instanceof MineralPlanet)
+         {
+            final MineralPlanet mineral = (MineralPlanet) selected;
+            g.setColor(Color.WHITE);
+            g.drawString(String.format("%d ton mineral planet", mineral.getMineralReservesMax()), screen.width - HUD_WIDTH + DX, 0 * FONT_LINE + DY_SELECTED);
+            g.setColor(Color.DARK_GRAY);
+            g.fillRect(screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED - BAR_HEIGHT, HUD_WIDTH - 2 * DX, BAR_HEIGHT);
+            g.setColor(Color.GREEN);
+            g.drawString(String.format("%d minerals", mineral.getMineralReserves()), screen.width - HUD_WIDTH + DX, 2 * FONT_LINE + DY_SELECTED);
+            g.fillRect(screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED - BAR_HEIGHT, (int) (mineral.getMineralReserves() / (double) mineral.getMineralReservesMax() * (HUD_WIDTH - 2 * DX)), BAR_HEIGHT);
+         }
+         
+         if (selected instanceof HomePlanet)
+         {
+            final HomePlanet home = (HomePlanet) selected;
+            // TODO: draw homeplanet relevant stuff
+         }
+         
+         if (selected instanceof Building)
+         {
+            final Building building = (Building) selected;
+            // TODO: draw building relevant stuff
+            
+            if (selected instanceof Relay)
+            {
+               final Relay relay = (Relay) building;
+               // TODO: draw relay relevant stuff
+            }
+            
+            if (selected instanceof SolarStation)
+            {
+               final SolarStation solar = (SolarStation) building;
+               // TODO: draw solar relevant stuff
+            }
+            
+            if (selected instanceof Mine)
+            {
+               final Mine mine = (Mine) building;
+               // TODO: draw mine relevant stuff
+            }
+            
+            if (selected instanceof LaserCanon)
+            {
+               final LaserCanon laser = (LaserCanon) building;
+               // TODO: draw laser relevant stuff
+            }
+            
+            if (selected instanceof Shipyard)
+            {
+               final Shipyard shipyard = (Shipyard) building;
+               // TODO: draw shipyard relevant stuff
+            }
+         }
+      }
+      /* 
       Dimension dimension = Screen.getInstance().getSize();
       @SuppressWarnings("unused")
       int minerals = player.getMinerals();
@@ -860,14 +1034,15 @@ public class ClientGame extends Game
          if (building instanceof SolarStation)
          {
             maxEnergy += ((SolarStation) building).getMaxEnergy();
-            System.out.println(player.getEnergy());
-            System.out.println("player max ener " + player.getMaxEnergy());
+            // Logger.getGlobal().info("Energy: " + player.getEnergy());
+            // Logger.getGlobal().info("player max ener " +
+            // player.getMaxEnergy());
          }
       }
       
       player.setMaxEnergy(maxEnergy);
       
-      g.setColor(Color.white);
+      g.setColor(Color.WHITE);
       
       g.drawRect(hudX, hudY, 500, 100);
       g.drawRect(hudX + 10, hudY + 10, 95, 20);
@@ -875,13 +1050,13 @@ public class ClientGame extends Game
       {
          g.fillRect(hudX + 10, hudY + 10, (int) (100.0 / maxEnergy * player.getEnergy()), 20);
       }
-      
+      */
    }
    
    /**
     * Renders the debug information.
     * 
-    * @param g the {@code Graphics2D} object
+    * @param g the <code>Graphics2D</code> object
     */
    private void renderDebug(Graphics2D g)
    {
@@ -890,16 +1065,15 @@ public class ClientGame extends Game
       final int DY = 22;
       final int LINE_HEIGHT = 14;
       
-      g.setColor(Color.WHITE);
+      g.setColor(Color.RED);
+      
       g.drawString("FPS: " + getGameTime().getFrameRate(), DX, 0 * LINE_HEIGHT + DY);
       g.drawString("Mouse: " + Mouse.getState().getX() + ", " + Mouse.getState().getY(), DX, 1 * LINE_HEIGHT + DY);
       g.drawString("Mouse delta: " + Mouse.getState().getDeltaX() + ", " + Mouse.getState().getDeltaY(), DX, 2 * LINE_HEIGHT + DY);
       g.drawString("Viewport origin: " + Screen.getInstance().getViewport().getOriginPosition().x + ", " + Screen.getInstance().getViewport().getOriginPosition().y, DX, 3 * LINE_HEIGHT + DY);
       g.drawString("Viewport central: " + Screen.getInstance().getViewport().getCentralPosition().x + ", " + Screen.getInstance().getViewport().getCentralPosition().y, DX, 4 * LINE_HEIGHT + DY);
-      g.drawString("Buildingtype: " + buildingType, 10, 5 * LINE_HEIGHT + DY);
+      g.drawString("Building type: " + buildingType, 10, 5 * LINE_HEIGHT + DY);
       g.drawString("Running slowly: " + getGameTime().isRunningSlowly(), DX, 6 * LINE_HEIGHT + DY);
       g.drawString("Ticks: " + getGameTime().getTicks(), DX, 7 * LINE_HEIGHT + DY);
-      g.drawString("Amount of Minerals: " + player.getMinerals(), 10, 8 * LINE_HEIGHT + DY);
-      g.drawString("Amount of Energy: " + player.getEnergy(), 10, 9 * LINE_HEIGHT + DY);
    }
 }

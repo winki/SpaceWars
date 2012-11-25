@@ -1,41 +1,51 @@
 package spacewars.game.model.buildings;
 
-import spacewars.game.ClientGame;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import spacewars.game.SpaceWarsGame;
 import spacewars.game.model.Player;
 import spacewars.game.model.Ship;
 import spacewars.gamelib.GameTime;
-import spacewars.gamelib.geometrics.Vector;
+import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
 public class Shipyard extends Building
 {
-   private static final String NAME = "Shipyard";
+   protected static final String name = "Shipyard";   
    
-   public Shipyard(final Player player, final Vector position)
+   public Shipyard(final Vector position, final Player player)
    {
-      super(player, position, 15, 200, 500);
+      super(position, 20, 100, player, 500);
    }
    
    @Override
    public String getName()
    {
-      return NAME;
+      return name;
    }
    
    @Override
    public void update(GameTime gameTime)
    {
-      // TODO: update super class?
-      // super.update(gameTime);
-      
       if (hasEnergy())
       {         
-         // TODO: take nanoseconds instead of ticks
-         if (gameTime.getTicks() % 120 == 0)
+         // repeat every 4 seconds
+         if (gameTime.timesPerSecond(0.25))
          {
             final Ship ship = new Ship(player, new Vector(position), 0);
-            ClientGame.getInstance().getGameState().getShips().add(ship);
+            SpaceWarsGame.getInstance().getGameState().getShips().add(ship);
          }
       }
+   }
+   
+   @Override
+   protected void renderBuilding(Graphics2D g)
+   {
+      super.renderBuilding(g);
+      
+      // draw icon
+      final int BORDER = 6;
+      g.setColor(Color.BLACK);
+      g.fillOval(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER));   
    }
 }

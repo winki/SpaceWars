@@ -6,7 +6,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import spacewars.game.SpaceWarsGame;
 import spacewars.game.model.buildings.Building;
-import spacewars.game.model.buildings.HomePlanet;
+import spacewars.game.model.buildings.HomeBase;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.IUpdateable;
 import spacewars.gamelib.Vector;
@@ -35,7 +35,7 @@ public class Ship extends PlayerElement implements IUpdateable
    private void setDirectionToEnemy()
    {
       // direction: enemy's home planet
-      final HomePlanet target = getEnemy().getHomePlanet();
+      final HomeBase target = getEnemy().getHomePlanet();
       final Vector direction = target.getPosition().sub(position);
       
       // set angle
@@ -61,7 +61,7 @@ public class Ship extends PlayerElement implements IUpdateable
       }
       
       // attack enemys home planet
-      final HomePlanet planet = enemy.getHomePlanet();
+      final HomeBase planet = enemy.getHomePlanet();
       if (planet.isReachableFrom(this))
       {
          attack = true;         

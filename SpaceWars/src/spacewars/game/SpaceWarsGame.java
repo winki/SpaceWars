@@ -24,7 +24,7 @@ import spacewars.game.model.Ship;
 import spacewars.game.model.Star;
 import spacewars.game.model.buildings.Building;
 import spacewars.game.model.buildings.BuildingType;
-import spacewars.game.model.buildings.HomePlanet;
+import spacewars.game.model.buildings.HomeBase;
 import spacewars.game.model.buildings.LaserCanon;
 import spacewars.game.model.buildings.Mine;
 import spacewars.game.model.buildings.Relay;
@@ -460,7 +460,7 @@ public class SpaceWarsGame extends Game
       for (Player p : gameState.getPlayers())
       {
          // TODO: add home planet to buildings?
-         final HomePlanet planet = p.getHomePlanet();
+         final HomeBase planet = p.getHomePlanet();
          if (planet != reachableElement && planet.collidesWith(line)) { return true; }
       }
       
@@ -494,7 +494,7 @@ public class SpaceWarsGame extends Game
       
       // add home planet as energy source
       // TODO: add home planet to buildings?
-      final HomePlanet home = player.getHomePlanet();
+      final HomeBase home = player.getHomePlanet();
       home.setCheckedForEngery(false);
       solars.add(home);
       
@@ -640,7 +640,7 @@ public class SpaceWarsGame extends Game
             }
          }
          
-         HomePlanet homePlanet = player.getHomePlanet();
+         HomeBase homePlanet = player.getHomePlanet();
          if (homePlanet.collidesWith(mouseworld))
          {
             selected = homePlanet;
@@ -755,7 +755,7 @@ public class SpaceWarsGame extends Game
     */
    private void deleteOrUpgrade()
    {
-      if (selected != null && selected instanceof Building && !(selected instanceof HomePlanet))
+      if (selected != null && selected instanceof Building && !(selected instanceof HomeBase))
       {
          Building selectedBuilding = (Building) selected;
          
@@ -977,9 +977,9 @@ public class SpaceWarsGame extends Game
             g.fillRect(screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED - BAR_HEIGHT, (int) (mineral.getMineralReserves() / (double) mineral.getMineralReservesMax() * (HUD_WIDTH - 2 * DX)), BAR_HEIGHT);
          }
          
-         if (selected instanceof HomePlanet)
+         if (selected instanceof HomeBase)
          {
-            final HomePlanet home = (HomePlanet) selected;
+            final HomeBase home = (HomeBase) selected;
             // TODO: draw homeplanet relevant stuff
          }
          

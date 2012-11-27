@@ -10,9 +10,9 @@ import spacewars.util.Ressources;
  * The home planet is a special solar station.
  */
 @SuppressWarnings("serial")
-public class HomePlanet extends SolarStation
+public class HomeBase extends SolarStation
 {
-   public HomePlanet(Vector position, Player player)
+   public HomeBase(Vector position, Player player)
    {
       super(position, player);
       

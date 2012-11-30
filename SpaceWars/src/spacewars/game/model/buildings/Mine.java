@@ -5,15 +5,16 @@ import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.util.LinkedList;
 import java.util.List;
-import spacewars.game.ClientGame;
+import spacewars.game.SpaceWarsGame;
 import spacewars.game.model.Player;
 import spacewars.game.model.planets.MineralPlanet;
-import spacewars.gamelib.geometrics.Vector;
+import spacewars.gamelib.GameTime;
+import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
 public class Mine extends Building
 {
-   private static final String   NAME           = "Mine";
+   protected static final String   name           = "Mine";
    /**
     * The range in which the mine can collect minerals
     */
@@ -25,16 +26,16 @@ public class Mine extends Building
     */
    protected List<MineralPlanet> reachableMineralPlanets;
    
-   public Mine(final Player player, final Vector position)
+   public Mine(final Vector position, final Player player)
    {
-      super(player, position, 10, 100, 100);
+      super(position, 10, 100, player, 100);
       this.reachableMineralPlanets = new LinkedList<>();
    }
    
    @Override
    public String getName()
    {
-      return NAME;
+      return name;
    }
    
    public int getResPerMin()
@@ -63,21 +64,47 @@ public class Mine extends Building
    }
    
    @Override
-   public void render(Graphics2D g)
+   public void update(GameTime gameTime)
    {
-      if (ClientGame.DEBUG)
+      if (hasEnergy())
+      {
+         // mine minerals
+         for (MineralPlanet planet : reachableMineralPlanets)
+         {
+            final int TO_MINE = 1;
+            planet.mine(TO_MINE);
+         }
+      }
+   }
+
+   @Override
+   protected void renderBuilding(Graphics2D g)
+   {
+      if (SpaceWarsGame.DEBUG)
       {
          g.setColor(Color.RED);
          for (MineralPlanet planet : reachableMineralPlanets)
          {
             final Vector p1 = getPosition();
             final Vector p2 = planet.getPosition();
-            final Line2D line = new Line2D.Float(p1.x, p1.y, p2.x, p2.y);            
-           
+            final Line2D line = new Line2D.Float(p1.x, p1.y, p2.x, p2.y);
+            
             g.draw(line);
          }
       }
       
-      super.render(g);
+      if (!isPlaced())
+      {
+         // draw mine range
+         g.setColor(isPlaceable() ? Color.WHITE : Color.RED);
+         g.drawOval(position.x - getMineRange(), position.y - getMineRange(), 2 * getMineRange(), 2 * getMineRange());
+      }
+      
+      super.renderBuilding(g);
+      
+      // draw icon
+      final int BORDER = 4;
+      g.setColor(Color.GREEN);
+      g.fillOval(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER));
    }
 }

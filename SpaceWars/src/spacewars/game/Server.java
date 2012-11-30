@@ -1,4 +1,4 @@
-package spacewars.network;
+package spacewars.game;
 
 import java.awt.Color;
 import spacewars.game.model.GameState;
@@ -6,11 +6,14 @@ import spacewars.game.model.Map;
 import spacewars.game.model.Player;
 import spacewars.game.model.Ship;
 import spacewars.game.model.buildings.Mine;
-import spacewars.gamelib.geometrics.Vector;
+import spacewars.gamelib.GameServer;
+import spacewars.gamelib.GameTime;
+import spacewars.gamelib.Vector;
+import spacewars.network.IServer;
 import de.root1.simon.annotation.SimonRemote;
 
 @SimonRemote(value = { IServer.class })
-public class Server implements IServer
+public class Server extends GameServer implements IServer
 {
    /*
     * TODO: kai
@@ -25,8 +28,6 @@ public class Server implements IServer
     * 
     */
    
-   private String[] clients = new String[2];
-   
    @Override
    public byte[] testNetworkSpeed(int bytes)
    {
@@ -38,26 +39,10 @@ public class Server implements IServer
       return data;
    }
    
-   public int register(String ID)
-   {
-      if (clients[0].equals(""))
-      {
-         clients[0] = ID;
-         return 1;
-      }
-      else if (clients[1].equals(""))
-      {  
-         clients[1] = ID;
-         return 2;
-      }else{
-         return 99;
-      }
-   }
-   
    @Override
-   public GameState getGameState(ClientInput input)
+   public GameState getGameState()
    {
-      Map map = new Map(100, 100, 500, 10);
+      Map map = new Map("Testmap", 100, 100, 500, 10);
       map.getHomePlanetPositions().add(new Vector(1, 2));
       map.getHomePlanetPositions().add(new Vector(6, 7));
       
@@ -72,7 +57,7 @@ public class Server implements IServer
       // 500 buildings
       for (int i = 0; i < 500; i++)
       {
-         gameState.getBuildings().add(new Mine(gameState.getPlayers().get(0), new Vector(1, 4)));
+         gameState.getBuildings().add(new Mine(new Vector(1, 4), gameState.getPlayers().get(0)));
       }
       
       // 100 ships
@@ -82,5 +67,23 @@ public class Server implements IServer
       }
       
       return gameState;
+   }
+
+   @Override
+   protected void initialize()
+   {
+      // TODO Auto-generated method stub
+   }
+   
+   @Override
+   public void update(GameTime gameTime)
+   {
+      // TODO Auto-generated method stub      
+   }
+
+   @Override
+   protected void sync()
+   {
+      // TODO Auto-generated method stub      
    }
 }

@@ -4,82 +4,92 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.util.Random;
-import spacewars.game.ClientGame;
-import spacewars.game.model.planets.HomePlanet;
+import spacewars.game.SpaceWarsGame;
+import spacewars.game.model.buildings.Building;
+import spacewars.game.model.buildings.HomeBase;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.IUpdateable;
-import spacewars.gamelib.geometrics.Vector;
+import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
 public class Ship extends PlayerElement implements IUpdateable
 {
-    protected int        power;
-    protected int        health;
-    
-    protected double     x;
-    protected double     y;
-    protected double     speed;
-    protected double     angle;
-    
-    protected double     anglediff;
-    
-    public Ship(final Player player, final Vector position, final double angle)
-    {
-        super(player, position, 5, 100);
-        this.health = 100;
-        this.x = position.x;
-        this.y = position.y;
-        this.speed = 0.5;
-        this.angle = angle;
-    }
-    
-    @Override
-    public void update(GameTime gameTime)
-    {
-        // direction: enemy's home planet
-        final HomePlanet target = ClientGame.getInstance().getGameState().getPlayers().get(1).getHomePlanet();
-        final Vector dir = target.getPosition().sub(position);
-        
-        // flight in the direction of the vector
-        final double targetangle = Math.atan((double) dir.y / dir.x);
-        
-        // angle difference
-        anglediff = targetangle - angle;
-        while (anglediff < 0)
-        {
-            anglediff += (2 * Math.PI);
-        }
-        anglediff %= (2 * Math.PI);
-        
-        final int TURN_SLOWMO = 300;
-        if (anglediff > Math.PI)
-        {
-            // turn left
-            angle -= anglediff / TURN_SLOWMO;
-        }
-        else
-        {
-            // turn right
-            angle += anglediff / TURN_SLOWMO;
-        }
-        
-        x += speed * Math.cos(angle) * gameTime.getElapsedGameTime() / 10000000;
-        y += speed * Math.sin(angle) * gameTime.getElapsedGameTime() / 10000000;
-        position.x = (int) x;
-        position.y = (int) y;
-    }
-    
-    @Override
-    public void render(Graphics2D g)
-    {
-        final AffineTransform viewport = g.getTransform();
-        
-        Shape ship = new Polygon(new int[] { position.x + 8, position.x - 4, position.x - 4 }, new int[] { position.y, position.y + 4, position.y - 4 }, 3);
-        g.rotate(angle, x, y);
-        g.setColor(player.getColor());
-        g.fill(ship);
-        
-        g.setTransform(viewport);
-    }
+   /**
+    * Don't serialize the exact position, it's just for the server to calculate
+    */
+   protected volatile double x;
+   protected volatile double y;
+   protected double          speed;
+   protected double          angle;
+   
+   public Ship(final Player player, final Vector position, final double angle)
+   {
+      super(position, 5, 100, player, 100);
+      
+      this.x = position.x;
+      this.y = position.y;
+      this.speed = 50;
+      setDirectionToEnemy();
+   }
+   
+   private void setDirectionToEnemy()
+   {
+      // direction: enemy's home planet
+      final HomeBase target = getEnemy().getHomePlanet();
+      final Vector direction = target.getPosition().sub(position);
+      
+      // set angle
+      angle = Math.atan2(direction.y, direction.x);
+   }
+   
+   @Override
+   public void update(GameTime gameTime)
+   {
+      final Player enemy = getEnemy();
+      final GameState gameState = SpaceWarsGame.getInstance().getGameState();
+      boolean attack = false;
+      final int ATTACK_POINTS = 1;
+      
+      // attack buildings
+      for (Building b : gameState.getBuildings())
+      {
+         if (b.isReachableFrom(this) && b.getPlayer() == enemy)
+         {
+            attack = true;
+            b.attack(ATTACK_POINTS);
+         }
+      }
+      
+      // attack enemys home planet
+      final HomeBase planet = enemy.getHomePlanet();
+      if (planet.isReachableFrom(this))
+      {
+         attack = true;         
+         planet.attack(ATTACK_POINTS);
+      }
+      
+      if (!attack)
+      {
+         // move only if not attacked
+         x += speed * Math.cos(angle) * gameTime.getElapsedGameTime() / 1000000000;
+         y += speed * Math.sin(angle) * gameTime.getElapsedGameTime() / 1000000000;
+         position.x = (int) x;
+         position.y = (int) y;
+      }
+   }
+   
+   @Override
+   public void render(Graphics2D g)
+   {
+      final AffineTransform viewport = g.getTransform();
+      
+      Shape ship = new Polygon(new int[] { position.x + 8, position.x - 4, position.x - 4 }, new int[] { position.y, position.y + 4, position.y - 4 }, 3);
+      g.rotate(angle, x, y);
+      g.setColor(player.getColor());
+      g.fill(ship);
+      
+      g.setTransform(viewport);
+      
+      super.render(g);
+   }
 }

@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import spacewars.gamelib.geometrics.Vector;
 
 public class Viewport
 {

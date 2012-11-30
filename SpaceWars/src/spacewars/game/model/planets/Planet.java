@@ -1,13 +1,13 @@
 package spacewars.game.model.planets;
 
 import spacewars.game.model.GameElement;
-import spacewars.gamelib.geometrics.Vector;
+import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
 public abstract class Planet extends GameElement
 {
-    public Planet(Vector position, int sizeRadius, int viewRadius)
-    {
-        super(position, sizeRadius, viewRadius);
-    }
+   public Planet(final Vector position, final int radius, final int sight)
+   {
+      super(position, radius, sight);
+   }
 }

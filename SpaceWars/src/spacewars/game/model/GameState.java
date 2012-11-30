@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import spacewars.game.model.buildings.Building;
 import spacewars.gamelib.IRenderable;
-import spacewars.gamelib.geometrics.Vector;
+import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
 public class GameState implements IRenderable, Serializable

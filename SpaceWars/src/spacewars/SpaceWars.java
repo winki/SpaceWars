@@ -10,9 +10,22 @@ public class SpaceWars
    /**
     * This method will be called if we are testing.
     */
+   
+   public static void print(int v, int w, String s1, String s2){
+      for(int y = 0; y < v * w; y++){
+         for(int x = 0; x<v*w;x++){
+            System.out.println((x/w)%2==0 || (y/w)%2 ==0 ? s1:s2);
+         }
+         System.out.println();
+      }
+   }
+   
    private static void testing()
    {
-      ClientGame.getInstance().run();
+      print(8, 4, " ", "#");
+      
+      //ClientGame.getInstance().run();
+      
       
       /*
        Network.runServer();

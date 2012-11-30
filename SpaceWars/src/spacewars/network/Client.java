@@ -9,5 +9,5 @@ public class Client implements IClient
     public void callback(String text)
     {
         System.out.printf("This message was received from the server: %s", text);
-    }    
+    }  
 }

@@ -1,6 +1,7 @@
 package spacewars.network;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import spacewars.game.model.GameState;
@@ -58,12 +59,15 @@ public class Network
         Lookup nameLookup = null;
         IServer server = null;
         
+        
         try
         {
             nameLookup = Simon.createNameLookup(serverAddress, PORT);
             server = (IServer) nameLookup.lookup(REGISTRY_NAME);
             
             // use the serverobject as it would exist on your local machine
+            
+            
             
             // first call (longer)
             server.testNetworkSpeed(0);
@@ -96,7 +100,7 @@ public class Network
         }
         finally
         {
-            // and finally 'release' the serverobject to release to connection
+            // and finally 'release' the serverobject to release the connection
             // to
             // the server
             if (nameLookup != null && server != null)

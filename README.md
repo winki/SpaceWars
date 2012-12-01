@@ -14,6 +14,8 @@ Projektantrag
 Im Internet haben wir folgendes interessante Flash-Game entdeckt:  
 [The Space Game](http://www.kongregate.com/games/CasualCollective/the-space-game)
 
+![Screenshot](http://drrm.net/wp-content/uploads/2011/07/TheSpaceGame.jpg)
+
 In diesem 2D-Spiel werden in Minen Rohstoffe abgebaut, welche man zum Ausbau seiner Mienenlandschaft einsetzen kann oder in die Verteidigung seiner Planeten investieren kann. Ein wichtiger Faktor ist auch das Energienetz: Jede Miene muss im Einflussgebiet des Energienetzes sein. Energie wird im Solarkraftwerk produziert und kann über Relais verteilt werden.
 
 Wir wollen noch einen Schritt weitergehen und das Spiel multiplayer-fähig machen. Durch eine Client-Server-Architektur, werden zwei Spieler auf derselben Karte platziert. Um dem Spiel noch etwas Würze zu verleihen, können die Spieler Angriffe mit Raumschiffen starten.
@@ -25,7 +27,7 @@ Die Herausforderung besteht auf der einen Seite in der Implementation eines Netz
 
 Auf der anderen Seite ist es nicht ganz trivial, auf einer grossen Karte mit vielen Objekten die Kollisionserkennung korrekt und auch performant durchzuführen. Zudem sollen die Objekte noch in einer vernünftigen Framerate gerendert werden.
 
- 
+
 ### Projektziele ###
 
 #### Woche 45 ####

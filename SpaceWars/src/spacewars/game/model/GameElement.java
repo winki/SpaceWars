@@ -23,7 +23,7 @@ public abstract class GameElement implements IRenderable, Serializable
     * The sight radius
     */
    protected int          sight;
-
+   
    /**
     * The power
     */
@@ -34,6 +34,16 @@ public abstract class GameElement implements IRenderable, Serializable
       this.position = position;
       this.radius = radius;
       this.sight = sight;
+   }
+   
+   /**
+    * Gets the game state from the game instance.
+    * 
+    * @return game state
+    */
+   public GameState getGameState()
+   {
+      return SpaceWarsGame.getInstance().getGameState();
    }
    
    /**
@@ -109,7 +119,7 @@ public abstract class GameElement implements IRenderable, Serializable
    {
       return position.distance(element.getPosition()) < element.getViewRadius();
    }
-
+   
    @Override
    public void render(Graphics2D g)
    {

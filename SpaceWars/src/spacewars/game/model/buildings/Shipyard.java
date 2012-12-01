@@ -2,7 +2,6 @@ package spacewars.game.model.buildings;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import spacewars.game.SpaceWarsGame;
 import spacewars.game.model.Player;
 import spacewars.game.model.Ship;
 import spacewars.gamelib.GameTime;
@@ -33,7 +32,7 @@ public class Shipyard extends Building
          if (gameTime.timesPerSecond(0.25))
          {
             final Ship ship = new Ship(player, new Vector(position), 0);
-            SpaceWarsGame.getInstance().getGameState().getShips().add(ship);
+            getGameState().getShips().add(ship);
          }
       }
    }

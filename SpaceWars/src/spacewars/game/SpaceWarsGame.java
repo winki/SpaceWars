@@ -530,29 +530,35 @@ public class SpaceWarsGame extends Game
        * - Korrekter Energiefluss
        */
       
-      // once a second
-      if (getGameTime().timesPerSecond(1))
+      // produce energy
+      for (Building building : getGameState().getBuildings())
       {
-         // produce energy
-         for (Building building : getGameState().getBuildings())
+         if (building instanceof SolarStation)
          {
-            if (building instanceof SolarStation)
+            final SolarStation solar = (SolarStation) building;
+            solar.update(getGameTime());
+            
+            if (getGameTime().timesPerSecond(1))
             {
-               final SolarStation solar = (SolarStation) building;
-               solar.update(getGameTime());
+               // produce energy once a second
                
                // TODO
                player.addEnergy(1);
             }
          }
-         
-         // mine minerals
-         for (Building building : getGameState().getBuildings())
+      }
+      
+      // mine minerals
+      for (Building building : getGameState().getBuildings())
+      {
+         if (building instanceof Mine)
          {
-            if (building instanceof Mine)
+            final Mine mine = (Mine) building;
+            mine.update(getGameTime());
+            
+            if (getGameTime().timesPerSecond(1))
             {
-               final Mine mine = (Mine) building;
-               mine.update(getGameTime());
+               mine.mine();
                
                // TODO:
                player.addMinerals(1);
@@ -811,7 +817,9 @@ public class SpaceWarsGame extends Game
    
    // TODO: make a copy of the gamestate before rendering. If not, there can
    // appear ConcurrentModificationExceptions because two threads (game thread
-   // and awt thread) iterate over the same list at the same time
+   // and awt thread) iterate over the same list at the same time.
+   // This copy will be automatically made, when the client gets the game state
+   // from the server, so no problem.
    @Override
    public void render(Graphics2D g)
    {

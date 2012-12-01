@@ -1,6 +1,10 @@
 package spacewars.game.model;
 
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Composite;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -88,6 +92,28 @@ public class GameState implements IRenderable, Serializable
         for (Ship ship : ships)
         {
             ship.render(g);
+            
+            // render attack line            
+            final PlayerElement attackTarget = ship.getAttackTarget();
+            if (attackTarget != null)
+            {
+               final int STROKE_WIDTH = 1;
+               final float TRANSPARENCY = 0.5f;
+               
+               final Composite composite = g.getComposite();
+               final Stroke stroke = g.getStroke();
+               g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
+               g.setStroke(new BasicStroke(STROKE_WIDTH));
+               g.setColor(ship.getPlayer().getColor());
+               
+               final Vector p1 = ship.getPosition();
+               final Vector p2 = attackTarget.getPosition();
+               final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);               
+               g.draw(line);
+               
+               g.setComposite(composite);
+               g.setStroke(stroke);
+            }            
         }
     }
 }

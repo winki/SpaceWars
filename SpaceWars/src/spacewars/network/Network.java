@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import spacewars.game.model.GameState;
-import de.root1.simon.*;
-import de.root1.simon.exceptions.*;
+import de.root1.simon.Lookup;
+import de.root1.simon.Registry;
+import de.root1.simon.Simon;
+import de.root1.simon.exceptions.EstablishConnectionFailed;
+import de.root1.simon.exceptions.LookupFailedException;
+import de.root1.simon.exceptions.NameBindingException;
 
 public class Network
 {
@@ -98,7 +101,7 @@ public class Network
    public static void testNetwork(IServer server)
    {
       // first call (takes longer)
-      server.testNetworkSpeed(0);
+      server.getBytes(0);
       
       // 1 byte:
       testNetworkSpeed(server, 1);
@@ -118,15 +121,16 @@ public class Network
       testNetworkSpeed(server, 10 * 1024 * 1024);
       
       // get game state
-      final long start = System.currentTimeMillis();
+      /*final long start = System.currentTimeMillis();
       GameState gameState = server.getGameState();
       Logger.getGlobal().info(String.format("\nGetting GameState: %5d ms | %s", (int) (System.currentTimeMillis() - start), gameState));
+      */
    }   
    
    private static void testNetworkSpeed(IServer server, int bytes)
    {
       final long start = System.currentTimeMillis();
-      server.testNetworkSpeed(bytes);
+      server.getBytes(bytes);
       Logger.getGlobal().info(String.format("%5d ms for %10d bytes\n", (int) (System.currentTimeMillis() - start), bytes));
    }
 }

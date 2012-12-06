@@ -2,32 +2,52 @@ package spacewars;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import spacewars.game.SpaceWarsGame;
+import spacewars.game.Client;
+import spacewars.game.Server;
+import spacewars.network.IServer;
+import spacewars.network.Network;
 
 public class SpaceWars
 {
    private static final boolean DEBUG = true;
    
-   /**
-    * This method will be called if we are testing.
-    */
-   
-   public static void print(int v, int w, String s1, String s2){
-      for(int y = 0; y < v * w; y++){
-         for(int x = 0; x<v*w;x++){
-            System.out.println((x/w)%2==0 || (y/w)%2 ==0 ? s1:s2);
+   public static void print(int v, int w, String s1, String s2)
+   {
+      for (int y = 0; y < v * w; y++)
+      {
+         for (int x = 0; x < v * w; x++)
+         {
+            System.out.println((x / w) % 2 == 0 || (y / w) % 2 == 0 ? s1 : s2);
          }
          System.out.println();
       }
    }
    
+   /**
+    * This method will be called if we are testing.
+    */
    private static void testing()
-   {
+   {      
       // set logging
       Logger.getGlobal().setLevel(Level.ALL);
       
+      runServer();
+      
+      try
+      {
+         // wait till server is ready
+         Thread.sleep(1000);
+      }
+      catch (InterruptedException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      
+      runClient("localhost");
+      
       // run game
-      SpaceWarsGame.getInstance().run();
+      //SpaceWarsGame.getInstance().run();
       
       /*
        Network.runServer();
@@ -88,7 +108,11 @@ public class SpaceWars
     */
    private static void runServer()
    {
-      // TODO: run server
+      final Server server = Server.getInstance();
+      Network.bindServer(server);      
+      
+      // run server in his own thread
+      new Thread(server).start();
    }
    
    /**
@@ -98,6 +122,11 @@ public class SpaceWars
     */
    private static void runClient(String serverAddress)
    {
-      // TODO: run client, connect to server
+      final IServer server = Network.connect(serverAddress);
+      final Client client = Client.getInstance();
+      
+      client.setServer(server);
+      client.run();
+      // client.setServer(server); TODO: winku
    }
 }

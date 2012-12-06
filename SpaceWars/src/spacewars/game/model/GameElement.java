@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.io.Serializable;
+import spacewars.game.Client;
+import spacewars.game.Server;
 import spacewars.game.SpaceWarsGame;
 import spacewars.gamelib.IRenderable;
 import spacewars.gamelib.Vector;
@@ -23,7 +25,6 @@ public abstract class GameElement implements IRenderable, Serializable
     * The sight radius
     */
    protected int          sight;
-   
    /**
     * The power
     */
@@ -43,7 +44,10 @@ public abstract class GameElement implements IRenderable, Serializable
     */
    public GameState getGameState()
    {
-      return SpaceWarsGame.getInstance().getGameState();
+      // TODO: solve client/server difference
+      GameState client = Client.getInstance().getGameState();
+      if (client == null) { return Server.getInstance().getGameState(); }
+      return client;
    }
    
    /**
@@ -130,7 +134,7 @@ public abstract class GameElement implements IRenderable, Serializable
       }
       
       // draw selection
-      if (SpaceWarsGame.getInstance().getSelected() == this)
+      if (Client.getInstance().getSelected() == this)
       {
          final int OVERLAY = 3;
          final int SERIF = 5;

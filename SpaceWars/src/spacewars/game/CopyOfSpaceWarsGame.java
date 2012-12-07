@@ -8,7 +8,6 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,14 +40,14 @@ import spacewars.gamelib.Mouse;
 import spacewars.gamelib.Screen;
 import spacewars.gamelib.Vector;
 
-public class SpaceWarsGame extends Game
+public class CopyOfSpaceWarsGame extends Game
 {
    public static final boolean             DEBUG             = false;
    public static final boolean             CAN_CHANGE_PLAYER = true;
    /**
     * Game instance
     */
-   private static SpaceWarsGame            instance;
+   private static CopyOfSpaceWarsGame            instance;
    /**
     * Random object
     */
@@ -95,16 +94,7 @@ public class SpaceWarsGame extends Game
     */
    private Vector                          scrollPosition;
    
-   // !!! correct placed? need them in rendering and upgrading
-   final int                               FONT_LINE = 15;
-   final int                               DX = 10;
-   final int                               DY = 24;
-   final int                               DY_SELECTED = 200;
-   final int                               HUD_WIDTH = 160;
-   final int                               BAR_HEIGHT = 5;
-   final Dimension                         screen = Screen.getInstance().getSize();
-   
-   private SpaceWarsGame()
+   private CopyOfSpaceWarsGame()
    {
       this.random = new Random();
       this.buildingType = BuildingType.NOTHING;
@@ -114,18 +104,154 @@ public class SpaceWarsGame extends Game
       this.linksToMineralPlanets = new LinkedList<>();
    }
    
-   public static SpaceWarsGame getInstance()
+   public static CopyOfSpaceWarsGame getInstance()
    {
       if (instance == null)
       {
-         instance = new SpaceWarsGame();
+         instance = new CopyOfSpaceWarsGame();
       }
       return instance;
    }
-
+   
+   public GameElement getSelected()
+   {
+      return selected;
+   }
+   
    public GameState getGameState()
    {
       return gameState;
+   }
+   
+   @Override
+   protected void initialize()
+   {
+      Screen screen = Screen.getInstance();
+      
+      screen.setTitle("Space Wars");
+      screen.setIcon("icon.png");
+      screen.setSize(new Dimension(800, 600));
+      screen.setSize(null);
+      
+      // init game state
+      createMap();
+      createStars();
+      createPlayers();
+      
+      returnToHomePlanet();
+      
+      // show screen
+      screen.setVisible(true);
+   }
+   
+   private void createMap()
+   {
+      Map map = MapFactory.loadMap("map1.png");
+      gameState = new GameState();
+      gameState.setMap(map);
+   }
+   
+   private void createStars()
+   {
+      for (int i = 0; i < gameState.getMap().getNumStars(); i++)
+      {
+         final int x = random.nextInt(Screen.getInstance().getSize().width);
+         final int y = random.nextInt(Screen.getInstance().getSize().height);
+         final int layer = random.nextInt(gameState.getMap().getNumLayers());
+         
+         stars.add(new Star(x, y, layer));
+      }
+   }
+   
+   private void createPlayers()
+   {
+      final List<Player> players = gameState.getPlayers();
+      
+      players.add(new Player(1, Color.BLUE, getGameState().getMap().getHomePlanetPositions().get(1)));
+      players.add(new Player(2, Color.MAGENTA, getGameState().getMap().getHomePlanetPositions().get(2)));
+      
+      player = players.get(0);
+   }
+   
+   @Override
+   public void update(GameTime gameTime)
+   {
+      // navigate
+      scroll();
+      if (Keyboard.getState().isKeyPressed(Key.HOME))
+      {
+         returnToHomePlanet();
+      }
+      
+      // select
+      select();
+      
+      // delete and upgrade buildings
+      deleteOrUpgrade();
+      
+      if (CAN_CHANGE_PLAYER)
+      {
+         // change player (only debug)
+         changePlayer();
+      }
+      
+      // build
+      setBuildMode();
+      build();
+      
+      // update world (game state)
+      updateWorld(gameTime);
+   }
+   
+   private void updateWorld(GameTime gameTime)
+   {
+      // check which buildings are on the energy net
+      checkEnergyAvailability();
+      
+      // update energy and mineral flow flow
+      updateEnergyAndMineralFlow();
+      
+      // war: defend, attack
+      for (Iterator<Building> iterator = getGameState().getBuildings().iterator(); iterator.hasNext();)
+      {
+         Building building = (Building) iterator.next();
+         
+         if (building instanceof LaserCanon || building instanceof Shipyard)
+         {
+            // defend, attack
+            building.update(gameTime);
+         }
+         
+         if (building.isDead())
+         {
+            // TODO: implement method for removing building clean
+            
+            // remove all links
+            for (Iterator<Building> iteratorLinked = building.getLinks().iterator(); iteratorLinked.hasNext();)
+            {
+               Building linked = (Building) iteratorLinked.next();
+               linked.getLinks().remove(building);
+            }
+            
+            // remove from list
+            iterator.remove();
+         }
+      }
+      
+      // update ships
+      for (Iterator<Ship> iterator = getGameState().getShips().iterator(); iterator.hasNext();)
+      {
+         Ship ship = (Ship) iterator.next();
+         ship.update(gameTime); // move
+         
+         if (ship.isDead())
+         {
+            // TODO: implement method for removing ship clean
+            
+            // remove remove from list
+            iterator.remove();
+         }
+      }
    }
    
    /**
@@ -397,14 +523,52 @@ public class SpaceWarsGame extends Game
          }
       }
    }
-
-   @Override
-   public void update(GameTime gameTime)
+   
+   private void updateEnergyAndMineralFlow()
    {
-      // TODO Auto-generated method stub
+      /*
+       * TODO: winki
+       * - Korrekter Energiefluss
+       */
       
+      // produce energy
+      for (Building building : getGameState().getBuildings())
+      {
+         if (building instanceof SolarStation)
+         {
+            final SolarStation solar = (SolarStation) building;
+            solar.update(getGameTime());
+            
+            if (getGameTime().timesPerSecond(1))
+            {
+               // produce energy once a second
+               
+               // TODO
+               player.addEnergy(1);
+            }
+         }
+      }
+      
+      // mine minerals
+      for (Building building : getGameState().getBuildings())
+      {
+         if (building instanceof Mine)
+         {
+            final Mine mine = (Mine) building;
+            mine.update(getGameTime());
+            
+            if (getGameTime().timesPerSecond(1))
+            {
+               mine.mine();
+               
+               // TODO:
+               player.addMinerals(1);
+               // player.removeEnergy(mine.getEnergyConsumPerMin() / 60);
+               // player.addMinerals(mine.getResPerMin() / 60);
+            }
+         }
+      }
    }
-<<<<<<< HEAD
    
    private void returnToHomePlanet()
    {
@@ -459,8 +623,8 @@ public class SpaceWarsGame extends Game
    
    private void select()
    {
-      // check if mouse is on building/planet and building/planet is not under the HUD
-      if (Mouse.getState().isButtonPressed(Button.LEFT) && Mouse.getState().getX() <= screen.getWidth() - HUD_WIDTH)
+      // check if mouse is on building/planet
+      if (Mouse.getState().isButtonPressed(Button.LEFT))
       {
          final Vector mousescreen = Mouse.getState().getVector();
          final Vector mouseworld = Screen.getInstance().getViewport().transformScreenToWorld(mousescreen);
@@ -612,13 +776,10 @@ public class SpaceWarsGame extends Game
             getGameState().getBuildings().remove(selectedBuilding);
          }
          
-         
-         //
-         if (Keyboard.getState().isKeyPressed(Key.PAGE_UP) || (Mouse.getState().getX() >= screen.width - HUD_WIDTH + HUD_WIDTH/2 -30 && Mouse.getState().getX() <= screen.width - HUD_WIDTH + HUD_WIDTH/2 + 30 && Mouse.getState().getY() >= 4 * FONT_LINE + DY_SELECTED && Mouse.getState().getY() <= 4 * FONT_LINE + DY_SELECTED - BAR_HEIGHT + 60 && Mouse.getState().isButtonPressed(Button.LEFT)) )
+         if (Keyboard.getState().isKeyPressed(Key.PAGE_UP))
          {
             // upgrade
-            if(selectedBuilding.getLevel() <= 3)
-               selectedBuilding.upgrade();
+            selectedBuilding.upgrade();
          }
       }
    }
@@ -657,16 +818,94 @@ public class SpaceWarsGame extends Game
    
    // TODO: make a copy of the gamestate before rendering. If not, there can
    // appear ConcurrentModificationExceptions because two threads (game thread
-   // and awt thread) iterate over the same list at the same time
-=======
-
->>>>>>> branch 'master' of https://github.com/winki/SpaceWars.git
+   // and awt thread) iterate over the same list at the same time.
+   // This copy will be automatically made, when the client gets the game state
+   // from the server, so no problem.
    @Override
    public void render(Graphics2D g)
    {
-      // TODO Auto-generated method stub
+      {
+         // render stars in the background
+         renderStars(g);
+      }
+      // add viewport translation and scale to the world rendering
+      final AffineTransform viewport = Screen.getInstance().getViewport().getWorldToScreenTransform();
+      final AffineTransform original = g.getTransform();
+      g.setTransform(viewport); // render world relative to viewport
+      {
+         // render world (game state, map...)
+         renderWorld(g);
+      }
+      g.setTransform(original); // reset transform
+      {
+         // render heads up display
+         renderHud(g);
+         
+         if (DEBUG)
+         {
+            renderDebug(g);
+         }
+      }
+   }
+   
+   private void renderStars(Graphics2D g)
+   {
+      // render stars
+      final float TRANSPARENCY = 0.4f;
+      final Composite original = g.getComposite();
+      g.setColor(Color.WHITE);
+      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
+      for (Star star : stars)
+      {
+         final int DEEP_DELTA = 2;
+         final int DEEP_FACTOR = 1;
+         final double FACTOR = 0.5;
+         final int SIZE = (int) ((gameState.getMap().getNumLayers() - star.getLayer()) * FACTOR);
+         
+         final Vector o = Screen.getInstance().getViewport().getOriginPosition();
+         final int screenw = Screen.getInstance().getSize().width;
+         final int screenh = Screen.getInstance().getSize().height;
+         
+         int x = (o.x / (1 + DEEP_DELTA + star.getLayer() * DEEP_FACTOR) + star.getPosititon().x - SIZE / 2) % screenw;
+         int y = (o.y / (1 + DEEP_DELTA + star.getLayer() * DEEP_FACTOR) + star.getPosititon().y - SIZE / 2) % screenh;
+         if (x < 0) x += screenw;
+         if (y < 0) y += screenh;
+         
+         g.fillOval(x, y, SIZE, SIZE);
+      }
+      g.setComposite(original);
+   }
+   
+   private void renderWorld(Graphics2D g)
+   {
+      // render connection lines between the buildings
+      if (buildingToBePlaced != null && buildingIsPlaceable)
+      {
+         g.setColor(Color.RED);
+         for (Link<Building> link : linksToBuildings)
+         {
+            final Line2D line = link.getLine();
+            
+            g.setColor(link.isCollision() ? Color.RED : Color.WHITE);
+            g.draw(line);
+         }
+         
+         if (!linksToMineralPlanets.isEmpty())
+         {
+            final int STROKE_WIDTH = 2;
+            final Stroke stroke = g.getStroke();
+            g.setStroke(new BasicStroke(STROKE_WIDTH));
+            g.setColor(Color.GREEN);
+            for (Link<MineralPlanet> link : linksToMineralPlanets)
+            {
+               final Line2D line = link.getLine();
+               
+               g.draw(line);
+            }
+            g.setStroke(stroke);
+         }
+      }
       
-<<<<<<< HEAD
       // render game state
       gameState.render(g);
       
@@ -700,9 +939,14 @@ public class SpaceWarsGame extends Game
       
       final int seconds = (int) (getGameTime().getTotalGameTime() / 1000000000);
       
-      // vars now declared in class
+      final int FONT_LINE = 15;
+      final int DX = 10;
+      final int DY = 24;
+      final int DY_SELECTED = 200;
+      final int HUD_WIDTH = 160;
+      final int BAR_HEIGHT = 5;
       final float TRANSPARENCY = 0.8f;
-      
+      final Dimension screen = Screen.getInstance().getSize();
       
       final Composite original = g.getComposite();
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
@@ -753,41 +997,16 @@ public class SpaceWarsGame extends Game
             final Building building = (Building) selected;
             // TODO: draw building relevant stuff
             
-            // type
-            g.setColor(Color.WHITE);
-            g.drawString(String.format("%s", building.getName()), screen.width - HUD_WIDTH + DX, 0 * FONT_LINE + DY_SELECTED);
-            
-            // level
-            g.setColor(Color.WHITE);
-            g.drawString(String.format("Level %s of 4", building.getLevel()), screen.width - HUD_WIDTH + DX, 1 * FONT_LINE + DY_SELECTED);
-            
-            // upgrade
-            g.setColor(Color.GREEN);
-            if (building.getLevel() <= 3){
-               g.drawString(String.format("upgrade to level %s of 4", building.getLevel() ), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
-            }else{
-               g.drawString("Maximalstufe erreicht", screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
-            }
-            
-            g.setColor(Color.GREEN);
-            g.fillRect(screen.width - HUD_WIDTH + HUD_WIDTH/2, 4 * FONT_LINE + DY_SELECTED, 1, 50);
-            g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH/2 - 20, 4 * FONT_LINE + DY_SELECTED+20, screen.width - HUD_WIDTH + HUD_WIDTH/2, 4 * FONT_LINE + DY_SELECTED);
-            g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH/2 + 20, 4 * FONT_LINE + DY_SELECTED+20, screen.width - HUD_WIDTH + HUD_WIDTH/2, 4 * FONT_LINE + DY_SELECTED);
-            g.draw(new Arc2D.Double(screen.width - HUD_WIDTH + HUD_WIDTH/2 -30, 4 * FONT_LINE + DY_SELECTED - 5,60,60,100,340,Arc2D.OPEN));
-            
-           
             if (selected instanceof Relay)
             {
                final Relay relay = (Relay) building;
                // TODO: draw relay relevant stuff
-               // number of connections
             }
             
             if (selected instanceof SolarStation)
             {
                final SolarStation solar = (SolarStation) building;
                // TODO: draw solar relevant stuff
-               // energy capazity
             }
             
             if (selected instanceof Mine)
@@ -865,7 +1084,5 @@ public class SpaceWarsGame extends Game
       g.drawString("Building type: " + buildingType, 10, 5 * LINE_HEIGHT + DY);
       g.drawString("Running slowly: " + getGameTime().isRunningSlowly(), DX, 6 * LINE_HEIGHT + DY);
       g.drawString("Ticks: " + getGameTime().getTicks(), DX, 7 * LINE_HEIGHT + DY);
-=======
->>>>>>> branch 'master' of https://github.com/winki/SpaceWars.git
    }
 }

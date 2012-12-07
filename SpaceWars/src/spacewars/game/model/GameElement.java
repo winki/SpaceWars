@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.io.Serializable;
+import spacewars.game.Client;
+import spacewars.game.Server;
 import spacewars.game.SpaceWarsGame;
 import spacewars.gamelib.IRenderable;
 import spacewars.gamelib.Vector;
@@ -23,7 +25,6 @@ public abstract class GameElement implements IRenderable, Serializable
     * The sight radius
     */
    protected int          sight;
-
    /**
     * The power
     */
@@ -34,6 +35,19 @@ public abstract class GameElement implements IRenderable, Serializable
       this.position = position;
       this.radius = radius;
       this.sight = sight;
+   }
+   
+   /**
+    * Gets the game state from the game instance.
+    * 
+    * @return game state
+    */
+   public GameState getGameState()
+   {
+      // TODO: solve client/server difference
+      GameState client = Client.getInstance().getGameState();
+      if (client == null) { return Server.getInstance().getGameState(); }
+      return client;
    }
    
    /**
@@ -109,7 +123,7 @@ public abstract class GameElement implements IRenderable, Serializable
    {
       return position.distance(element.getPosition()) < element.getViewRadius();
    }
-
+   
    @Override
    public void render(Graphics2D g)
    {
@@ -120,7 +134,7 @@ public abstract class GameElement implements IRenderable, Serializable
       }
       
       // draw selection
-      if (SpaceWarsGame.getInstance().getSelected() == this)
+      if (this.equals(Client.getInstance().getSelected()))
       {
          final int OVERLAY = 3;
          final int SERIF = 5;
@@ -132,5 +146,25 @@ public abstract class GameElement implements IRenderable, Serializable
          g.drawLine(position.x, position.y + radius + OVERLAY - SERIF, position.x, position.y + radius + OVERLAY + SERIF);
          g.drawLine(position.x - radius - OVERLAY - SERIF, position.y, position.x - radius - OVERLAY + SERIF, position.y);
       }
+   }
+   
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == null) return false;
+      if (this == obj) return true;
+      if (obj instanceof GameElement)
+      {
+         GameElement gameElement = (GameElement) obj;
+         if (this.hashCode() != gameElement.hashCode()) { return false; }
+         // TODO: check real equality
+      }
+      return false;
+   }
+   
+   @Override
+   public int hashCode()
+   {
+      return getPosition().x ^ getPosition().y;
    }
 }

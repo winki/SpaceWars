@@ -4,7 +4,6 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import spacewars.game.SpaceWarsGame;
 import spacewars.game.model.buildings.Building;
 import spacewars.game.model.buildings.HomeBase;
 import spacewars.gamelib.GameTime;
@@ -22,6 +21,8 @@ public class Ship extends PlayerElement implements IUpdateable
    protected double          speed;
    protected double          angle;
    
+   protected PlayerElement   attackTarget;
+   
    public Ship(final Player player, final Vector position, final double angle)
    {
       super(position, 5, 100, player, 100);
@@ -30,6 +31,17 @@ public class Ship extends PlayerElement implements IUpdateable
       this.y = position.y;
       this.speed = 50;
       setDirectionToEnemy();
+   }
+   
+   public int getAttackPower()
+   {
+      // TODO: depends on level
+      return 1;
+   }
+   
+   public PlayerElement getAttackTarget()
+   {
+      return attackTarget;
    }
    
    private void setDirectionToEnemy()
@@ -42,35 +54,37 @@ public class Ship extends PlayerElement implements IUpdateable
       angle = Math.atan2(direction.y, direction.x);
    }
    
-   @Override
-   public void update(GameTime gameTime)
+   private PlayerElement chooseAttackTarget()
    {
       final Player enemy = getEnemy();
-      final GameState gameState = SpaceWarsGame.getInstance().getGameState();
-      boolean attack = false;
-      final int ATTACK_POINTS = 1;
+      final GameState gameState = getGameState();
       
       // attack buildings
-      for (Building b : gameState.getBuildings())
+      for (Building building : gameState.getBuildings())
       {
-         if (b.isReachableFrom(this) && b.getPlayer() == enemy)
-         {
-            attack = true;
-            b.attack(ATTACK_POINTS);
-         }
+         if (building.isReachableFrom(this) && building.getPlayer() == enemy) { return building; }
       }
       
       // attack enemys home planet
       final HomeBase planet = enemy.getHomePlanet();
-      if (planet.isReachableFrom(this))
+      if (planet.isReachableFrom(this)) { return planet; }
+      
+      // no target
+      return null;
+   }
+   
+   @Override
+   public void update(GameTime gameTime)
+   {
+      attackTarget = chooseAttackTarget();
+      if (attackTarget != null)
       {
-         attack = true;         
-         planet.attack(ATTACK_POINTS);
+         attackTarget.attack(getAttackPower());
       }
       
-      if (!attack)
+      // move only if not attacking
+      if (attackTarget == null)
       {
-         // move only if not attacked
          x += speed * Math.cos(angle) * gameTime.getElapsedGameTime() / 1000000000;
          y += speed * Math.sin(angle) * gameTime.getElapsedGameTime() / 1000000000;
          position.x = (int) x;

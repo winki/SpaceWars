@@ -1,9 +1,8 @@
 package spacewars.gamelib;
 
-public abstract class Game implements Runnable, IUpdateable, IRenderable
+public abstract class Game implements Runnable, IRenderable
 {
    private final GameTime gameTime;
-   private boolean        running;
    
    public Game()
    {
@@ -26,33 +25,30 @@ public abstract class Game implements Runnable, IUpdateable, IRenderable
          long latest = System.nanoTime();
          long difference;
          
-         running = true;
-         while (running && !Thread.interrupted())
+         while (!Thread.interrupted())
          {
             // handle game time
+            past = latest;
+            difference = GameTime.TARGET_CYCLE_TIME - (System.nanoTime() - past);
+            if (difference > 0)
             {
-               past = latest;
-               difference = GameTime.TARGET_CYCLE_TIME - (System.nanoTime() - past);
-               if (difference > 0)
-               {
-                  // wait if update performs too fast
-                  Thread.sleep((difference + 500000) / 1000000);
-                  gameTime.setRunningSlowly(false);
-               }
-               else
-               {
-                  gameTime.setRunningSlowly(true);
-               }
-               latest = System.nanoTime();
-               gameTime.setElapsedGameTime(latest - past);
+               // wait if update performs too fast
+               Thread.sleep((difference + 500000) / 1000000);
+               gameTime.setRunningSlowly(false);
             }
+            else
+            {
+               gameTime.setRunningSlowly(true);
+            }
+            latest = System.nanoTime();
+            gameTime.setElapsedGameTime(latest - past);
             
             process();
          }
       }
       catch (InterruptedException ex)
       {
-         // do nothing
+         // interrupted while thread was sleeping, do nothing
       }
       finally
       {
@@ -61,11 +57,13 @@ public abstract class Game implements Runnable, IUpdateable, IRenderable
    }
    
    /**
-    * Stops the game loop.
+    * Gets the game time object.
+    * 
+    * @return game time object
     */
-   public void stop()
+   public GameTime getGameTime()
    {
-      running = false;
+      return gameTime;
    }
    
    /**
@@ -77,7 +75,8 @@ public abstract class Game implements Runnable, IUpdateable, IRenderable
    }
    
    /**
-    * Initializes everything that has to be available in the game loop.
+    * Initializes everything that has to be available short before the game loop
+    * starts.
     */
    protected void initialize()
    {}
@@ -99,18 +98,15 @@ public abstract class Game implements Runnable, IUpdateable, IRenderable
    }
    
    /**
+    * Is called, when the game has to be updated.
+    * 
+    * @param gameTime elapsed game time
+    */
+   protected abstract void update(GameTime gameTime);
+   
+   /**
     * Loads all content.
     */
    protected void unload()
    {}
-   
-   /**
-    * Gets the game time object.
-    * 
-    * @return game time object
-    */
-   protected GameTime getGameTime()
-   {
-      return gameTime;
-   }
 }

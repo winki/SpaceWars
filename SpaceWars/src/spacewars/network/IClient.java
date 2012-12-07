@@ -2,5 +2,9 @@ package spacewars.network;
 
 public interface IClient
 {
-    public void callback(String text);
+   /**
+    * Is called from the server to tell the client that the game has been
+    * started.
+    */
+   void startGame();
 }

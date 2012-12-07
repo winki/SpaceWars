@@ -16,30 +16,29 @@ public abstract class Building extends PlayerElement implements IUpdateable
    /**
     * The upgrade level (zero-based) of the building
     */
-   protected int              level;
+   protected int              level;   
+   protected int              buildState;
    protected boolean          placeable;
-   protected boolean          placed;
+   protected boolean          placed;   
    protected int              costs;
    /**
     * Helper flag to check if a building has already been check for energy
     * availability
     */
-   protected volatile boolean isCheckedForEngery = false;
+   protected volatile boolean isCheckedForEngery;
    /**
     * Is the building on the energy net
     */
-   protected boolean          hasEnergy          = false;
+   protected boolean          hasEnergy;
    protected List<Building>   linkedBuildings;
-   
-   /*
-    * TODO: kai
-    * - Baustatus
-    */
    
    public Building(final Vector position, final int radius, final int sight, final Player player, final int costs)
    {
       super(position, radius, sight, player, 100);
       
+      this.buildState = 0;
+      this.isCheckedForEngery = false;
+      this.hasEnergy = false;
       this.placeable = true;
       this.linkedBuildings = new LinkedList<>();
    }
@@ -108,7 +107,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
    {
       this.level++;
    }
-
+   
    @Override
    public void update(GameTime gameTime)
    {

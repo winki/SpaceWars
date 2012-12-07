@@ -1,8 +1,11 @@
 package spacewars.game.model.buildings;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.Line2D;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import spacewars.game.SpaceWarsGame;
@@ -14,7 +17,7 @@ import spacewars.gamelib.Vector;
 @SuppressWarnings("serial")
 public class Mine extends Building
 {
-   protected static final String   name           = "Mine";
+   protected static final String name           = "Mine";
    /**
     * The range in which the mine can collect minerals
     */
@@ -25,6 +28,10 @@ public class Mine extends Building
     * List of mineral planets that are reachable from this mine
     */
    protected List<MineralPlanet> reachableMineralPlanets;
+   /**
+    * The mineral planet which this mine is mining in this moment
+    */
+   protected MineralPlanet       miningTarget;
    
    public Mine(final Vector position, final Player player)
    {
@@ -53,9 +60,10 @@ public class Mine extends Building
       return mineRange;
    }
    
-   public boolean canMine(MineralPlanet planet)
+   public int getMineAmount()
    {
-      return position.distance(planet.getPosition()) - planet.getSizeRadius() < getMineRange();
+      // TODO: depends on level
+      return 1;
    }
    
    public List<MineralPlanet> getReachableMineralPlanets()
@@ -63,20 +71,49 @@ public class Mine extends Building
       return reachableMineralPlanets;
    }
    
-   @Override
-   public void update(GameTime gameTime)
+   public MineralPlanet getMiningTarget()
    {
+      return miningTarget;
+   }
+   
+   private MineralPlanet chooseMiningTarget()
+   {
+      Collections.shuffle(reachableMineralPlanets);
+      for (MineralPlanet planet : reachableMineralPlanets)
+      {
+         // take first random planet which has mineral reserves
+         if (planet.getMineralReserves() > 0) { return planet; }
+      }
+      
+      return null;
+   }
+   
+   public boolean canMine(MineralPlanet planet)
+   {
+      return position.distance(planet.getPosition()) - planet.getSizeRadius() < getMineRange();
+   }
+   
+   public void mine()
+   {
+      // mine minerals if there is energy
       if (hasEnergy())
       {
-         // mine minerals
-         for (MineralPlanet planet : reachableMineralPlanets)
+         miningTarget = chooseMiningTarget();
+         
+         // mine if there's a planet with minerals
+         if (miningTarget != null)
          {
-            final int TO_MINE = 1;
-            planet.mine(TO_MINE);
+            miningTarget.mine(getMineAmount());
          }
       }
    }
-
+   
+   @Override
+   public void update(GameTime gameTime)
+   {
+      miningTarget = null;
+   }
+   
    @Override
    protected void renderBuilding(Graphics2D g)
    {
@@ -91,6 +128,21 @@ public class Mine extends Building
             
             g.draw(line);
          }
+      }
+      
+      if (miningTarget != null)
+      {
+         final int STROKE_WIDTH = 2;
+         final Stroke stroke = g.getStroke();
+         g.setStroke(new BasicStroke(STROKE_WIDTH));
+         g.setColor(Color.GREEN);
+         
+         final Vector p1 = getPosition();
+         final Vector p2 = miningTarget.getPosition();
+         final Line2D line = new Line2D.Float(p1.x, p1.y, p2.x, p2.y);
+         g.draw(line);
+         
+         g.setStroke(stroke);
       }
       
       if (!isPlaced())

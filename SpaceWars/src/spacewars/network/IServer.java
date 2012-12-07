@@ -1,18 +1,27 @@
 package spacewars.network;
 
 import spacewars.game.model.GameState;
+import spacewars.game.model.buildings.Building;
 
 public interface IServer
 {
-   public void login();
-   
    /**
-    * Test method.
+    * Client can register itself at the server.
     * 
-    * @param bytes number of bytes to receive
-    * @return array of random bytes
+    * @param client client callback object
     */
-   public byte[] getBytes(int bytes);
+   void register(IClient client);
    
-   public GameState getInitialGameState();
+   void build(Building building);
+   
+   void upgrade(Building building);
+   
+   void recycle(Building building);
+
+   /**
+    * Gets the current game state from the server.
+    * 
+    * @return the game state
+    */
+   GameState getGameState();
 }

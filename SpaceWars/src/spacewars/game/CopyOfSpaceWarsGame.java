@@ -147,7 +147,8 @@ public class CopyOfSpaceWarsGame extends Game
    private void createMap()
    {
       Map map = MapFactory.loadMap("map1.png");
-      gameState = new GameState(map);
+      gameState = new GameState();
+      gameState.setMap(map);
    }
    
    private void createStars()

@@ -29,19 +29,17 @@ public class SpaceWars
    private static void testing()
    {      
       // set logging
-      Logger.getGlobal().setLevel(Level.ALL);
+      Logger.getGlobal().setLevel(Level.ALL);      
       
-      runServer();
+      runServer();  
       
       try
       {
-         // wait till server is ready
-         Thread.sleep(1000);
+         Thread.sleep(500);
       }
       catch (InterruptedException e)
       {
-         // TODO Auto-generated catch block
-         e.printStackTrace();
+         e.printStackTrace();         
       }
       
       runClient("localhost");
@@ -127,6 +125,5 @@ public class SpaceWars
       
       client.setServer(server);
       client.run();
-      // client.setServer(server); TODO: winku
    }
 }

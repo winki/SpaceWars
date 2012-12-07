@@ -134,7 +134,7 @@ public abstract class GameElement implements IRenderable, Serializable
       }
       
       // draw selection
-      if (Client.getInstance().getSelected() == this)
+      if (this.equals(Client.getInstance().getSelected()))
       {
          final int OVERLAY = 3;
          final int SERIF = 5;
@@ -146,5 +146,25 @@ public abstract class GameElement implements IRenderable, Serializable
          g.drawLine(position.x, position.y + radius + OVERLAY - SERIF, position.x, position.y + radius + OVERLAY + SERIF);
          g.drawLine(position.x - radius - OVERLAY - SERIF, position.y, position.x - radius - OVERLAY + SERIF, position.y);
       }
+   }
+   
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == null) return false;
+      if (this == obj) return true;
+      if (obj instanceof GameElement)
+      {
+         GameElement gameElement = (GameElement) obj;
+         if (this.hashCode() != gameElement.hashCode()) { return false; }
+         // TODO: check real equality
+      }
+      return false;
+   }
+   
+   @Override
+   public int hashCode()
+   {
+      return getPosition().x ^ getPosition().y;
    }
 }

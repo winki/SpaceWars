@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Logger;
 import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Link;
@@ -100,6 +99,10 @@ public class Client extends GameClient implements IClient
     * Current scroll position
     */
    private Vector                          scrollPosition;
+   /**
+    * Intro screen before the game starts
+    */
+   private final IntroScreen               intro;
    
    private Client()
    {
@@ -109,6 +112,7 @@ public class Client extends GameClient implements IClient
       this.stars = new LinkedList<Star>();
       this.linksToBuildings = new LinkedList<>();
       this.linksToMineralPlanets = new LinkedList<>();
+      this.intro = new IntroScreen();
    }
    
    public static Client getInstance()
@@ -133,6 +137,7 @@ public class Client extends GameClient implements IClient
    public void setServer(IServer server)
    {
       this.server = server;
+      server.register(this);
    }
    
    @Override
@@ -147,7 +152,7 @@ public class Client extends GameClient implements IClient
       
       // init game state
       // TODO: get game state
-      gameState = server.getInitialGameState();
+      gameState = server.getGameState();
       player = gameState.getPlayers().get(0);
       
       createStars();
@@ -172,26 +177,46 @@ public class Client extends GameClient implements IClient
    @Override
    public void update(GameTime gameTime)
    {
-      // navigate
-      scroll();
-      if (Keyboard.getState().isKeyPressed(Key.HOME))
+      if (gameState != null)
       {
-         returnToHomePlanet();
+         if (intro.isVisible())
+         {
+            intro.update(gameTime);
+         }
+         else
+         {
+            // navigate
+            scroll();
+            if (Keyboard.getState().isKeyPressed(Key.HOME))
+            {
+               returnToHomePlanet();
+            }
+            
+            // select
+            select();
+            
+            // upgrade or recycle buildings
+            upgradeOrRecycle();
+            
+            // build
+            setBuildMode();
+            build();
+         }
       }
-      
-      // select
-      select();
-      
-      // delete and upgrade buildings
-      deleteOrUpgrade();
-      
-      // build
-      setBuildMode();
-      build();
-      
+   }
+   
+   @Override
+   protected void sync()
+   {
       // update game state
       // TODO: make more performant
-      gameState = server.getInitialGameState();
+      
+      long start = System.currentTimeMillis();
+      
+      gameState = server.getGameState();
+      long time = System.currentTimeMillis() - start;
+      
+      System.out.printf("Time to get game state: %d ms\n", time);
    }
    
    /**
@@ -499,23 +524,18 @@ public class Client extends GameClient implements IClient
             case RELAY:
                buildingToBePlaced = new Relay(position, player);
                break;
-            
             case MINE:
                buildingToBePlaced = new Mine(position, player);
                break;
-            
             case SOLAR:
                buildingToBePlaced = new SolarStation(position, player);
                break;
-            
             case LASER_CANON:
                buildingToBePlaced = new LaserCanon(position, player);
                break;
-            
             case SHIPYARD:
                buildingToBePlaced = new Shipyard(position, player);
                break;
-            
             default:
                break;
          }
@@ -541,39 +561,14 @@ public class Client extends GameClient implements IClient
             // effectively build
             if (Mouse.getState().isButtonReleased(Button.LEFT))
             {
-               // place this building
-               buildingToBePlaced.place();
-               gameState.getBuildings().add(buildingToBePlaced);
-               
-               // add links
-               for (Link<Building> link : linksToBuildings)
-               {
-                  if (!link.isCollision())
-                  {
-                     final Building building = link.getLinkedElement();
-                     buildingToBePlaced.getLinks().add(building);
-                     building.getLinks().add(buildingToBePlaced);
-                  }
-               }
-               
-               // add reachable mineral planets to mine
-               if (buildingToBePlaced instanceof Mine)
-               {
-                  Mine mine = (Mine) buildingToBePlaced;
-                  for (Link<MineralPlanet> link : linksToMineralPlanets)
-                  {
-                     mine.getReachableMineralPlanets().add(link.getLinkedElement());
-                  }
-               }
-               
+               server.build(buildingToBePlaced);
                buildingToBePlaced = null;
                
                /*
-               // TODO: uncomment if shift down function is wished
                if (!Keyboard.getState().isKeyDown(Key.SHIFT))
                {
                   // lose building type if shift is not pressed
-                  buildingType = BuildingType.NOTHING;               
+                  buildingType = BuildingType.NOTHING;
                }
                */
             }
@@ -582,28 +577,22 @@ public class Client extends GameClient implements IClient
    }
    
    /**
-    * Delete or upgrade selected building
+    * Upgrade or recycle selected building
     */
-   private void deleteOrUpgrade()
+   private void upgradeOrRecycle()
    {
       if (selected != null && selected instanceof Building && !(selected instanceof HomeBase))
       {
-         Building selectedBuilding = (Building) selected;
-         
-         if (Keyboard.getState().isKeyPressed(Key.DELETE))
-         {
-            // delete
-            for (Building linked : selectedBuilding.getLinks())
-            {
-               linked.getLinks().remove(selectedBuilding);
-            }
-            getGameState().getBuildings().remove(selectedBuilding);
-         }
-         
+         final Building selectedBuilding = (Building) selected;
          if (Keyboard.getState().isKeyPressed(Key.PAGE_UP))
          {
             // upgrade
-            selectedBuilding.upgrade();
+            server.upgrade(selectedBuilding);
+         }
+         else if (Keyboard.getState().isKeyPressed(Key.DELETE))
+         {
+            // recycle
+            server.recycle(selectedBuilding);
          }
       }
    }
@@ -648,26 +637,33 @@ public class Client extends GameClient implements IClient
    @Override
    public void render(Graphics2D g)
    {
+      if (gameState != null)
       {
          // render stars in the background
          renderStars(g);
-      }
-      // add viewport translation and scale to the world rendering
-      final AffineTransform viewport = Screen.getInstance().getViewport().getWorldToScreenTransform();
-      final AffineTransform original = g.getTransform();
-      g.setTransform(viewport); // render world relative to viewport
-      {
-         // render world (game state, map...)
-         renderWorld(g);
-      }
-      g.setTransform(original); // reset transform
-      {
-         // render heads up display
-         renderHud(g);
          
-         if (DEBUG)
+         // add viewport translation and scale to the world rendering
+         final AffineTransform viewport = Screen.getInstance().getViewport().getWorldToScreenTransform();
+         final AffineTransform original = g.getTransform();
+         g.setTransform(viewport); // render world relative to viewport
          {
-            renderDebug(g);
+            // render world (game state, map...)
+            renderWorld(g);
+            
+            if (intro.isVisible())
+            {
+               intro.render(g);
+            }
+         }
+         g.setTransform(original); // reset transform
+         {
+            // render heads up display
+            renderHud(g);
+            
+            if (DEBUG)
+            {
+               renderDebug(g);
+            }
          }
       }
    }
@@ -911,19 +907,7 @@ public class Client extends GameClient implements IClient
    }
    
    @Override
-   public void callback(String text)
-   {
-      Logger.getGlobal().info(String.format("This message was received from the server: %s", text));
-   }
-   
-   @Override
-   protected void sync()
-   {
-      // TODO Auto-generated method stub
-   }
-   
-   @Override
-   public void updateGameState(GameState gameState)
+   public void startGame()
    {
       // TODO Auto-generated method stub
    }

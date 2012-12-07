@@ -101,7 +101,7 @@ public class Network
    public static void testNetwork(IServer server)
    {
       // first call (takes longer)
-      server.getBytes(0);
+      //server.getBytes(0);
       
       // 1 byte:
       testNetworkSpeed(server, 1);
@@ -130,7 +130,7 @@ public class Network
    private static void testNetworkSpeed(IServer server, int bytes)
    {
       final long start = System.currentTimeMillis();
-      server.getBytes(bytes);
+      //server.getBytes(bytes);
       Logger.getGlobal().info(String.format("%5d ms for %10d bytes\n", (int) (System.currentTimeMillis() - start), bytes));
    }
 }

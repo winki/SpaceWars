@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Random;
 import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Link;
@@ -14,6 +16,7 @@ import spacewars.game.model.Map;
 import spacewars.game.model.Player;
 import spacewars.game.model.Ship;
 import spacewars.game.model.buildings.Building;
+import spacewars.game.model.buildings.BuildingType;
 import spacewars.game.model.buildings.HomeBase;
 import spacewars.game.model.buildings.LaserCanon;
 import spacewars.game.model.buildings.Mine;
@@ -21,9 +24,13 @@ import spacewars.game.model.buildings.Relay;
 import spacewars.game.model.buildings.Shipyard;
 import spacewars.game.model.buildings.SolarStation;
 import spacewars.game.model.planets.MineralPlanet;
+import spacewars.gamelib.Button;
 import spacewars.gamelib.GameServer;
 import spacewars.gamelib.GameTime;
+import spacewars.gamelib.Mouse;
+import spacewars.gamelib.Screen;
 import spacewars.gamelib.Vector;
+import spacewars.network.IClient;
 import spacewars.network.IServer;
 import de.root1.simon.annotation.SimonRemote;
 
@@ -39,7 +46,12 @@ public class Server extends GameServer implements IServer
    /**
     * The game state
     */
-   private GameState                       gameState;
+   private final GameState                 gameState;
+   
+   private final Queue<Building>           toBuild;
+   private final Queue<Building>           toUpgrade;
+   private final Queue<Building>           toRecycle;
+   
    /**
     * The links of the building that will be built
     */
@@ -54,6 +66,9 @@ public class Server extends GameServer implements IServer
       this.linksToBuildings = new LinkedList<>();
       this.linksToMineralPlanets = new LinkedList<>();
       this.gameState = new GameState();
+      this.toBuild = new LinkedList<>();
+      this.toUpgrade = new LinkedList<>();
+      this.toRecycle = new LinkedList<>();
    }
    
    public static Server getInstance()
@@ -64,12 +79,13 @@ public class Server extends GameServer implements IServer
       }
       return instance;
    }
-
+   
+   @Override
    public GameState getGameState()
    {
       return gameState;
    }
-
+   
    @Override
    protected void initialize()
    {
@@ -80,9 +96,7 @@ public class Server extends GameServer implements IServer
    {
       // create map
       final Map map = MapFactory.loadMap("map1.png");
-      
-      // create gamestate
-      gameState = new GameState(map);
+      gameState.setMap(map);
       
       // TODO: only sample players and objects, remove later
       {
@@ -91,25 +105,115 @@ public class Server extends GameServer implements IServer
          players.add(new Player(1, Color.BLUE, getGameState().getMap().getHomePlanetPositions().get(1)));
          players.add(new Player(2, Color.MAGENTA, getGameState().getMap().getHomePlanetPositions().get(2)));
          
-         // 50 buildings
-         for (int i = 0; i < 50; i++)
+         // 400 buildings
+         for (int i = 0; i < 500; i++)
          {
-            gameState.getBuildings().add(new Mine(new Vector(10 * i, 5 * i), gameState.getPlayers().get(0)));
+            final int x = (int) (Math.random() * 10000);
+            final int y = (int) (Math.random() * 10000);
+            
+            final Mine mine = new Mine(new Vector(x, y), gameState.getPlayers().get(0));
+            mine.place();
+            
+            gameState.getBuildings().add(mine);
          }
          
          // 100 ships
          for (int i = 0; i < 100; i++)
          {
-            gameState.getShips().add(new Ship(gameState.getPlayers().get(0), new Vector(5 * i, 10 * i), 0.5));
+            final int x = (int) (Math.random() * 1000);
+            final int y = (int) (Math.random() * 1000);
+            
+            gameState.getShips().add(new Ship(gameState.getPlayers().get(0), new Vector(x, y), 0.5));
          }
       }
    }
-
+   
    @Override
    public void update(GameTime gameTime)
    {
+      // process all build, upgrade and recycle requests
+      buildAll();
+      upgradeAll();
+      recycleAll();
+      
       // update world (game state)
       updateWorld(gameTime);
+   }
+   
+   private void buildAll()
+   {
+      while (!toBuild.isEmpty())
+      {
+         final Building buildingToBuild = toBuild.poll();
+         
+         // check collisions
+         boolean buildingIsPlaceable = !checkCollision(buildingToBuild);
+         buildingToBuild.setPlaceable(buildingIsPlaceable);
+         
+         if (buildingIsPlaceable)
+         {
+            // calculate connections
+            computeLinksToBuildings(buildingToBuild);
+            
+            // can build mines only if there is minimum one mineral planet
+            // reachable
+            if (buildingToBuild instanceof Mine && linksToMineralPlanets.isEmpty())
+            {
+               buildingIsPlaceable = false;
+               buildingToBuild.setPlaceable(buildingIsPlaceable);
+               return;
+            }
+            
+            // place this building
+            buildingToBuild.place();
+            gameState.getBuildings().add(buildingToBuild);
+            
+            // add links
+            for (Link<Building> link : linksToBuildings)
+            {
+               if (!link.isCollision())
+               {
+                  final Building building = link.getLinkedElement();
+                  buildingToBuild.getLinks().add(building);
+                  building.getLinks().add(buildingToBuild);
+               }
+            }
+            
+            // add reachable mineral planets to mine
+            if (buildingToBuild instanceof Mine)
+            {
+               Mine mine = (Mine) buildingToBuild;
+               for (Link<MineralPlanet> link : linksToMineralPlanets)
+               {
+                  mine.getReachableMineralPlanets().add(link.getLinkedElement());
+               }
+            }
+         }
+      }
+   }
+   
+   private void upgradeAll()
+   {
+      while (!toUpgrade.isEmpty())
+      {
+         final Building buildingToUpgrade = toBuild.poll();
+         
+         buildingToUpgrade.upgrade();
+      }
+   }
+   
+   private void recycleAll()
+   {
+      while (!toRecycle.isEmpty())
+      {
+         final Building buildingToRecycle = toBuild.poll();
+         
+         for (Building linked : buildingToRecycle.getLinks())
+         {
+            linked.getLinks().remove(buildingToRecycle);
+         }
+         getGameState().getBuildings().remove(buildingToRecycle);
+      }
    }
    
    private void updateWorld(GameTime gameTime)
@@ -506,31 +610,32 @@ public class Server extends GameServer implements IServer
     */
    
    @Override
-   public byte[] getBytes(int bytes)
-   {
-      byte[] data = new byte[bytes];
-      for (int i = 0; i < data.length; i++)
-      {
-         data[i] = (byte) i;
-      }
-      return data;
-   }
-   
-   @Override
    protected void sync()
    {
       // TODO Auto-generated method stub
    }
    
    @Override
-   public void login()
+   public void register(IClient client)
    {
       // TODO Auto-generated method stub
    }
-
+   
    @Override
-   public GameState getInitialGameState()
+   public void build(Building building)
    {
-      return gameState;
+      toBuild.offer(building);
+   }
+   
+   @Override
+   public void upgrade(Building building)
+   {
+      toUpgrade.offer(building);
+   }
+   
+   @Override
+   public void recycle(Building building)
+   {
+      toRecycle.offer(building);
    }
 }

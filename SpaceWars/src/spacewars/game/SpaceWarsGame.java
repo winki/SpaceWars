@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.util.Collections;
 import java.util.Comparator;
@@ -93,6 +94,15 @@ public class SpaceWarsGame extends Game
     * Current scroll position
     */
    private Vector                          scrollPosition;
+   
+   // !!! correct placed? need them in rendering and upgrading
+   final int                               FONT_LINE = 15;
+   final int                               DX = 10;
+   final int                               DY = 24;
+   final int                               DY_SELECTED = 200;
+   final int                               HUD_WIDTH = 160;
+   final int                               BAR_HEIGHT = 5;
+   final Dimension                         screen = Screen.getInstance().getSize();
    
    private SpaceWarsGame()
    {
@@ -616,8 +626,8 @@ public class SpaceWarsGame extends Game
    
    private void select()
    {
-      // check if mouse is on building/planet
-      if (Mouse.getState().isButtonPressed(Button.LEFT))
+      // check if mouse is on building/planet and building/planet is not under the HUD
+      if (Mouse.getState().isButtonPressed(Button.LEFT) && Mouse.getState().getX() <= screen.getWidth() - HUD_WIDTH)
       {
          final Vector mousescreen = Mouse.getState().getVector();
          final Vector mouseworld = Screen.getInstance().getViewport().transformScreenToWorld(mousescreen);
@@ -769,10 +779,13 @@ public class SpaceWarsGame extends Game
             getGameState().getBuildings().remove(selectedBuilding);
          }
          
-         if (Keyboard.getState().isKeyPressed(Key.PAGE_UP))
+         
+         //
+         if (Keyboard.getState().isKeyPressed(Key.PAGE_UP) || (Mouse.getState().getX() >= screen.width - HUD_WIDTH + HUD_WIDTH/2 -30 && Mouse.getState().getX() <= screen.width - HUD_WIDTH + HUD_WIDTH/2 + 30 && Mouse.getState().getY() >= 4 * FONT_LINE + DY_SELECTED && Mouse.getState().getY() <= 4 * FONT_LINE + DY_SELECTED - BAR_HEIGHT + 60 && Mouse.getState().isButtonPressed(Button.LEFT)) )
          {
             // upgrade
-            selectedBuilding.upgrade();
+            if(selectedBuilding.getLevel() <= 3)
+               selectedBuilding.upgrade();
          }
       }
    }
@@ -930,14 +943,9 @@ public class SpaceWarsGame extends Game
       
       final int seconds = (int) (getGameTime().getTotalGameTime() / 1000000000);
       
-      final int FONT_LINE = 15;
-      final int DX = 10;
-      final int DY = 24;
-      final int DY_SELECTED = 200;
-      final int HUD_WIDTH = 160;
-      final int BAR_HEIGHT = 5;
+      // vars now declared in class
       final float TRANSPARENCY = 0.8f;
-      final Dimension screen = Screen.getInstance().getSize();
+      
       
       final Composite original = g.getComposite();
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
@@ -988,16 +996,41 @@ public class SpaceWarsGame extends Game
             final Building building = (Building) selected;
             // TODO: draw building relevant stuff
             
+            // type
+            g.setColor(Color.WHITE);
+            g.drawString(String.format("%s", building.getName()), screen.width - HUD_WIDTH + DX, 0 * FONT_LINE + DY_SELECTED);
+            
+            // level
+            g.setColor(Color.WHITE);
+            g.drawString(String.format("Level %s of 4", building.getLevel()), screen.width - HUD_WIDTH + DX, 1 * FONT_LINE + DY_SELECTED);
+            
+            // upgrade
+            g.setColor(Color.GREEN);
+            if (building.getLevel() <= 3){
+               g.drawString(String.format("upgrade to level %s of 4", building.getLevel() ), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+            }else{
+               g.drawString("Maximalstufe erreicht", screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+            }
+            
+            g.setColor(Color.GREEN);
+            g.fillRect(screen.width - HUD_WIDTH + HUD_WIDTH/2, 4 * FONT_LINE + DY_SELECTED, 1, 50);
+            g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH/2 - 20, 4 * FONT_LINE + DY_SELECTED+20, screen.width - HUD_WIDTH + HUD_WIDTH/2, 4 * FONT_LINE + DY_SELECTED);
+            g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH/2 + 20, 4 * FONT_LINE + DY_SELECTED+20, screen.width - HUD_WIDTH + HUD_WIDTH/2, 4 * FONT_LINE + DY_SELECTED);
+            g.draw(new Arc2D.Double(screen.width - HUD_WIDTH + HUD_WIDTH/2 -30, 4 * FONT_LINE + DY_SELECTED - 5,60,60,100,340,Arc2D.OPEN));
+            
+           
             if (selected instanceof Relay)
             {
                final Relay relay = (Relay) building;
                // TODO: draw relay relevant stuff
+               // number of connections
             }
             
             if (selected instanceof SolarStation)
             {
                final SolarStation solar = (SolarStation) building;
                // TODO: draw solar relevant stuff
+               // energy capazity
             }
             
             if (selected instanceof Mine)

@@ -14,8 +14,8 @@ import spacewars.gamelib.Vector;
 public class LaserCanon extends Building
 {
    protected static final String name        = "Laser";
-   protected static final int[]  laserRanges = new int[] { 150, 250, 400 };
-   protected static final int[]  laserPowers = new int[] { 3, 4, 5 };
+   protected static final int[]  laserRanges = new int[] { 150, 250, 400, 500, 600 };
+   protected static final int[]  laserPowers = new int[] { 3, 4, 5, 6, 7 };
    
    public LaserCanon(final Vector position, final Player player)
    {

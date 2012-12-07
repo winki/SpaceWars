@@ -19,8 +19,8 @@ public class Mine extends Building
     * The range in which the mine can collect minerals
     */
    protected int                 mineRange      = sight / 2;
-   protected int                 mineralsPerMin = 60;
-   protected int                 energyConsum   = 6;
+   protected static final int[]  mineralsPerMin      = { 60, 70, 80, 90, 100 };
+   protected static final int[]  energyConsum        = { 6, 7, 8, 9, 10 };
    /**
     * List of mineral planets that are reachable from this mine
     */
@@ -40,12 +40,12 @@ public class Mine extends Building
    
    public int getResPerMin()
    {
-      return super.level * mineralsPerMin;
+      return mineralsPerMin[level];
    }
    
    public int getEnergyConsumPerMin()
    {
-      return energyConsum;
+      return energyConsum[level];
    }
    
    public int getMineRange()

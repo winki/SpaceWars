@@ -11,7 +11,9 @@ import spacewars.gamelib.Vector;
 @SuppressWarnings("serial")
 public class Shipyard extends Building
 {
-   protected static final String name = "Shipyard";   
+   protected static final String name = "Shipyard";  
+   protected static final int[]  secondsPerShipbuild        = { 8, 7, 6, 5, 4 };
+   
    
    public Shipyard(final Vector position, final Player player)
    {
@@ -29,8 +31,8 @@ public class Shipyard extends Building
    {
       if (hasEnergy())
       {         
-         // repeat every 4 seconds
-         if (gameTime.timesPerSecond(0.25))
+         // repeat every x seconds depending on the level
+         if (gameTime.timesPerSecond(1/secondsPerShipbuild[level]))
          {
             final Ship ship = new Ship(player, new Vector(position), 0);
             SpaceWarsGame.getInstance().getGameState().getShips().add(ship);

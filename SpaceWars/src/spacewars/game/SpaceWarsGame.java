@@ -404,7 +404,6 @@ public class SpaceWarsGame extends Game
       // TODO Auto-generated method stub
       
    }
-<<<<<<< HEAD
    
    private void returnToHomePlanet()
    {
@@ -658,15 +657,13 @@ public class SpaceWarsGame extends Game
    // TODO: make a copy of the gamestate before rendering. If not, there can
    // appear ConcurrentModificationExceptions because two threads (game thread
    // and awt thread) iterate over the same list at the same time
-=======
 
->>>>>>> branch 'master' of https://github.com/winki/SpaceWars.git
    @Override
    public void render(Graphics2D g)
    {
       // TODO Auto-generated method stub
       
-<<<<<<< HEAD
+
       // render game state
       gameState.render(g);
       
@@ -865,7 +862,5 @@ public class SpaceWarsGame extends Game
       g.drawString("Building type: " + buildingType, 10, 5 * LINE_HEIGHT + DY);
       g.drawString("Running slowly: " + getGameTime().isRunningSlowly(), DX, 6 * LINE_HEIGHT + DY);
       g.drawString("Ticks: " + getGameTime().getTicks(), DX, 7 * LINE_HEIGHT + DY);
-=======
->>>>>>> branch 'master' of https://github.com/winki/SpaceWars.git
    }
 }

@@ -656,22 +656,14 @@ public class SpaceWarsGame extends Game
    
    // TODO: make a copy of the gamestate before rendering. If not, there can
    // appear ConcurrentModificationExceptions because two threads (game thread
-<<<<<<< HEAD
-   // and awt thread) iterate over the same list at the same time
-=======
-   // and awt thread) iterate over the same list at the same time
 
->>>>>>> branch 'master' of https://github.com/winki/SpaceWars.git
    @Override
    public void render(Graphics2D g)
-<<<<<<< HEAD
    {
-=======
+
    {
       // TODO Auto-generated method stub
       
-
->>>>>>> branch 'master' of https://github.com/winki/SpaceWars.git
       // render game state
       gameState.render(g);
       
@@ -684,7 +676,7 @@ public class SpaceWarsGame extends Game
          g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
          buildingToBePlaced.render(g);
          g.setComposite(original);
-      }
+      }}
    }
    
    /**

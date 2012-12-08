@@ -104,6 +104,11 @@ public class Client extends GameClient implements IClient
     */
    private final IntroScreen               intro;
    
+   /**
+    * to set introScreen visible the first run
+    */
+   private static boolean                  firstRun = true;                 
+   
    private Client()
    {
       this.random = new Random();
@@ -177,9 +182,12 @@ public class Client extends GameClient implements IClient
    @Override
    public void update(GameTime gameTime)
    {
+      if(firstRun){
+         intro.setVisible(true);
+         firstRun = false;
+      }
       if (gameState != null)
       {
-         intro.setVisible(true);
          if (intro.isVisible())
          {
             intro.update(gameTime);

@@ -33,16 +33,16 @@ public class SpaceWars
       
       runServer();  
       
-//      try
-//      {
-//         Thread.sleep(500);
-//      }
-//      catch (InterruptedException e)
-//      {
-//         e.printStackTrace();         
-//      }
-//      
-//      runClient("localhost");
+      try
+      {
+         Thread.sleep(500);
+      }
+      catch (InterruptedException e)
+      {
+         e.printStackTrace();         
+      }
+      
+      runClient("localhost");
       
       // run game
       //SpaceWarsGame.getInstance().run();
@@ -110,8 +110,7 @@ public class SpaceWars
       Network.bindServer(server);      
       
       // run server in his own thread
-      //new Thread(server).start();
-      server.run();
+      new Thread(server).start();
    }
    
    /**
@@ -123,7 +122,7 @@ public class SpaceWars
    {
       final IServer server = Network.connect(serverAddress);
       final Client client = Client.getInstance();
-      
+         
       client.setServer(server);
       client.run();
    }

@@ -179,6 +179,7 @@ public class Client extends GameClient implements IClient
    {
       if (gameState != null)
       {
+         intro.setVisible(true);
          if (intro.isVisible())
          {
             intro.update(gameTime);

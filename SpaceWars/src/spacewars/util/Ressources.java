@@ -1,5 +1,7 @@
 package spacewars.util;
 
+import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -35,6 +37,23 @@ public class Ressources
         {
             return (Image) cache.get(path);
         }
+    }
+    
+    public static Font getFont(String path){
+       try {
+          //Returned font is of pt size 1
+          Font font = Font.createFont(Font.TRUETYPE_FONT, new File(PATH_RES + path));
+
+          //Derive and return a 12 pt version:
+          //Need to use float otherwise
+          //it would be interpreted as style
+
+          return font.deriveFont(12f);
+
+     } catch (IOException|FontFormatException e) {
+          // Handle exception
+     }
+       return null;
     }
     
     /**

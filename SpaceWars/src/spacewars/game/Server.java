@@ -105,6 +105,7 @@ public class Server extends GameServer implements IServer
          players.add(new Player(1, Color.BLUE, getGameState().getMap().getHomePlanetPositions().get(1)));
          players.add(new Player(2, Color.MAGENTA, getGameState().getMap().getHomePlanetPositions().get(2)));
          
+         /*
          // 400 buildings
          for (int i = 0; i < 500; i++)
          {
@@ -125,6 +126,7 @@ public class Server extends GameServer implements IServer
             
             gameState.getShips().add(new Ship(gameState.getPlayers().get(0), new Vector(x, y), 0.5));
          }
+         */
       }
    }
    

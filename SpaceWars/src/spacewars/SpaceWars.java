@@ -110,7 +110,8 @@ public class SpaceWars
       Network.bindServer(server);      
       
       // run server in his own thread
-      new Thread(server).start();
+      //new Thread(server).start();
+      server.run();
    }
    
    /**

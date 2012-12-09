@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
-import spacewars.game.SpaceWarsGame;
+import spacewars.game.Client;
 import spacewars.game.model.planets.MineralPlanet;
 import spacewars.gamelib.IRenderable;
 import spacewars.gamelib.Vector;
@@ -76,7 +76,7 @@ public class Map implements IRenderable, Serializable
          planet.render(g);
       }
       
-      if (SpaceWarsGame.DEBUG)
+      if (Client.DEBUG)
       {
          g.setColor(Color.RED);
          

@@ -11,23 +11,23 @@ public class Player implements Serializable
    /**
     * Which homeplanet does he have
     */
-   protected int        id;
+   protected int      id;
    /**
     * The players color
     */
-   protected Color      color;
+   protected Color    color;
    /**
     * The score
     */
-   protected int        score;
+   protected int      score;
    /**
     * The amount of minerals he owns
     */
-   protected int        minerals;
+   protected int      minerals;
    /**
     * The amount of minerals mined per minute
     */
-   protected int        mineralsPerMinute;
+   protected int      mineralsPerMinute;
    /**
     * The players home planet
     */
@@ -35,8 +35,8 @@ public class Player implements Serializable
    /**
     * The enable energy
     */
-   protected int        energy;   
-   protected int        energyMax = 100;
+   protected int      energy;
+   protected int      energyMax = 100;
    
    public Player(int id, Color color, Vector homePlanetPosition)
    {
@@ -85,23 +85,23 @@ public class Player implements Serializable
    {
       this.minerals += mineralsToAdd;
    }
-
+   
    public void removeMinerals(int mineralsToRemove)
    {
       this.minerals -= mineralsToRemove;
    }
-
+   
    public int getEnergy()
    {
       return this.energy;
    }
-
+   
    // TODO: only returns a dummy value
    public int getEnergyEfficency()
    {
       return 60;
    }
-
+   
    public int getMaxEnergy()
    {
       return energyMax;
@@ -111,7 +111,7 @@ public class Player implements Serializable
    {
       this.energyMax = maxEnergy;
    }
-
+   
    public void addEnergy(int energy)
    {
       if (this.energy + energy >= energyMax)
@@ -124,7 +124,7 @@ public class Player implements Serializable
       }
       
    }
-
+   
    public boolean removeEnergy(int energy)
    {
       if (this.energy - energy < 0)
@@ -136,5 +136,28 @@ public class Player implements Serializable
          this.energy -= energy;
          return true;
       }
+   }
+   
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == null) return false;
+      if (obj == this) return true;
+      if (obj instanceof Player)
+      {
+         Player player = (Player) obj;
+         if (this.hashCode() == player.hashCode())
+         {
+            // TODO: check real equality
+            return true;
+         }         
+      }
+      return false;
+   }
+   
+   @Override
+   public int hashCode()
+   {
+      return id;
    }
 }

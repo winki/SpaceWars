@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.util.Collections;
 import java.util.Comparator;
@@ -104,6 +105,20 @@ public class Client extends GameClient implements IClient
     */
    private final IntroScreen               intro;
    
+   /**
+    * to set introScreen visible the first run
+    */
+   private static boolean                  firstRun = true;                 
+   
+   // !!! correct placed? need them in rendering and upgrading
+   final int                               FONT_LINE         = 15;
+   final int                               DX                = 10;
+   final int                               DY                = 24;
+   final int                               DY_SELECTED       = 200;
+   final int                               HUD_WIDTH         = 160;
+   final int                               BAR_HEIGHT        = 5;
+   final Dimension                         screen            = Screen.getInstance().getSize();
+   
    private Client()
    {
       this.random = new Random();
@@ -177,6 +192,10 @@ public class Client extends GameClient implements IClient
    @Override
    public void update(GameTime gameTime)
    {
+      if(firstRun){
+         intro.setVisible(true);
+         firstRun = false;
+      }
       if (gameState != null)
       {
          if (intro.isVisible())
@@ -216,7 +235,7 @@ public class Client extends GameClient implements IClient
       gameState = server.getGameState();
       long time = System.currentTimeMillis() - start;
       
-      System.out.printf("Time to get game state: %d ms\n", time);
+      //System.out.printf("Time to get game state: %d ms\n", time);
    }
    
    /**
@@ -282,7 +301,7 @@ public class Client extends GameClient implements IClient
             final Building building = link.getLinkedElement();
             
             // only treat the players building
-            if (!removeRest && building.getPlayer() == player)
+            if (!removeRest && building.getPlayer().equals(player))
             {
                // take every link to relays, solar stations or buildings
                // with no links
@@ -303,7 +322,7 @@ public class Client extends GameClient implements IClient
             final Building building = iterator.next().getLinkedElement();
             
             // only treat the players building
-            if (building.getPlayer() == player)
+            if (building.getPlayer().equals(player))
             {
                // take every link to relays, solar stations or buildings
                // with no links
@@ -325,7 +344,7 @@ public class Client extends GameClient implements IClient
             final Building building = link.getLinkedElement();
             
             // only treat the players building
-            if (!removeRest && building.getPlayer() == player)
+            if (!removeRest && building.getPlayer().equals(player))
             {
                // take every link to relays, solar stations or buildings
                // with no links
@@ -413,7 +432,7 @@ public class Client extends GameClient implements IClient
       // check collision with buildings
       for (Building b : gameState.getBuildings())
       {
-         if (b != reachableElement && b.collidesWith(line)) { return true; }
+         if (!b.equals(reachableElement) && b.collidesWith(line)) { return true; }
       }
       
       // check collision with planets
@@ -427,7 +446,7 @@ public class Client extends GameClient implements IClient
       {
          // TODO: add home planet to buildings?
          final HomeBase planet = p.getHomePlanet();
-         if (planet != reachableElement && planet.collidesWith(line)) { return true; }
+         if (!planet.equals(reachableElement) && planet.collidesWith(line)) { return true; }
       }
       
       // no collision
@@ -560,7 +579,7 @@ public class Client extends GameClient implements IClient
             
             // effectively build
             if (Mouse.getState().isButtonReleased(Button.LEFT))
-            {
+            {               
                server.build(buildingToBePlaced);
                buildingToBePlaced = null;
                
@@ -759,14 +778,8 @@ public class Client extends GameClient implements IClient
       
       final int seconds = (int) (getGameTime().getTotalGameTime() / 1000000000);
       
-      final int FONT_LINE = 15;
-      final int DX = 10;
-      final int DY = 24;
-      final int DY_SELECTED = 200;
-      final int HUD_WIDTH = 160;
-      final int BAR_HEIGHT = 5;
+      // vars now declared in class
       final float TRANSPARENCY = 0.8f;
-      final Dimension screen = Screen.getInstance().getSize();
       
       final Composite original = g.getComposite();
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
@@ -817,16 +830,43 @@ public class Client extends GameClient implements IClient
             final Building building = (Building) selected;
             // TODO: draw building relevant stuff
             
+            // type
+            g.setColor(Color.WHITE);
+            g.drawString(String.format("%s", building.getName()), screen.width - HUD_WIDTH + DX, 0 * FONT_LINE + DY_SELECTED);
+            
+            // level
+            g.setColor(Color.WHITE);
+            g.drawString(String.format("Level %s of 4", building.getLevel()), screen.width - HUD_WIDTH + DX, 1 * FONT_LINE + DY_SELECTED);
+            
+            // upgrade
+            g.setColor(Color.GREEN);
+            if (building.getLevel() <= 3)
+            {
+               g.drawString(String.format("upgrade to level %s of 4", building.getLevel()), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+            }
+            else
+            {
+               g.drawString("Maximalstufe erreicht", screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+            }
+            
+            g.setColor(Color.GREEN);
+            g.fillRect(screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED, 1, 50);
+            g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
+            g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 + 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
+            g.draw(new Arc2D.Double(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 30, 4 * FONT_LINE + DY_SELECTED - 5, 60, 60, 100, 340, Arc2D.OPEN));
+            
             if (selected instanceof Relay)
             {
                final Relay relay = (Relay) building;
                // TODO: draw relay relevant stuff
+               // number of connections
             }
             
             if (selected instanceof SolarStation)
             {
                final SolarStation solar = (SolarStation) building;
                // TODO: draw solar relevant stuff
+               // energy capazity
             }
             
             if (selected instanceof Mine)

@@ -6,7 +6,6 @@ import java.awt.geom.Line2D;
 import java.io.Serializable;
 import spacewars.game.Client;
 import spacewars.game.Server;
-import spacewars.game.SpaceWarsGame;
 import spacewars.gamelib.IRenderable;
 import spacewars.gamelib.Vector;
 
@@ -38,17 +37,24 @@ public abstract class GameElement implements IRenderable, Serializable
    }
    
    /**
-    * Gets the game state from the game instance.
+    * Gets the game state from the client game instance.
     * 
     * @return game state
     */
-   public GameState getGameState()
+   public GameState getClientGameState()
    {
-      // TODO: solve client/server difference
-      GameState client = Client.getInstance().getGameState();
-      if (client == null) { return Server.getInstance().getGameState(); }
-      return client;
+      return Client.getInstance().getGameState();
    }
+   
+   /**
+    * Gets the game state from the client game instance.
+    * 
+    * @return game state
+    */
+   public GameState getServerGameState()
+   {
+      return Server.getInstance().getGameState();
+   } 
    
    /**
     * Gets the position.
@@ -127,7 +133,7 @@ public abstract class GameElement implements IRenderable, Serializable
    @Override
    public void render(Graphics2D g)
    {
-      if (SpaceWarsGame.DEBUG)
+      if (Client.DEBUG)
       {
          g.setColor(Color.RED);
          g.drawOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
@@ -152,12 +158,15 @@ public abstract class GameElement implements IRenderable, Serializable
    public boolean equals(Object obj)
    {
       if (obj == null) return false;
-      if (this == obj) return true;
+      if (obj == this) return true;
       if (obj instanceof GameElement)
       {
          GameElement gameElement = (GameElement) obj;
-         if (this.hashCode() != gameElement.hashCode()) { return false; }
-         // TODO: check real equality
+         if (this.hashCode() == gameElement.hashCode())
+         {
+            // TODO: check real equality
+            return true;
+         }
       }
       return false;
    }

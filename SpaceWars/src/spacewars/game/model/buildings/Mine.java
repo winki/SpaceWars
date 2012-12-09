@@ -8,7 +8,7 @@ import java.awt.geom.Line2D;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import spacewars.game.SpaceWarsGame;
+import spacewars.game.Client;
 import spacewars.game.model.Player;
 import spacewars.game.model.planets.MineralPlanet;
 import spacewars.gamelib.GameTime;
@@ -22,8 +22,8 @@ public class Mine extends Building
     * The range in which the mine can collect minerals
     */
    protected int                 mineRange      = sight / 2;
-   protected static final int[]  mineralsPerMin      = { 60, 70, 80, 90, 100 };
-   protected static final int[]  energyConsum        = { 6, 7, 8, 9, 10 };
+   protected static final int[]  mineralsPerMin = { 60, 70, 80, 90, 100 };
+   protected static final int[]  energyConsum   = { 6, 7, 8, 9, 10 };
    /**
     * List of mineral planets that are reachable from this mine
     */
@@ -83,8 +83,7 @@ public class Mine extends Building
       {
          // take first random planet which has mineral reserves
          if (planet.getMineralReserves() > 0) { return planet; }
-      }
-      
+      }      
       return null;
    }
    
@@ -117,7 +116,7 @@ public class Mine extends Building
    @Override
    protected void renderBuilding(Graphics2D g)
    {
-      if (SpaceWarsGame.DEBUG)
+      if (Client.DEBUG)
       {
          g.setColor(Color.RED);
          for (MineralPlanet planet : reachableMineralPlanets)

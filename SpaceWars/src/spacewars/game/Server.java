@@ -105,6 +105,7 @@ public class Server extends GameServer implements IServer
          players.add(new Player(1, Color.BLUE, getGameState().getMap().getHomePlanetPositions().get(1)));
          players.add(new Player(2, Color.MAGENTA, getGameState().getMap().getHomePlanetPositions().get(2)));
          
+         /*
          // 400 buildings
          for (int i = 0; i < 500; i++)
          {
@@ -125,6 +126,7 @@ public class Server extends GameServer implements IServer
             
             gameState.getShips().add(new Ship(gameState.getPlayers().get(0), new Vector(x, y), 0.5));
          }
+         */
       }
    }
    
@@ -332,7 +334,7 @@ public class Server extends GameServer implements IServer
             final Building building = link.getLinkedElement();
             
             // only treat the players building
-            if (!removeRest && building.getPlayer() == player)
+            if (!removeRest && building.getPlayer().equals(player))
             {
                // take every link to relays, solar stations or buildings
                // with no links
@@ -353,7 +355,7 @@ public class Server extends GameServer implements IServer
             final Building building = iterator.next().getLinkedElement();
             
             // only treat the players building
-            if (building.getPlayer() == player)
+            if (building.getPlayer().equals(player))
             {
                // take every link to relays, solar stations or buildings
                // with no links
@@ -375,7 +377,7 @@ public class Server extends GameServer implements IServer
             final Building building = link.getLinkedElement();
             
             // only treat the players building
-            if (!removeRest && building.getPlayer() == player)
+            if (!removeRest && building.getPlayer().equals(player))
             {
                // take every link to relays, solar stations or buildings
                // with no links
@@ -463,7 +465,7 @@ public class Server extends GameServer implements IServer
       // check collision with buildings
       for (Building b : gameState.getBuildings())
       {
-         if (b != reachableElement && b.collidesWith(line)) { return true; }
+         if (!b.equals(reachableElement) && b.collidesWith(line)) { return true; }
       }
       
       // check collision with planets
@@ -477,7 +479,7 @@ public class Server extends GameServer implements IServer
       {
          // TODO: add home planet to buildings?
          final HomeBase planet = p.getHomePlanet();
-         if (planet != reachableElement && planet.collidesWith(line)) { return true; }
+         if (!planet.equals(reachableElement) && planet.collidesWith(line)) { return true; }
       }
       
       // no collision
@@ -489,6 +491,8 @@ public class Server extends GameServer implements IServer
     */
    private void checkEnergyAvailability()
    {
+      // TODO winkler: home base shuld be a full functional solar station
+      
       final List<SolarStation> solars = new LinkedList<>();
       
       // reset checked for energy flag

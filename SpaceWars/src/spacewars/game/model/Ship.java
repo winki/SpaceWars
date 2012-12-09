@@ -57,12 +57,12 @@ public class Ship extends PlayerElement implements IUpdateable
    private PlayerElement chooseAttackTarget()
    {
       final Player enemy = getEnemy();
-      final GameState gameState = getGameState();
+      final GameState gameState = getServerGameState();
       
       // attack buildings
       for (Building building : gameState.getBuildings())
       {
-         if (building.isReachableFrom(this) && building.getPlayer() == enemy) { return building; }
+         if (building.isReachableFrom(this) && building.getPlayer().equals(enemy)) { return building; }
       }
       
       // attack enemys home planet

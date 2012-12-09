@@ -3,6 +3,7 @@ package spacewars.game.model;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.io.Serializable;
+import java.util.Iterator;
 import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
@@ -47,8 +48,11 @@ public abstract class PlayerElement extends GameElement implements Serializable
     */
    public Player getEnemy()
    {
-      final int enemyId = 2 - player.getId();
-      return getGameState().getPlayers().get(enemyId);
+      for (Player player : getServerGameState().getPlayers())
+      {
+         if (!player.equals(this.player)) { return player; }
+      }
+      return null;
    }
    
    /**

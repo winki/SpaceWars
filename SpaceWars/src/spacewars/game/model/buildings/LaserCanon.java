@@ -58,12 +58,12 @@ public class LaserCanon extends Building
    private PlayerElement chooseAttackTarget()
    {
       final Player enemy = getEnemy();
-      final GameState gameState = getGameState();
+      final GameState gameState = getServerGameState();
       
       for (Ship ship : gameState.getShips())
       {
          // only attack enemy ships that are in range
-         if (this.canLaser(ship) && ship.getPlayer() == enemy) { return ship; }
+         if (this.canLaser(ship) && ship.getPlayer().equals(enemy)) { return ship; }
       }
       
       // no target

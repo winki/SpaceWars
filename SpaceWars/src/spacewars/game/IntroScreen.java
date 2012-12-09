@@ -7,12 +7,15 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import javax.sound.sampled.Clip;
+import spacewars.game.model.GameState;
+import spacewars.game.model.Player;
 import spacewars.gamelib.Button;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.IRenderable;
 import spacewars.gamelib.IUpdateable;
 import spacewars.gamelib.Mouse;
 import spacewars.gamelib.Screen;
+import spacewars.gamelib.Vector;
 import spacewars.util.Ressources;
 
 public class IntroScreen implements IUpdateable, IRenderable
@@ -20,7 +23,8 @@ public class IntroScreen implements IUpdateable, IRenderable
    private boolean   visible;
    final Dimension   screen        = Screen.getInstance().getSize();
    
-   // Kai: fix this! why do i need to set these?
+   // Kai: fix this! why do i need to set these? !! with getting the viewport position and calculate the zero point! Vector p = gameState.getMap().getHomePlanetPositions().get(player.getId());
+   
    private int       zeroX         = -205;
    private int       zeroY         = 875;
    
@@ -42,7 +46,7 @@ public class IntroScreen implements IUpdateable, IRenderable
    
    // start button
    private Dimension startSize;
-   private int       startX        = introX + introWidth / 2;
+   private int       startX        = introX + introWidth / 2 - 200;
    private int       startY        = introY + introHeight / 2 + 200;
    private float     startFontSize = 40.0f;
    private Color     startColor    = Color.WHITE;
@@ -53,6 +57,15 @@ public class IntroScreen implements IUpdateable, IRenderable
    public IntroScreen()
    {
       this.visible = false;
+      Server server = Server.getInstance();
+      GameState gameState = server.getGameState();
+      Player player = gameState.getPlayers().get(0);
+      
+      Vector p = gameState.getMap().getHomePlanetPositions().get(player.getId());
+      
+      zeroX = p.x - screen.width/2;
+      zeroY = p.y - screen.height/2;
+      
    }
    
    public boolean isVisible()
@@ -154,20 +167,16 @@ public class IntroScreen implements IUpdateable, IRenderable
       g.setFont(Ressources.loadFont("space_age.ttf", 150.0f));
       g.drawString("Space", spaceX, spaceY);
       int hgt = metrics.getHeight();
-      int adv = metrics.stringWidth("Start Game");
+      int adv = metrics.stringWidth("Space");
       spaceSize = new Dimension(adv + 2, hgt + 2);
       g.drawString("Wars", warsX, warsY);
       hgt = metrics.getHeight();
-      adv = metrics.stringWidth("Start Game");
+      adv = metrics.stringWidth("Wars");
       warsSize = new Dimension(adv + 2, hgt + 2);
       
       // start
       
       g.setFont(font);
-      
-      // get font size (placed correct?)
-      
-      // get metrics from the graphics
       hgt = metrics.getHeight();
       adv = metrics.stringWidth("Start Game");
       startSize = new Dimension(adv + 2, hgt + 2);

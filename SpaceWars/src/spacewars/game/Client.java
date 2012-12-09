@@ -51,6 +51,7 @@ public class Client extends GameClient implements IClient
     * Game instance
     */
    private static Client                   instance;
+   private static int                      i = 0;
    /**
     * Server proxy
     */
@@ -172,7 +173,8 @@ public class Client extends GameClient implements IClient
       
       createStars();
       returnToHomePlanet();
-      
+
+
       // show screen
       screen.setVisible(true);
    }
@@ -204,22 +206,29 @@ public class Client extends GameClient implements IClient
          }
          else
          {
-            // navigate
-            scroll();
-            if (Keyboard.getState().isKeyPressed(Key.HOME))
-            {
-               returnToHomePlanet();
-            }
-            
-            // select
-            select();
-            
-            // upgrade or recycle buildings
-            upgradeOrRecycle();
-            
-            // build
-            setBuildMode();
-            build();
+            //Zum homeplanet fliegen
+//            if (i<100){
+//               if (i == 1)
+//               Screen.getInstance().getViewport().move(-10,-15);
+//               i++;
+//            }
+//            else{
+               scroll();
+               if (Keyboard.getState().isKeyPressed(Key.HOME))
+               {
+                  returnToHomePlanet();
+               }
+               
+               // select
+               select();
+               
+               // upgrade or recycle buildings
+               upgradeOrRecycle();
+               
+               // build
+               setBuildMode();
+               build();
+            //}
          }
       }
    }

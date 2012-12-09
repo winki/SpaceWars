@@ -30,7 +30,7 @@ public class SpaceWars
    {      
       // set logging
       Logger.getGlobal().setLevel(Level.ALL);      
-      
+      /*
       runServer();  
       
       try
@@ -41,8 +41,9 @@ public class SpaceWars
       {
          e.printStackTrace();         
       }
+      */
       
-      runClient("localhost");
+      runClient("147.87.46.141");
       
       // run game
       //SpaceWarsGame.getInstance().run();

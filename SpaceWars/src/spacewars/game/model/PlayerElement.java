@@ -3,7 +3,6 @@ package spacewars.game.model;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.io.Serializable;
-import java.util.Iterator;
 import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
@@ -115,5 +114,24 @@ public abstract class PlayerElement extends GameElement implements Serializable
    protected boolean renderHealth()
    {
       return true;
+   }
+   
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == null) return false;
+      if (obj == this) return true;
+      if (obj instanceof PlayerElement)
+      {
+         PlayerElement element = (PlayerElement) obj;
+         if (this.hashCode() == element.hashCode()) { return position.x == element.position.x && position.y == element.position.y && player.id == element.player.id; }
+      }
+      return false;
+   }
+   
+   @Override
+   public int hashCode()
+   {
+      return position.x ^ position.y ^ player.id;
    }
 }

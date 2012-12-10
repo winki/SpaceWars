@@ -54,7 +54,7 @@ public abstract class GameElement implements IRenderable, Serializable
    public GameState getServerGameState()
    {
       return Server.getInstance().getGameState();
-   } 
+   }
    
    /**
     * Gets the position.
@@ -162,11 +162,7 @@ public abstract class GameElement implements IRenderable, Serializable
       if (obj instanceof GameElement)
       {
          GameElement gameElement = (GameElement) obj;
-         if (this.hashCode() == gameElement.hashCode())
-         {
-            // TODO: check real equality
-            return true;
-         }
+         if (this.hashCode() == gameElement.hashCode()) { return position.x == gameElement.position.x && position.y == gameElement.position.y; }
       }
       return false;
    }
@@ -174,6 +170,6 @@ public abstract class GameElement implements IRenderable, Serializable
    @Override
    public int hashCode()
    {
-      return getPosition().x ^ getPosition().y;
+      return position.x ^ position.y;
    }
 }

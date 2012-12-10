@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Random;
 import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Link;
@@ -16,7 +15,6 @@ import spacewars.game.model.Map;
 import spacewars.game.model.Player;
 import spacewars.game.model.Ship;
 import spacewars.game.model.buildings.Building;
-import spacewars.game.model.buildings.BuildingType;
 import spacewars.game.model.buildings.HomeBase;
 import spacewars.game.model.buildings.LaserCanon;
 import spacewars.game.model.buildings.Mine;
@@ -24,16 +22,20 @@ import spacewars.game.model.buildings.Relay;
 import spacewars.game.model.buildings.Shipyard;
 import spacewars.game.model.buildings.SolarStation;
 import spacewars.game.model.planets.MineralPlanet;
-import spacewars.gamelib.Button;
 import spacewars.gamelib.GameServer;
 import spacewars.gamelib.GameTime;
-import spacewars.gamelib.Mouse;
-import spacewars.gamelib.Screen;
 import spacewars.gamelib.Vector;
 import spacewars.network.IClient;
 import spacewars.network.IServer;
 import de.root1.simon.annotation.SimonRemote;
 
+/*
+ * TODO: winkler
+ * 
+ * - GameState minimieren 
+ * - Clients können sich beim Server registrieren
+ * - Server informiert Clients, wann das Spiel startet
+ */
 @SimonRemote(value = { IServer.class })
 public class Server extends GameServer implements IServer
 {
@@ -140,6 +142,12 @@ public class Server extends GameServer implements IServer
       
       // update world (game state)
       updateWorld(gameTime);
+      
+      // debug
+      if (DEBUG) 
+      {
+         printDebug();
+      }
    }
    
    private void buildAll()
@@ -597,21 +605,8 @@ public class Server extends GameServer implements IServer
     */
    private void printDebug()
    {
-      // TODO
+      // TODO winku
    }
-   
-   /*
-    * TODO: kai
-    * 
-    * - GameState minimieren 
-    * - Clients können sich beim Server registrieren
-    * - Server informiert Clients, wann das Spiel startet
-    *
-    * - Client holt neuen GameState
-    * - Client ruft Methoden auf, wenn er z.B. bauen will, oder upgraden
-    * - Server muss im Update loop die Anfragen berücksichtigen
-    * 
-    */
    
    @Override
    protected void sync()

@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Link;
@@ -51,7 +52,6 @@ public class Client extends GameClient implements IClient
     * Game instance
     */
    private static Client                   instance;
-   private static int                      i = 0;
    /**
     * Server proxy
     */
@@ -109,7 +109,7 @@ public class Client extends GameClient implements IClient
    /**
     * to set introScreen visible the first run
     */
-   private static boolean                  firstRun = true;                 
+   private static boolean                  firstRun          = true;
    
    // !!! correct placed? need them in rendering and upgrading
    final int                               FONT_LINE         = 15;
@@ -173,8 +173,7 @@ public class Client extends GameClient implements IClient
       
       createStars();
       returnToHomePlanet();
-
-
+      
       // show screen
       screen.setVisible(true);
    }
@@ -194,7 +193,8 @@ public class Client extends GameClient implements IClient
    @Override
    public void update(GameTime gameTime)
    {
-      if(firstRun){
+      if (firstRun)
+      {
          intro.setVisible(true);
          firstRun = false;
       }
@@ -206,29 +206,29 @@ public class Client extends GameClient implements IClient
          }
          else
          {
-            //Zum homeplanet fliegen
-//            if (i<100){
-//               if (i == 1)
-//               Screen.getInstance().getViewport().move(-10,-15);
-//               i++;
-//            }
-//            else{
-               scroll();
-               if (Keyboard.getState().isKeyPressed(Key.HOME))
-               {
-                  returnToHomePlanet();
-               }
-               
-               // select
-               select();
-               
-               // upgrade or recycle buildings
-               upgradeOrRecycle();
-               
-               // build
-               setBuildMode();
-               build();
-            //}
+            // Zum homeplanet fliegen
+            // if (i<100){
+            // if (i == 1)
+            // Screen.getInstance().getViewport().move(-10,-15);
+            // i++;
+            // }
+            // else{
+            scroll();
+            if (Keyboard.getState().isKeyPressed(Key.HOME))
+            {
+               returnToHomePlanet();
+            }
+            
+            // select
+            select();
+            
+            // upgrade or recycle buildings
+            upgradeOrRecycle();
+            
+            // build
+            setBuildMode();
+            build();
+            // }
          }
       }
    }
@@ -240,11 +240,13 @@ public class Client extends GameClient implements IClient
       // TODO: make more performant
       
       long start = System.currentTimeMillis();
-      
       gameState = server.getGameState();
       long time = System.currentTimeMillis() - start;
       
-      //System.out.printf("Time to get game state: %d ms\n", time);
+      if (DEBUG)
+      {
+         Logger.getGlobal().info(String.format("Time to get game state: %d ms\n", time));
+      }
    }
    
    /**
@@ -588,7 +590,7 @@ public class Client extends GameClient implements IClient
             
             // effectively build
             if (Mouse.getState().isButtonReleased(Button.LEFT))
-            {               
+            {
                server.build(buildingToBePlaced);
                buildingToBePlaced = null;
                

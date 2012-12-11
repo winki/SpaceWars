@@ -15,16 +15,11 @@ public abstract class GameServer extends Game
    {
       // update game state
       update(getGameTime());
-      
-      // sync
-      sync();
    }
    
    @Override
    public final void render(Graphics2D g)
    {
       // no rendering on server
-   }   
-   
-   abstract protected void sync();
+   }
 }

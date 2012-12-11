@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -48,46 +49,60 @@ public class Ressources
    
    public static Font loadFont(String path, float size)
    {
-      try
+      if (!cache.containsKey(path))
       {
-         // Returned font is of pt size 1
-         Font font = Font.createFont(Font.TRUETYPE_FONT, new File(PATH_RES + PATH_FONT + path));
-         
-         // Derive and return a 12 pt version:
-         // Need to use float otherwise
-         // it would be interpreted as style
-         
+         try
+         {
+            // Returned font is of pt size 1
+            final Font font = Font.createFont(Font.TRUETYPE_FONT, new File(PATH_RES + PATH_FONT + path));
+            
+            // Derive and return a 12 pt version:
+            // Need to use float otherwise
+            // it would be interpreted as style
+            final Font sizedFont = font.deriveFont(size);    
+            
+            cache.put(path, sizedFont);
+            return sizedFont;
+         }
+         catch (IOException | FontFormatException ex)
+         {
+            Logger.getGlobal().throwing(Ressources.class.getName(), "loadFont", ex);
+         }
+         return null;
+      }
+      else
+      {
+         final Font font = (Font) cache.get(path);
          return font.deriveFont(size);
-         
       }
-      catch (IOException | FontFormatException e)
-      {
-         // Handle exception
-      }
-      return null;
    }
    
-   public static Clip playSound(String path)
+   public static Clip loadSound(String path)
    {
-      try
+      if (!cache.containsKey(path))
       {
-         AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(PATH_RES + PATH_SOUND + path));
-         AudioFormat af = audioInputStream.getFormat();
-         int size = (int) (af.getFrameSize() * audioInputStream.getFrameLength());
-         byte[] audio = new byte[size];
-         DataLine.Info info = new DataLine.Info(Clip.class, af, size);
-         audioInputStream.read(audio, 0, size);
-         
-         Clip clip = (Clip) AudioSystem.getLine(info);
-
-         clip.open(af, audio, 0, size);
-         return clip;
+         try
+         {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(PATH_RES + PATH_SOUND + path));
+            AudioFormat af = audioInputStream.getFormat();
+            int size = (int) (af.getFrameSize() * audioInputStream.getFrameLength());
+            byte[] audio = new byte[size];
+            audioInputStream.read(audio, 0, size);
+            Clip clip = (Clip) AudioSystem.getLine(new DataLine.Info(Clip.class, af, size));
+            clip.open(af, audio, 0, size);
+            cache.put(path, clip);
+            return clip;
+         }
+         catch (Exception ex)
+         {
+            Logger.getGlobal().throwing(Ressources.class.getName(), "loadSound", ex);
+         }
+         return null;
       }
-      catch (Exception e)
+      else
       {
-         e.printStackTrace();
+         return (Clip) cache.get(path);
       }
-      return null;
    }
    
    /**
@@ -109,7 +124,7 @@ public class Ressources
          }
          catch (IOException ex)
          {
-            ex.printStackTrace();
+            Logger.getGlobal().throwing(Ressources.class.getName(), "loadBufferedImage", ex);
          }
          return null;
       }

@@ -25,20 +25,20 @@ import spacewars.game.model.planets.MineralPlanet;
 import spacewars.gamelib.GameServer;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.Vector;
+import spacewars.network.Guest;
 import spacewars.network.IClient;
 import spacewars.network.IServer;
 import de.root1.simon.annotation.SimonRemote;
 
 /*
- * TODO: winkler
- * 
- * - GameState minimieren 
- * - Clients können sich beim Server registrieren
- * - Server informiert Clients, wann das Spiel startet
+ * TODO: winkler - GameState minimieren - Clients können sich beim Server
+ * registrieren - Server informiert Clients, wann das Spiel startet
  */
 @SimonRemote(value = { IServer.class })
 public class Server extends GameServer implements IServer
 {
+   private static final Color[]            colors            = new Color[] { Color.BLUE, Color.PINK, Color.GRAY };
+   
    public static final boolean             DEBUG             = false;
    public static final boolean             CAN_CHANGE_PLAYER = true;
    /**
@@ -46,9 +46,17 @@ public class Server extends GameServer implements IServer
     */
    private static Server                   instance;
    /**
+    * All registred guests
+    */
+   private final List<Guest>               guests;
+   /**
     * The game state
     */
    private final GameState                 gameState;
+   /**
+    * Is the game currently running
+    */
+   private boolean                         running;
    
    private final Queue<Building>           toBuild;
    private final Queue<Building>           toUpgrade;
@@ -65,6 +73,7 @@ public class Server extends GameServer implements IServer
    
    private Server()
    {
+      this.guests = new LinkedList<Guest>();
       this.linksToBuildings = new LinkedList<>();
       this.linksToMineralPlanets = new LinkedList<>();
       this.gameState = new GameState();
@@ -135,18 +144,21 @@ public class Server extends GameServer implements IServer
    @Override
    public void update(GameTime gameTime)
    {
-      // process all build, upgrade and recycle requests
-      buildAll();
-      upgradeAll();
-      recycleAll();
-      
-      // update world (game state)
-      updateWorld(gameTime);
-      
-      // debug
-      if (DEBUG) 
+      if (running)
       {
-         printDebug();
+         // process all build, upgrade and recycle requests
+         buildAll();
+         upgradeAll();
+         recycleAll();
+         
+         // update world (game state)
+         updateWorld(gameTime);
+         
+         // debug
+         if (DEBUG)
+         {
+            printDebug();
+         }
       }
    }
    
@@ -609,15 +621,24 @@ public class Server extends GameServer implements IServer
    }
    
    @Override
-   protected void sync()
+   public Player register(IClient client)
    {
-      // TODO Auto-generated method stub
-   }
-   
-   @Override
-   public void register(IClient client)
-   {
-      // TODO Auto-generated method stub
+      Player player = null;
+      
+      // can only register if game is not running
+      if (!running)
+      {
+         final Guest guest = new Guest(client, colors[guests.size()], null);
+         guests.add(guest);
+         player = guest.getPlayer();
+         
+         if (guests.size() == 2)
+         {
+            // start game if two players are there
+            running = true;
+         }
+      }
+      return player;
    }
    
    @Override

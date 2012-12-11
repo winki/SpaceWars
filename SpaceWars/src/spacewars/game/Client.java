@@ -153,7 +153,7 @@ public class Client extends GameClient implements IClient
    public void setServer(IServer server)
    {
       this.server = server;
-      server.register(this);
+      player = server.register(this);
    }
    
    @Override

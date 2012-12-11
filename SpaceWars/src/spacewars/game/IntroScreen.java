@@ -81,8 +81,8 @@ public class IntroScreen implements IUpdateable, IRenderable
    @Override
    public void update(GameTime gameTime)
    {
-      Clip backgroundClip = Ressources.playSound("background.wav");
-      Clip startButtonClip = Ressources.playSound("start_button.wav");
+      Clip backgroundClip = Ressources.loadSound("background.wav");
+      Clip startButtonClip = Ressources.loadSound("start_button.wav");
       
       // TODO: kai
       if (exitIntro)

@@ -28,7 +28,8 @@ public class SpaceWars
       catch (InterruptedException e)
       {
          e.printStackTrace();
-      }      
+      }     
+      
       runClient("localhost");
       
       // run game

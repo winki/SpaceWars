@@ -59,12 +59,14 @@ public class IntroScreen implements IUpdateable, IRenderable
       this.visible = false;
       Server server = Server.getInstance();
       GameState gameState = server.getGameState();
+      /*
       Player player = gameState.getPlayers().get(0);
       
       Vector p = gameState.getMap().getHomePlanetPositions().get(player.getId());
       
       zeroX = p.x - screen.width/2;
       zeroY = p.y - screen.height/2;
+      */
       
    }
    

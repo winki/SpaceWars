@@ -113,8 +113,10 @@ public class Server extends GameServer implements IServer
       {
          // create players
          final List<Player> players = gameState.getPlayers();
-         players.add(new Player(1, Color.BLUE, getGameState().getMap().getHomePlanetPositions().get(1)));
-         players.add(new Player(2, Color.MAGENTA, getGameState().getMap().getHomePlanetPositions().get(2)));
+         // players.add(new Player(1, Color.BLUE,
+         // getGameState().getMap().getHomePlanetPositions().get(1)));
+         // players.add(new Player(2, Color.MAGENTA,
+         // getGameState().getMap().getHomePlanetPositions().get(2)));
          
          /*
          // 400 buildings
@@ -628,7 +630,7 @@ public class Server extends GameServer implements IServer
       // can only register if game is not running
       if (!running)
       {
-         final Guest guest = new Guest(client, colors[guests.size()], null);
+         final Guest guest = new Guest(client, colors[guests.size()], gameState.getMap().getHomePlanetPositions().get(guests.size()));
          guests.add(guest);
          player = guest.getPlayer();
          

@@ -1,10 +1,12 @@
 package spacewars.network;
 
 import java.awt.Color;
+import java.io.Serializable;
 import spacewars.game.model.Player;
 import spacewars.gamelib.Vector;
 
-public class Guest
+@SuppressWarnings("serial")
+public class Guest implements Serializable
 {
    private static int    counter;
    

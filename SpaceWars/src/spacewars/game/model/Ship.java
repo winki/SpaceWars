@@ -16,8 +16,8 @@ public class Ship extends PlayerElement implements IUpdateable
    /**
     * Don't serialize the exact position, it's just for the server to calculate
     */
-   protected volatile double x;
-   protected volatile double y;
+   protected transient double x;
+   protected transient double y;
    protected double          speed;
    protected double          angle;
    

@@ -169,7 +169,6 @@ public class Client extends GameClient implements IClient
       // init game state
       // TODO: get game state
       gameState = server.getGameState();
-      player = gameState.getPlayers().get(0);
       
       createStars();
       returnToHomePlanet();
@@ -195,7 +194,7 @@ public class Client extends GameClient implements IClient
    {
       if (firstRun)
       {
-         intro.setVisible(true);
+         intro.setVisible(false);
          firstRun = false;
       }
       if (gameState != null)
@@ -526,7 +525,7 @@ public class Client extends GameClient implements IClient
             }
          }
          
-         HomeBase homePlanet = player.getHomePlanet();
+         final HomeBase homePlanet = player.getHomePlanet();
          if (homePlanet.collidesWith(mouseworld))
          {
             selected = homePlanet;

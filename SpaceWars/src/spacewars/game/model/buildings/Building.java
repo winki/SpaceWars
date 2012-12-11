@@ -25,7 +25,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
     * Helper flag to check if a building has already been check for energy
     * availability
     */
-   protected volatile boolean isCheckedForEngery;
+   protected transient boolean isCheckedForEngery;
    /**
     * Is the building on the energy net
     */

@@ -24,9 +24,14 @@ public class LaserCanon extends Building
    
    protected PlayerElement       attackTarget;
    
+   /**
+    * The power
+    */
+   protected int                 power;
+   
    public LaserCanon(final Vector position, final Player player)
    {
-      super(position, 10, 100, player);
+      super(position, (short) 10, (short) 100, player);
    }
    
    @Override
@@ -40,7 +45,7 @@ public class LaserCanon extends Building
    {
       return 300;
    }
-
+   
    public int getLaserRange()
    {
       return laserRanges[level];
@@ -109,10 +114,13 @@ public class LaserCanon extends Building
       
       super.renderBuilding(g);
       
-      // draw icon
-      final int BORDER = 3;
-      g.setColor(Color.BLACK);
-      g.fill(new Polygon(new int[] { position.x, position.x + radius - BORDER, position.x, position.x - radius + BORDER }, new int[] { position.y - radius + BORDER, position.y, position.y + radius - BORDER, position.y }, 4));
+      if (isBuilt() || !isPlaced())
+      {
+         // draw icon
+         final int BORDER = 3;
+         g.setColor(Color.BLACK);
+         g.fill(new Polygon(new int[] { position.x, position.x + radius - BORDER, position.x, position.x - radius + BORDER }, new int[] { position.y - radius + BORDER, position.y, position.y + radius - BORDER, position.y }, 4));
+      }
       
       // draw attack line
       if (attackTarget != null)

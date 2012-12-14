@@ -10,9 +10,8 @@ import spacewars.gamelib.Vector;
 @SuppressWarnings("serial")
 public class Shipyard extends Building
 {
-   protected static final String name = "Shipyard";  
-   protected static final int[]  secondsPerShipbuild        = { 8, 7, 6, 5, 4 };
-   
+   protected static final String name                = "Shipyard";
+   protected static final int[]  secondsPerShipbuild = { 8, 7, 6, 5, 4 };
    
    public Shipyard(final Vector position, final Player player)
    {
@@ -34,10 +33,10 @@ public class Shipyard extends Building
    @Override
    public void update(GameTime gameTime)
    {
-      if (hasEnergy())
-      {         
+      if (isBuilt() && hasEnergy())
+      {
          // repeat every x seconds depending on the level
-         if (gameTime.timesPerSecond(1.0/secondsPerShipbuild[level]))
+         if (gameTime.timesPerSecond(1.0 / secondsPerShipbuild[level]))
          {
             final Ship ship = new Ship(player, new Vector(position), 0);
             getServerGameState().getShips().add(ship);
@@ -50,9 +49,12 @@ public class Shipyard extends Building
    {
       super.renderBuilding(g);
       
-      // draw icon
-      final int BORDER = 6;
-      g.setColor(Color.BLACK);
-      g.fillOval(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER));   
+      if (isBuilt() || !isPlaced())
+      {
+         // draw icon
+         final int BORDER = 6;
+         g.setColor(Color.BLACK);
+         g.fillOval(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER));
+      }
    }
 }

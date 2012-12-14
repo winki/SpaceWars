@@ -89,7 +89,7 @@ public class Mine extends Building
       {
          // take first random planet which has mineral reserves
          if (planet.getMineralReserves() > 0) { return planet; }
-      }      
+      }
       return null;
    }
    
@@ -101,7 +101,7 @@ public class Mine extends Building
    public void mine()
    {
       // mine minerals if there is energy
-      if (hasEnergy())
+      if (isBuilt() && hasEnergy())
       {
          miningTarget = chooseMiningTarget();
          
@@ -159,9 +159,12 @@ public class Mine extends Building
       
       super.renderBuilding(g);
       
-      // draw icon
-      final int BORDER = 4;
-      g.setColor(Color.GREEN);
-      g.fillOval(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER));
+      if (isBuilt() || !isPlaced())
+      {
+         // draw icon
+         final int BORDER = 4;
+         g.setColor(Color.GREEN);
+         g.fillOval(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER));
+      }
    }
 }

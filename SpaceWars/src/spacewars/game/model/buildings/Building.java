@@ -90,6 +90,16 @@ public abstract class Building extends PlayerElement implements IUpdateable
       this.state = 0;
    }
    
+   public boolean isBuilt()
+   {
+      return state >= 100;
+   }
+   
+   public byte establishBy(int percent)
+   {
+      return state += (byte) percent;
+   }
+   
    /**
     * Gets the building name of the derrived subclass.
     * 
@@ -149,6 +159,22 @@ public abstract class Building extends PlayerElement implements IUpdateable
             final int POINT_RADIUS = 3;
             g.setColor(Color.RED);
             g.fillOval(position.x - POINT_RADIUS, position.y - POINT_RADIUS, 2 * POINT_RADIUS, 2 * POINT_RADIUS);
+         }
+         
+         if (!isBuilt())
+         {
+            final int maxState = 100;
+            
+            // render build state
+            final int WIDTH = 20;
+            final int HEIGHT = 2;
+            final int DY = 8;
+            
+            // g.setColor(new Color(20, 90, 88));
+            // g.fillRect(position.x - WIDTH / 2, position.y - radius - DY -
+            // HEIGHT, WIDTH, HEIGHT);
+            g.setColor(Color.WHITE);
+            g.fillRect(position.x - WIDTH / 2, position.y - radius - DY - HEIGHT, (int) ((double) WIDTH * state / maxState), HEIGHT);
          }
       }
       else

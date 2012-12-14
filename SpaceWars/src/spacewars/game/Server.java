@@ -17,7 +17,6 @@ import spacewars.game.model.Map;
 import spacewars.game.model.Player;
 import spacewars.game.model.Ship;
 import spacewars.game.model.buildings.Building;
-import spacewars.game.model.buildings.HomeBase;
 import spacewars.game.model.buildings.LaserCanon;
 import spacewars.game.model.buildings.Mine;
 import spacewars.game.model.buildings.Relay;
@@ -39,12 +38,11 @@ import de.root1.simon.annotation.SimonRemote;
 @SimonRemote(value = { IServer.class })
 public class Server extends GameServer implements IServer
 {
-   private static final int                minPlayers        = 1;
+   private static int                      playerId;
+   private static final int                minPlayers       = 1;
+   private static final Color[]            colors           = new Color[] { Color.BLUE, Color.PINK, Color.GRAY };
+   private static int                      startingMinerals = 400;
    
-   private static final Color[]            colors            = new Color[] { Color.BLUE, Color.PINK, Color.GRAY };
-   
-   public static final boolean             DEBUG             = false;
-   public static final boolean             CAN_CHANGE_PLAYER = true;
    /**
     * Server instance
     */
@@ -57,6 +55,10 @@ public class Server extends GameServer implements IServer
     * The game state
     */
    private final GameState                 gameState;
+   /**
+    * Starting time of the game
+    */
+   private long                            startingTime;
    /**
     * Is the game currently running
     */
@@ -114,6 +116,21 @@ public class Server extends GameServer implements IServer
       gameState.setMap(map);
    }
    
+   private void updatePlayerObject(Building building)
+   {
+      for (Player player : gameState.getPlayers())
+      {
+         if (player.equals(building.getPlayer()))
+         {
+            building.setPlayer(player);
+            return;
+         }
+      }
+      
+      // no player object found
+      Logger.getGlobal().log(Level.SEVERE, "No user object found that corresponds with the building.");
+   }
+   
    @Override
    public void update(GameTime gameTime)
    {
@@ -128,8 +145,9 @@ public class Server extends GameServer implements IServer
          updateWorld(gameTime);
       }
       else if (guests.size() == minPlayers)
-      {       
+      {
          // start game if minimal number of players are there
+         startingTime = System.nanoTime();
          running = true;
       }
    }
@@ -139,6 +157,16 @@ public class Server extends GameServer implements IServer
       while (!toBuild.isEmpty())
       {
          final Building buildingToBuild = toBuild.poll();
+         updatePlayerObject(buildingToBuild);
+         final Player player = buildingToBuild.getPlayer();
+         final int costs = buildingToBuild.getCosts();
+         
+         if (player.getMinerals() < costs)
+         {
+            Logger.getGlobal().info("Not enough minerals to build building.");
+            continue;
+         }
+         player.removeMinerals(costs);
          
          // check collisions
          boolean buildingIsPlaceable = !checkCollision(buildingToBuild);
@@ -191,6 +219,7 @@ public class Server extends GameServer implements IServer
       while (!toUpgrade.isEmpty())
       {
          final Building buildingToUpgrade = toBuild.poll();
+         updatePlayerObject(buildingToUpgrade);
          
          buildingToUpgrade.upgrade();
       }
@@ -201,6 +230,7 @@ public class Server extends GameServer implements IServer
       while (!toRecycle.isEmpty())
       {
          final Building buildingToRecycle = toBuild.poll();
+         updatePlayerObject(buildingToRecycle);
          
          for (Building linked : buildingToRecycle.getLinks())
          {
@@ -217,6 +247,8 @@ public class Server extends GameServer implements IServer
       
       // update energy and mineral flow flow
       updateEnergyAndMineralFlow();
+      
+      establishBuildings();
       
       // war: defend, attack
       for (Iterator<Building> iterator = getGameState().getBuildings().iterator(); iterator.hasNext();)
@@ -259,6 +291,10 @@ public class Server extends GameServer implements IServer
             iterator.remove();
          }
       }
+      
+      // update game time
+      int seconds = (int) ((System.nanoTime() - startingTime) / 1000000000);
+      gameState.setDuration(seconds);
    }
    
    /**
@@ -271,32 +307,9 @@ public class Server extends GameServer implements IServer
       linksToMineralPlanets.clear();
       
       // get player object
-      Player player = null;
-      for (Player p : gameState.getPlayers())
-      {
-         if (p.equals(buildingToBePlaced.getPlayer()))
-         {
-            player = p;
-            break;
-         }
-      }
-      if (player == null)
-      {
-         Logger.getGlobal().log(Level.WARNING, "No user object found that corresponds with the building.");
-      }
-      
-      // treat home planet as a building/solar station
-      Building home = (SolarStation) player.getHomePlanet();
-      if (home.isReachableFrom(buildingToBePlaced))
-      {
-         final Vector p1 = buildingToBePlaced.getPosition();
-         final Vector p2 = home.getPosition();
-         final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
-         final boolean collision = checkCollision(line, home);
-         
-         linksToBuildings.add(new Link<>(home, line, collision));
-      }
-      
+      // final Player player = getPlayerOfBuilding(buildingToBePlaced)// TODO
+      final Player player = buildingToBePlaced.getPlayer();
+
       // create links to other buildings that are reachable
       for (Building building : gameState.getBuildings())
       {
@@ -479,14 +492,6 @@ public class Server extends GameServer implements IServer
          if (m.collidesWith(line)) { return true; }
       }
       
-      // check collision with home planets
-      for (Player p : gameState.getPlayers())
-      {
-         // TODO: add home planet to buildings?
-         final HomeBase planet = p.getHomePlanet();
-         if (!planet.equals(reachableElement) && planet.collidesWith(line)) { return true; }
-      }
-      
       // no collision
       return false;
    }
@@ -515,6 +520,7 @@ public class Server extends GameServer implements IServer
          }
       }
       
+      /*
       // add home planet as energy source
       for (Player player : gameState.getPlayers())
       {
@@ -522,6 +528,7 @@ public class Server extends GameServer implements IServer
          home.setCheckedForEngery(false);
          solars.add(home);
       }
+      */
       
       // checks recursively
       for (SolarStation solar : solars)
@@ -540,10 +547,13 @@ public class Server extends GameServer implements IServer
       if (!check.isCheckedForEngery())
       {
          check.setCheckedForEngery(true);
-         for (Building linked : check.getLinks())
+         if (check.isBuilt())
          {
-            linked.setHasEnergy(true);
-            checkEnergyAvailability(linked);
+            for (Building linked : check.getLinks())
+            {
+               linked.setHasEnergy(true);
+               checkEnergyAvailability(linked);
+            }
          }
       }
    }
@@ -583,35 +593,57 @@ public class Server extends GameServer implements IServer
             
             if (getGameTime().timesPerSecond(1))
             {
-               mine.mine();
-               
-               // TODO:
-               mine.getPlayer().addMinerals(1);
-               // player.removeEnergy(mine.getEnergyConsumPerMin() / 60);
-               // player.addMinerals(mine.getResPerMin() / 60);
+               final Player player = mine.getPlayer();
+               if (player.getEnergy() >= mine.getEnergyConsumPerMin())
+               {
+                  mine.mine();
+                  final int amount = mine.getMineAmount();
+                  mine.getPlayer().addMinerals(amount);
+                  player.removeEnergy(mine.getEnergyConsumPerMin());
+               }
+            }
+         }
+      }
+   }
+   
+   /**
+    * Establish every building by 10 percent 3 times a second.
+    */
+   private void establishBuildings()
+   {
+      if (getGameTime().timesPerSecond(3))
+      {
+         for (Building building : getGameState().getBuildings())
+         {
+            if (!building.isBuilt() && building.hasEnergy())
+            {
+               building.establishBy(10);
             }
          }
       }
    }
    
    @Override
-   public Player register(IClient client)
+   public int register(IClient client)
    {
-      Player player = null;
-      
       // can only register if game is not running
       if (!running)
       {
+         final int id = playerId++;
          final Color color = colors[guests.size()];
          final Vector position = gameState.getMap().getHomePlanetPositions().get(guests.size());
-         final Guest guest = new Guest(client, color, position);
          
-         player = guest.getPlayer();
+         final Player player = new Player(id, color, position, startingMinerals);
+         final Guest guest = new Guest(client, player);
+         
          gameState.getPlayers().add(player);
+         gameState.getBuildings().add(player.getHomePlanet());
          guests.add(guest);
+         
+         return id;
       }
       
-      return player;
+      return -1;
    }
    
    @Override

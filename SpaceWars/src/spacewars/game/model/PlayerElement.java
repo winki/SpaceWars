@@ -41,6 +41,16 @@ public abstract class PlayerElement extends GameElement implements Serializable
    }
    
    /**
+    * Sets the owner of this element new (server function).
+    * 
+    * @param player
+    */
+   public void setPlayer(Player player)
+   {
+      this.player = player;
+   }
+   
+   /**
     * Gets the enemy of this player
     * 
     * @return enemy

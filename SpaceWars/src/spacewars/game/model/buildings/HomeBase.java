@@ -19,8 +19,9 @@ public class HomeBase extends SolarStation
       super.radius = 40;
       super.sight = 100;
       
-      // already built
+      // already built and produces energy
       super.state = 100;
+      super.hasEnergy = true;
    }
    
    @Override

@@ -16,6 +16,7 @@ import spacewars.gamelib.Vector;
 @SuppressWarnings("serial")
 public class GameState implements IRenderable, Serializable
 {
+   private int                  duration;
    private Map                  map;
    private final List<Player>   players;
    private final List<Building> buildings;
@@ -26,6 +27,16 @@ public class GameState implements IRenderable, Serializable
       this.players = new LinkedList<>();
       this.buildings = new LinkedList<>();
       this.ships = new LinkedList<>();
+   }
+   
+   public int getDuration()
+   {
+      return duration;
+   }
+   
+   public void setDuration(int duration)
+   {
+      this.duration = duration;
    }
    
    public Map getMap()

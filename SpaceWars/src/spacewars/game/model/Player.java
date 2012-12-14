@@ -38,11 +38,12 @@ public class Player implements Serializable
    protected int      energy;
    protected int      energyMax = 100;
    
-   public Player(int id, Color color, Vector homePlanetPosition)
+   public Player(final int id, final Color color, final Vector position, final int minerals)
    {
       this.id = id;
       this.color = color;
-      this.homePlanet = new HomeBase(homePlanetPosition, this);
+      this.homePlanet = new HomeBase(position, this);
+      this.minerals = minerals;
    }
    
    public int getScore()
@@ -145,12 +146,8 @@ public class Player implements Serializable
       if (obj == this) return true;
       if (obj instanceof Player)
       {
-         Player player = (Player) obj;
-         if (this.hashCode() == player.hashCode())
-         {
-            // TODO: check real equality
-            return true;
-         }         
+         final Player player = (Player) obj;
+         return id == player.id;
       }
       return false;
    }

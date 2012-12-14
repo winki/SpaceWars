@@ -64,6 +64,7 @@ public class Client extends GameClient implements IClient
    /**
     * The player
     */
+   private int                             playerId = -1;
    private Player                          player;
    /**
     * The game state
@@ -144,7 +145,7 @@ public class Client extends GameClient implements IClient
       this.server = server;
       try
       {
-         player = server.register(this);
+         playerId = server.register(this);
       }
       catch (Exception ex)
       {
@@ -173,7 +174,7 @@ public class Client extends GameClient implements IClient
       // TODO: is this done now in intro screen?
       returnToHomePlanet();
    }
-
+   
    private void createStars()
    {
       final Random random = new Random();
@@ -197,7 +198,7 @@ public class Client extends GameClient implements IClient
       {
          long start = System.currentTimeMillis();
          final GameState newGameState = server.getGameState();
-         long time = System.currentTimeMillis() - start;         
+         long time = System.currentTimeMillis() - start;
          if (DEBUG)
          {
             Logger.getGlobal().info(String.format("Time to get game state: %d ms\n", time));
@@ -205,8 +206,14 @@ public class Client extends GameClient implements IClient
          
          if (newGameState != null)
          {
-            boolean startGame = gameState == null;
+            final boolean startGame = gameState == null;
             gameState = newGameState;
+            
+            if (playerId != -1)
+            {
+               // set player
+               player = gameState.getPlayers().get(playerId);
+            }
             
             // begin of game
             if (startGame)
@@ -278,19 +285,7 @@ public class Client extends GameClient implements IClient
    {
       linksToBuildings.clear();
       linksToMineralPlanets.clear();
-      
-      // treat home planet as a building/solar station
-      Building home = (SolarStation) player.getHomePlanet();
-      if (home.isReachableFrom(buildingToBePlaced))
-      {
-         final Vector p1 = buildingToBePlaced.getPosition();
-         final Vector p2 = home.getPosition();
-         final Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
-         final boolean collision = checkCollision(line, home);
-         
-         linksToBuildings.add(new Link<>(home, line, collision));
-      }
-      
+
       // create links to other buildings that are reachable
       for (Building building : gameState.getBuildings())
       {
@@ -473,14 +468,6 @@ public class Client extends GameClient implements IClient
          if (m.collidesWith(line)) { return true; }
       }
       
-      // check collision with home planets
-      for (Player p : gameState.getPlayers())
-      {
-         // TODO: add home planet to buildings?
-         final HomeBase planet = p.getHomePlanet();
-         if (!planet.equals(reachableElement) && planet.collidesWith(line)) { return true; }
-      }
-      
       // no collision
       return false;
    }
@@ -524,7 +511,7 @@ public class Client extends GameClient implements IClient
    private void select()
    {
       // check if mouse is on building/planet
-      if (Mouse.getState().isButtonPressed(Button.LEFT))
+      if (Mouse.getState().isButtonDown(Button.LEFT))
       {
          final Vector mousescreen = Mouse.getState().getVector();
          final Vector mouseworld = Screen.getInstance().getViewport().transformScreenToWorld(mousescreen);
@@ -546,14 +533,7 @@ public class Client extends GameClient implements IClient
                return;
             }
          }
-         
-         final HomeBase homePlanet = player.getHomePlanet();
-         if (homePlanet.collidesWith(mouseworld))
-         {
-            selected = homePlanet;
-            return;
-         }
-         
+                
          // select nothing
          selected = null;
       }
@@ -773,6 +753,11 @@ public class Client extends GameClient implements IClient
       // render connection lines between the buildings
       if (buildingToBePlaced != null && buildingIsPlaceable)
       {
+         final float TRANSPARENCY = 0.4f;
+         
+         Composite original = g.getComposite();
+         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
+         
          g.setColor(Color.RED);
          for (Link<Building> link : linksToBuildings)
          {
@@ -796,6 +781,8 @@ public class Client extends GameClient implements IClient
             }
             g.setStroke(stroke);
          }
+         
+         g.setComposite(original);
       }
       
       // render game state
@@ -820,6 +807,8 @@ public class Client extends GameClient implements IClient
     */
    private void renderHud(Graphics2D g)
    {
+      if (player == null) return;
+      
       /*
        *  TODO: kai
        *  
@@ -827,8 +816,7 @@ public class Client extends GameClient implements IClient
        *  - Anzeige des aktuell ausgewählten GameElements (Tipp: getSelected())
        *  - Siehe The Space Game
        *  
-       */
-      
+       */      
       final int FONT_LINE = 15;
       final int DX = 10;
       final int DY = 24;
@@ -836,10 +824,7 @@ public class Client extends GameClient implements IClient
       final int HUD_WIDTH = 160;
       final int BAR_HEIGHT = 5;
       final Dimension screen = Screen.getInstance().getSize();
-      
-      final int seconds = (int) (getGameTime().getTotalGameTime() / 1000000000);
-      
-      // vars now declared in class
+      final int seconds = gameState.getDuration();
       final float TRANSPARENCY = 0.8f;
       
       final Composite original = g.getComposite();

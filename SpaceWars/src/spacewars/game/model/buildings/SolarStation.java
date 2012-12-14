@@ -19,7 +19,6 @@ public class SolarStation extends Building
    {
       super(position, 15, 100, player);
       
-      this.hasEnergy = true;
       this.energy = 0;
    }
    
@@ -69,11 +68,14 @@ public class SolarStation extends Building
    {
       super.renderBuilding(g);
       
-      // draw icon
-      final int BORDER = 4;
-      g.setColor(Color.BLACK);
-      g.fillArc(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER), 60, 60);
-      g.fillArc(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER), 180, 60);
-      g.fillArc(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER), 300, 60);
+      if (isBuilt() || !isPlaced())
+      {
+         // draw icon
+         final int BORDER = 4;
+         g.setColor(Color.BLACK);
+         g.fillArc(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER), 60, 60);
+         g.fillArc(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER), 180, 60);
+         g.fillArc(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER), 300, 60);
+      }
    }
 }

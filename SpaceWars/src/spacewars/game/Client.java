@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
@@ -46,8 +47,8 @@ import de.root1.simon.annotation.SimonRemote;
 @SimonRemote(value = { IClient.class })
 public class Client extends GameClient implements IClient
 {
-   public static final boolean             DEBUG             = false;
-   public static final boolean             CAN_CHANGE_PLAYER = true;
+   public static final boolean             DEBUG    = false;
+   
    /**
     * Game instance
     */
@@ -56,10 +57,6 @@ public class Client extends GameClient implements IClient
     * Server proxy
     */
    private IServer                         server;
-   /**
-    * Random object
-    */
-   private final Random                    random;
    /**
     * The stars in the background
     */
@@ -105,24 +102,16 @@ public class Client extends GameClient implements IClient
     * Intro screen before the game starts
     */
    private final IntroScreen               intro;
-   
    /**
     * to set introScreen visible the first run
     */
-   private static boolean                  firstRun          = true;
+   private boolean                         firstRun = true;
    
-   // !!! correct placed? need them in rendering and upgrading
-   final int                               FONT_LINE         = 15;
-   final int                               DX                = 10;
-   final int                               DY                = 24;
-   final int                               DY_SELECTED       = 200;
-   final int                               HUD_WIDTH         = 160;
-   final int                               BAR_HEIGHT        = 5;
-   final Dimension                         screen            = Screen.getInstance().getSize();
-   
+   /**
+    * Default constructor.
+    */
    private Client()
    {
-      this.random = new Random();
       this.buildingType = BuildingType.NOTHING;
       this.scrollPosition = new Vector();
       this.stars = new LinkedList<Star>();
@@ -153,7 +142,14 @@ public class Client extends GameClient implements IClient
    public void setServer(IServer server)
    {
       this.server = server;
-      player = server.register(this);
+      try
+      {
+         player = server.register(this);
+      }
+      catch (Exception ex)
+      {
+         Logger.getGlobal().log(Level.SEVERE, "Couldn't register at server.", ex);
+      }
    }
    
    @Override
@@ -164,21 +160,24 @@ public class Client extends GameClient implements IClient
       screen.setTitle("Space Wars");
       screen.setIcon("icon.png");
       screen.setSize(new Dimension(800, 600));
-      screen.setSize(null);
-      
-      // init game state
-      // TODO: get game state
-      gameState = server.getGameState();
-      
-      createStars();
-      returnToHomePlanet();
+      // screen.setSize(null);
       
       // show screen
       screen.setVisible(true);
    }
    
+   private void startGame()
+   {
+      createStars();
+      
+      // TODO: is this done now in intro screen?
+      returnToHomePlanet();
+   }
+
    private void createStars()
    {
+      final Random random = new Random();
+      
       for (int i = 0; i < gameState.getMap().getNumStars(); i++)
       {
          final int x = random.nextInt(Screen.getInstance().getSize().width);
@@ -186,6 +185,39 @@ public class Client extends GameClient implements IClient
          final int layer = random.nextInt(gameState.getMap().getNumLayers());
          
          stars.add(new Star(x, y, layer));
+      }
+   }
+   
+   /**
+    * Updates the game state with the newest version from server.
+    */
+   private void updateGameState()
+   {
+      try
+      {
+         long start = System.currentTimeMillis();
+         final GameState newGameState = server.getGameState();
+         long time = System.currentTimeMillis() - start;         
+         if (DEBUG)
+         {
+            Logger.getGlobal().info(String.format("Time to get game state: %d ms\n", time));
+         }
+         
+         if (newGameState != null)
+         {
+            boolean startGame = gameState == null;
+            gameState = newGameState;
+            
+            // begin of game
+            if (startGame)
+            {
+               startGame();
+            }
+         }
+      }
+      catch (Exception ex)
+      {
+         Logger.getGlobal().log(Level.WARNING, "Couldn't get game state from server.", ex);
       }
    }
    
@@ -235,17 +267,7 @@ public class Client extends GameClient implements IClient
    @Override
    protected void sync()
    {
-      // update game state
-      // TODO: make more performant
-      
-      long start = System.currentTimeMillis();
-      gameState = server.getGameState();
-      long time = System.currentTimeMillis() - start;
-      
-      if (DEBUG)
-      {
-         Logger.getGlobal().info(String.format("Time to get game state: %d ms\n", time));
-      }
+      updateGameState();
    }
    
    /**
@@ -590,8 +612,15 @@ public class Client extends GameClient implements IClient
             // effectively build
             if (Mouse.getState().isButtonReleased(Button.LEFT))
             {
-               server.build(buildingToBePlaced);
-               buildingToBePlaced = null;
+               try
+               {
+                  server.build(buildingToBePlaced);
+                  buildingToBePlaced = null;
+               }
+               catch (Exception ex)
+               {
+                  Logger.getGlobal().log(Level.WARNING, "Couldn't build building on server.", ex);
+               }
                
                /*
                if (!Keyboard.getState().isKeyDown(Key.SHIFT))
@@ -616,12 +645,26 @@ public class Client extends GameClient implements IClient
          if (Keyboard.getState().isKeyPressed(Key.PAGE_UP))
          {
             // upgrade
-            server.upgrade(selectedBuilding);
+            try
+            {
+               server.upgrade(selectedBuilding);
+            }
+            catch (Exception ex)
+            {
+               Logger.getGlobal().log(Level.WARNING, "Couldn't upgrade building on server.", ex);
+            }
          }
          else if (Keyboard.getState().isKeyPressed(Key.DELETE))
          {
             // recycle
-            server.recycle(selectedBuilding);
+            try
+            {
+               server.recycle(selectedBuilding);
+            }
+            catch (Exception ex)
+            {
+               Logger.getGlobal().log(Level.WARNING, "Couldn't recycle building on server.", ex);
+            }
          }
       }
    }
@@ -785,6 +828,14 @@ public class Client extends GameClient implements IClient
        *  - Siehe The Space Game
        *  
        */
+      
+      final int FONT_LINE = 15;
+      final int DX = 10;
+      final int DY = 24;
+      final int DY_SELECTED = 200;
+      final int HUD_WIDTH = 160;
+      final int BAR_HEIGHT = 5;
+      final Dimension screen = Screen.getInstance().getSize();
       
       final int seconds = (int) (getGameTime().getTotalGameTime() / 1000000000);
       
@@ -954,11 +1005,5 @@ public class Client extends GameClient implements IClient
       g.drawString("Building type: " + buildingType, 10, 5 * LINE_HEIGHT + DY);
       g.drawString("Running slowly: " + getGameTime().isRunningSlowly(), DX, 6 * LINE_HEIGHT + DY);
       g.drawString("Ticks: " + getGameTime().getTicks(), DX, 7 * LINE_HEIGHT + DY);
-   }
-   
-   @Override
-   public void startGame()
-   {
-      // TODO Auto-generated method stub
    }
 }

@@ -18,10 +18,10 @@ public class Ship extends PlayerElement implements IUpdateable
     */
    protected transient double x;
    protected transient double y;
-   protected double          speed;
-   protected double          angle;
+   protected double           speed;
+   protected double           angle;
    
-   protected PlayerElement   attackTarget;
+   protected PlayerElement    attackTarget;
    
    public Ship(final Player player, final Vector position, final double angle)
    {
@@ -47,8 +47,8 @@ public class Ship extends PlayerElement implements IUpdateable
    private void setDirectionToEnemy()
    {
       // direction: enemy's home planet
-      final HomeBase target = getEnemy().getHomePlanet();
-      final Vector direction = target.getPosition().sub(position);
+      final Vector target = getEnemy().getHomePlanet().getPosition();
+      final Vector direction = target.sub(position);
       
       // set angle
       angle = Math.atan2(direction.y, direction.x);

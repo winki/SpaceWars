@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Link;
@@ -37,6 +39,8 @@ import de.root1.simon.annotation.SimonRemote;
 @SimonRemote(value = { IServer.class })
 public class Server extends GameServer implements IServer
 {
+   private static final int                minPlayers        = 1;
+   
    private static final Color[]            colors            = new Color[] { Color.BLUE, Color.PINK, Color.GRAY };
    
    public static final boolean             DEBUG             = false;
@@ -100,47 +104,14 @@ public class Server extends GameServer implements IServer
    @Override
    protected void initialize()
    {
-      createGameState();
+      createMap();
    }
    
-   private void createGameState()
+   private void createMap()
    {
       // create map
       final Map map = MapFactory.loadMap("map1.png");
       gameState.setMap(map);
-      
-      // TODO: only sample players and objects, remove later
-      {
-         // create players
-         final List<Player> players = gameState.getPlayers();
-         // players.add(new Player(1, Color.BLUE,
-         // getGameState().getMap().getHomePlanetPositions().get(1)));
-         // players.add(new Player(2, Color.MAGENTA,
-         // getGameState().getMap().getHomePlanetPositions().get(2)));
-         
-         /*
-         // 400 buildings
-         for (int i = 0; i < 500; i++)
-         {
-            final int x = (int) (Math.random() * 10000);
-            final int y = (int) (Math.random() * 10000);
-            
-            final Mine mine = new Mine(new Vector(x, y), gameState.getPlayers().get(0));
-            mine.place();
-            
-            gameState.getBuildings().add(mine);
-         }
-         
-         // 100 ships
-         for (int i = 0; i < 100; i++)
-         {
-            final int x = (int) (Math.random() * 1000);
-            final int y = (int) (Math.random() * 1000);
-            
-            gameState.getShips().add(new Ship(gameState.getPlayers().get(0), new Vector(x, y), 0.5));
-         }
-         */
-      }
    }
    
    @Override
@@ -155,12 +126,11 @@ public class Server extends GameServer implements IServer
          
          // update world (game state)
          updateWorld(gameTime);
-         
-         // debug
-         if (DEBUG)
-         {
-            printDebug();
-         }
+      }
+      else if (guests.size() == minPlayers)
+      {       
+         // start game if minimal number of players are there
+         running = true;
       }
    }
    
@@ -300,7 +270,20 @@ public class Server extends GameServer implements IServer
       linksToBuildings.clear();
       linksToMineralPlanets.clear();
       
-      final Player player = buildingToBePlaced.getPlayer();
+      // get player object
+      Player player = null;
+      for (Player p : gameState.getPlayers())
+      {
+         if (p.equals(buildingToBePlaced.getPlayer()))
+         {
+            player = p;
+            break;
+         }
+      }
+      if (player == null)
+      {
+         Logger.getGlobal().log(Level.WARNING, "No user object found that corresponds with the building.");
+      }
       
       // treat home planet as a building/solar station
       Building home = (SolarStation) player.getHomePlanet();
@@ -513,8 +496,6 @@ public class Server extends GameServer implements IServer
     */
    private void checkEnergyAvailability()
    {
-      // TODO winkler: home base shuld be a full functional solar station
-      
       final List<SolarStation> solars = new LinkedList<>();
       
       // reset checked for energy flag
@@ -535,10 +516,9 @@ public class Server extends GameServer implements IServer
       }
       
       // add home planet as energy source
-      // TODO: add home planet to buildings?
       for (Player player : gameState.getPlayers())
       {
-         final HomeBase home = player.getHomePlanet();
+         final SolarStation home = player.getHomePlanet();
          home.setCheckedForEngery(false);
          solars.add(home);
       }
@@ -614,14 +594,6 @@ public class Server extends GameServer implements IServer
       }
    }
    
-   /**
-    * Prints debug informations on the server console.
-    */
-   private void printDebug()
-   {
-      // TODO winku
-   }
-   
    @Override
    public Player register(IClient client)
    {
@@ -630,16 +602,15 @@ public class Server extends GameServer implements IServer
       // can only register if game is not running
       if (!running)
       {
-         final Guest guest = new Guest(client, colors[guests.size()], gameState.getMap().getHomePlanetPositions().get(guests.size()));
-         guests.add(guest);
-         player = guest.getPlayer();
+         final Color color = colors[guests.size()];
+         final Vector position = gameState.getMap().getHomePlanetPositions().get(guests.size());
+         final Guest guest = new Guest(client, color, position);
          
-         if (guests.size() == 2)
-         {
-            // start game if two players are there
-            running = true;
-         }
+         player = guest.getPlayer();
+         gameState.getPlayers().add(player);
+         guests.add(guest);
       }
+      
       return player;
    }
    

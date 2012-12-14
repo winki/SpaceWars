@@ -35,7 +35,7 @@ public class Mine extends Building
    
    public Mine(final Vector position, final Player player)
    {
-      super(position, 10, 100, player, 100);
+      super(position, 10, 100, player);
       this.reachableMineralPlanets = new LinkedList<>();
    }
    
@@ -43,6 +43,12 @@ public class Mine extends Building
    public String getName()
    {
       return name;
+   }
+   
+   @Override
+   public int getCosts()
+   {
+      return 100;
    }
    
    public int getResPerMin()

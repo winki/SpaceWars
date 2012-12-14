@@ -19,26 +19,8 @@ public class SpaceWars
       // set logging
       Logger.getGlobal().setLevel(Level.ALL);
       
-      
-      runServer();      
-      try
-      {
-         Thread.sleep(500);
-      }
-      catch (InterruptedException e)
-      {
-         e.printStackTrace();
-      }     
-      
+      runServer(true);
       runClient("localhost");
-      
-      // run game
-      // SpaceWarsGame.getInstance().run();
-      
-      /*
-       Network.runServer();
-       Network.runClient("127.0.0.1");
-       */
    }
    
    /**
@@ -73,7 +55,7 @@ public class SpaceWars
          if (args[0].equals("serveronly"))
          {
             // only start server
-            runServer();
+            runServer(false);
          }
          else
          {
@@ -84,7 +66,7 @@ public class SpaceWars
       else
       {
          // start server and connect to it
-         runServer();
+         runServer(true);
          runClient("127.0.0.1");
       }
    }
@@ -92,13 +74,20 @@ public class SpaceWars
    /**
     * Run a server instance.
     */
-   private static void runServer()
+   private static void runServer(boolean ownThread)
    {
       final Server server = Server.getInstance();
       Network.bindServer(server);
       
       // run server in his own thread
-      new Thread(server).start();
+      if (ownThread)
+      {
+         new Thread(server).start();
+      }
+      else
+      {
+         server.run();
+      }
    }
    
    /**
@@ -113,18 +102,5 @@ public class SpaceWars
       
       client.setServer(server);
       client.run();
-   }
-   
-   // TODO: kai: wofür ist diese methode?^^
-   public static void print(int v, int w, String s1, String s2)
-   {
-      for (int y = 0; y < v * w; y++)
-      {
-         for (int x = 0; x < v * w; x++)
-         {
-            System.out.println((x / w) % 2 == 0 || (y / w) % 2 == 0 ? s1 : s2);
-         }
-         System.out.println();
-      }
    }
 }

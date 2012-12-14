@@ -14,13 +14,17 @@ import spacewars.gamelib.Vector;
 public abstract class Building extends PlayerElement implements IUpdateable
 {
    /**
-    * The upgrade level (zero-based) of the building
+    * The upgrade level (zero-based)
     */
-   protected int              level;   
-   protected int              buildState;
-   protected boolean          placeable;
-   protected boolean          placed;   
-   protected int              costs;
+   protected byte              level;
+   /**
+    * The build state (0 to 100 percent). -1 for not placed.
+    */
+   protected byte              state;
+   /**
+    * Helper flags for client to indicate if a building is placeable
+    */
+   protected transient boolean placeable;
    /**
     * Helper flag to check if a building has already been check for energy
     * availability
@@ -29,14 +33,17 @@ public abstract class Building extends PlayerElement implements IUpdateable
    /**
     * Is the building on the energy net
     */
-   protected boolean          hasEnergy;
-   protected List<Building>   linkedBuildings;
+   protected boolean           hasEnergy;
+   /**
+    * The buildings this building is linked with
+    */
+   protected List<Building>    linkedBuildings;
    
-   public Building(final Vector position, final int radius, final int sight, final Player player, final int costs)
+   public Building(final Vector position, final int radius, final int sight, final Player player)
    {
       super(position, radius, sight, player, 100);
       
-      this.buildState = 0;
+      this.state = -1;
       this.isCheckedForEngery = false;
       this.hasEnergy = false;
       this.placeable = true;
@@ -55,7 +62,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
    
    public boolean isPlaced()
    {
-      return placed;
+      return state > -1;
    }
    
    public boolean hasEnergy()
@@ -80,7 +87,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
    
    public void place()
    {
-      this.placed = true;
+      this.state = 0;
    }
    
    /**
@@ -99,6 +106,13 @@ public abstract class Building extends PlayerElement implements IUpdateable
    {
       return linkedBuildings;
    }
+   
+   /**
+    * Gets the costs of a building
+    * 
+    * @return costs in minerals
+    */
+   public abstract int getCosts();
    
    /**
     * Upgrade building
@@ -156,7 +170,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
     */
    protected void renderBuilding(Graphics2D g)
    {
-      g.setColor(isPlaceable() ? (isPlaced() ? player.getColor() : Color.WHITE) : Color.RED);
+      g.setColor(isPlaced() ? player.getColor() : (isPlaceable() ? Color.WHITE : Color.RED));
       g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
    }
 }

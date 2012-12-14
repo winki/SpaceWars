@@ -16,13 +16,19 @@ public class Shipyard extends Building
    
    public Shipyard(final Vector position, final Player player)
    {
-      super(position, 20, 100, player, 500);
+      super(position, 20, 100, player);
    }
    
    @Override
    public String getName()
    {
       return name;
+   }
+   
+   @Override
+   public int getCosts()
+   {
+      return 500;
    }
    
    @Override

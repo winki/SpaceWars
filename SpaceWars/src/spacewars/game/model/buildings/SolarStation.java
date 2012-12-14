@@ -17,7 +17,7 @@ public class SolarStation extends Building
    
    public SolarStation(final Vector position, final Player player)
    {
-      super(position, 15, 100, player, 100);
+      super(position, 15, 100, player);
       
       this.hasEnergy = true;
       this.energy = 0;
@@ -27,6 +27,12 @@ public class SolarStation extends Building
    public String getName()
    {
       return name;
+   }
+   
+   @Override
+   public int getCosts()
+   {
+      return 100 + level * 50;
    }
    
    public int getEnergy()
@@ -47,8 +53,6 @@ public class SolarStation extends Building
    @Override
    public void upgrade()
    {
-      costs += 50;
-      
       super.upgrade();
    }
    

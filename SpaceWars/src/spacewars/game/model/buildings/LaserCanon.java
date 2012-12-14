@@ -26,7 +26,7 @@ public class LaserCanon extends Building
    
    public LaserCanon(final Vector position, final Player player)
    {
-      super(position, 10, 100, player, 300);
+      super(position, 10, 100, player);
    }
    
    @Override
@@ -35,6 +35,12 @@ public class LaserCanon extends Building
       return name;
    }
    
+   @Override
+   public int getCosts()
+   {
+      return 300;
+   }
+
    public int getLaserRange()
    {
       return laserRanges[level];

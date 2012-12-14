@@ -10,12 +10,18 @@ public class Relay extends Building
    
    public Relay(final Vector position, final Player player)
    {
-      super(position, 5, 100, player, 200);
+      super(position, 5, 100, player);
    }
    
    @Override
    public String getName()
    {
       return name;
+   }   
+   
+   @Override
+   public int getCosts()
+   {
+      return 200;
    }
 }

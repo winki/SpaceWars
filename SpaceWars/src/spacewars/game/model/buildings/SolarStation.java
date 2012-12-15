@@ -5,11 +5,11 @@ import java.awt.Graphics2D;
 import spacewars.game.model.Player;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.Vector;
+import spacewars.util.Config;
 
 @SuppressWarnings("serial")
 public class SolarStation extends Building
 {
-   protected static final String name              = "Solar";
    protected static final int[]  maxEnergys        = { 4, 12, 15, 20, 27 };
    protected static final int[]  energyProductions = { 4, 12, 15, 20, 27 };
    
@@ -25,7 +25,7 @@ public class SolarStation extends Building
    @Override
    public String getName()
    {
-      return name;
+      return Config.getStringValue("buildings/SolarStation/name");
    }
    
    @Override
@@ -77,5 +77,11 @@ public class SolarStation extends Building
          g.fillArc(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER), 180, 60);
          g.fillArc(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER), 300, 60);
       }
+   }   
+
+   @Override
+   public int getHighestLevel()
+   {
+      return 3;
    }
 }

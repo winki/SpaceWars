@@ -42,12 +42,13 @@ import spacewars.gamelib.Screen;
 import spacewars.gamelib.Vector;
 import spacewars.network.IClient;
 import spacewars.network.IServer;
+import spacewars.util.Config;
 import de.root1.simon.annotation.SimonRemote;
 
 @SimonRemote(value = { IClient.class })
 public class Client extends GameClient implements IClient
 {
-   public static final boolean             DEBUG    = false;
+   private static final boolean            CAN_SWITCH_PLAYER = true;
    
    /**
     * Game instance
@@ -64,7 +65,7 @@ public class Client extends GameClient implements IClient
    /**
     * The player
     */
-   private int                             playerId = -1;
+   private int                             playerId          = -1;
    private Player                          player;
    /**
     * The game state
@@ -106,7 +107,7 @@ public class Client extends GameClient implements IClient
    /**
     * to set introScreen visible the first run
     */
-   private boolean                         firstRun = true;
+   private boolean                         firstRun          = true;
    
    /**
     * Default constructor.
@@ -128,6 +129,11 @@ public class Client extends GameClient implements IClient
          instance = new Client();
       }
       return instance;
+   }
+   
+   public static boolean isDebug()
+   {
+      return Config.getBooleanValue("client/debug");
    }
    
    public GameElement getSelected()
@@ -160,8 +166,7 @@ public class Client extends GameClient implements IClient
       
       screen.setTitle("Space Wars");
       screen.setIcon("icon.png");
-      screen.setSize(new Dimension(800, 600));
-      // screen.setSize(null);
+      screen.setSize(Config.getBooleanValue("client/fullscreen") ? null : new Dimension(800, 600));
       
       // show screen
       screen.setVisible(true);
@@ -199,7 +204,7 @@ public class Client extends GameClient implements IClient
          long start = System.currentTimeMillis();
          final GameState newGameState = server.getGameState();
          long time = System.currentTimeMillis() - start;
-         if (DEBUG)
+         if (isDebug())
          {
             Logger.getGlobal().info(String.format("Time to get game state: %d ms\n", time));
          }
@@ -251,6 +256,13 @@ public class Client extends GameClient implements IClient
             // i++;
             // }
             // else{
+            
+            // if activated, user can switch player with F12
+            if (CAN_SWITCH_PLAYER && Keyboard.getState().isKeyPressed(Key.F12))
+            {
+               playerId = playerId == 0 ? 1 : 0;
+            }
+            
             scroll();
             if (Keyboard.getState().isKeyPressed(Key.HOME))
             {
@@ -285,7 +297,7 @@ public class Client extends GameClient implements IClient
    {
       linksToBuildings.clear();
       linksToMineralPlanets.clear();
-
+      
       // create links to other buildings that are reachable
       for (Building building : gameState.getBuildings())
       {
@@ -533,7 +545,7 @@ public class Client extends GameClient implements IClient
                return;
             }
          }
-                
+         
          // select nothing
          selected = null;
       }
@@ -712,7 +724,7 @@ public class Client extends GameClient implements IClient
             // render heads up display
             renderHud(g);
             
-            if (DEBUG)
+            if (isDebug())
             {
                renderDebug(g);
             }
@@ -816,7 +828,7 @@ public class Client extends GameClient implements IClient
        *  - Anzeige des aktuell ausgewählten GameElements (Tipp: getSelected())
        *  - Siehe The Space Game
        *  
-       */      
+       */
       final int FONT_LINE = 15;
       final int DX = 10;
       final int DY = 24;
@@ -885,21 +897,24 @@ public class Client extends GameClient implements IClient
             g.drawString(String.format("Level %s of 4", building.getLevel()), screen.width - HUD_WIDTH + DX, 1 * FONT_LINE + DY_SELECTED);
             
             // upgrade
-            g.setColor(Color.GREEN);
-            if (building.getLevel() <= 3)
+            if (building.isUpgradeable())
             {
-               g.drawString(String.format("upgrade to level %s of 4", building.getLevel()), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+               g.setColor(Color.GREEN);
+               if (building.getLevel() <= 3)
+               {
+                  g.drawString(String.format("upgrade to level %s of 4", building.getLevel()), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+               }
+               else
+               {
+                  g.drawString("Maximalstufe erreicht", screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+               }
+               
+               g.setColor(Color.GREEN);
+               g.fillRect(screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED, 1, 50);
+               g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
+               g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 + 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
+               g.draw(new Arc2D.Double(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 30, 4 * FONT_LINE + DY_SELECTED - 5, 60, 60, 100, 340, Arc2D.OPEN));
             }
-            else
-            {
-               g.drawString("Maximalstufe erreicht", screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
-            }
-            
-            g.setColor(Color.GREEN);
-            g.fillRect(screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED, 1, 50);
-            g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
-            g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 + 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
-            g.draw(new Arc2D.Double(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 30, 4 * FONT_LINE + DY_SELECTED - 5, 60, 60, 100, 340, Arc2D.OPEN));
             
             if (selected instanceof Relay)
             {

@@ -9,8 +9,6 @@ import spacewars.network.Network;
 
 public class SpaceWars
 {
-   private static final boolean DEBUG = true;
-   
    /**
     * This method will be called if we are testing.
     */
@@ -44,11 +42,9 @@ public class SpaceWars
     */
    public static void main(String[] args)
    {
-      if (DEBUG)
-      {
-         testing();
-         System.exit(0);
-      }
+      // TODO: remove in productive version
+      testing();
+      System.exit(0);
       
       if (args.length > 0)
       {

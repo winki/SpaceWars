@@ -13,17 +13,12 @@ import spacewars.game.model.Player;
 import spacewars.game.model.planets.MineralPlanet;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.Vector;
+import spacewars.util.Config;
 
 @SuppressWarnings("serial")
 public class Mine extends Building
-{
-   protected static final String name           = "Mine";
-   /**
-    * The range in which the mine can collect minerals
-    */
-   protected int                 mineRange      = sight / 2;
+{   
    protected static final int[]  mineralsPerMin = { 60, 70, 80, 90, 100 };
-   protected static final int[]  energyConsum   = { 6, 7, 8, 9, 10 };
    /**
     * List of mineral planets that are reachable from this mine
     */
@@ -42,7 +37,7 @@ public class Mine extends Building
    @Override
    public String getName()
    {
-      return name;
+      return Config.getStringValue("buildings/Mine/name");
    }
    
    @Override
@@ -58,12 +53,16 @@ public class Mine extends Building
    
    public int getEnergyConsumPerMin()
    {
+      int[] energyConsum = Config.getIntArrayValue("buildings/Mine/energyConsum");
       return energyConsum[level];
    }
    
+   /**
+    * Gets the range in which the mine can collect minerals.
+    */
    public int getMineRange()
    {
-      return mineRange;
+      return sight / 2;
    }
    
    public int getMineAmount()
@@ -122,7 +121,7 @@ public class Mine extends Building
    @Override
    protected void renderBuilding(Graphics2D g)
    {
-      if (Client.DEBUG)
+      if (Client.isDebug())
       {
          g.setColor(Color.RED);
          for (MineralPlanet planet : reachableMineralPlanets)
@@ -166,5 +165,11 @@ public class Mine extends Building
          g.setColor(Color.GREEN);
          g.fillOval(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER));
       }
+   }
+   
+   @Override
+   public int getHighestLevel()
+   {
+      return 3;
    }
 }

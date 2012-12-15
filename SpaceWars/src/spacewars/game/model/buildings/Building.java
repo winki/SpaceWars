@@ -14,31 +14,31 @@ import spacewars.gamelib.Vector;
 public abstract class Building extends PlayerElement implements IUpdateable
 {
    /**
-    * The upgrade level (zero-based)
+    * Is the building on the energy net
     */
-   protected byte              level;
-   /**
-    * The build state (0 to 100 percent). -1 for not placed.
-    */
-   protected byte              state;
-   /**
-    * Helper flags for client to indicate if a building is placeable
-    */
-   protected transient boolean placeable;
+   protected boolean           hasEnergy;
    /**
     * Helper flag to check if a building has already been check for energy
     * availability
     */
    protected transient boolean isCheckedForEngery;
    /**
-    * Is the building on the energy net
+    * The upgrade level (zero-based)
     */
-   protected boolean           hasEnergy;
+   protected byte              level;
    /**
     * The buildings this building is linked with
     */
    protected List<Building>    linkedBuildings;
-   
+   /**
+    * Helper flags for client to indicate if a building is placeable
+    */
+   protected transient boolean placeable;
+   /**
+    * The build state (0 to 100 percent). -1 for not placed.
+    */
+   protected byte              state;
+
    public Building(final Vector position, final int radius, final int sight, final Player player)
    {
       super(position, radius, sight, player, 100);
@@ -50,62 +50,17 @@ public abstract class Building extends PlayerElement implements IUpdateable
       this.linkedBuildings = new LinkedList<>();
    }
    
-   public boolean isPlaceable()
-   {
-      return placeable;
-   }
-   
-   public void setPlaceable(boolean placeable)
-   {
-      this.placeable = placeable;
-   }
-   
-   public boolean isPlaced()
-   {
-      return state > -1;
-   }
-   
-   public boolean hasEnergy()
-   {
-      return hasEnergy;
-   }
-   
-   public boolean isCheckedForEngery()
-   {
-      return isCheckedForEngery;
-   }
-   
-   public void setCheckedForEngery(boolean isCheckedForEngery)
-   {
-      this.isCheckedForEngery = isCheckedForEngery;
-   }
-   
-   public void setHasEnergy(boolean hasEnergy)
-   {
-      this.hasEnergy = hasEnergy;
-   }
-   
-   public void place()
-   {
-      this.state = 0;
-   }
-   
-   public boolean isBuilt()
-   {
-      return state >= 100;
-   }
-   
    public byte establishBy(int percent)
    {
       return state += (byte) percent;
    }
    
    /**
-    * Gets the building name of the derrived subclass.
+    * Gets the costs of a building
     * 
-    * @return the building name
+    * @return costs in minerals
     */
-   public abstract String getName();
+   public abstract int getCosts();
    
    public int getLevel()
    {
@@ -118,32 +73,52 @@ public abstract class Building extends PlayerElement implements IUpdateable
    }
    
    /**
-    * Gets the costs of a building
+    * Gets the building name of the derrived subclass.
     * 
-    * @return costs in minerals
+    * @return the building name
     */
-   public abstract int getCosts();
+   public abstract String getName();
    
-   /**
-    * Upgrade building
-    */
-   public void upgrade()
+   public boolean hasEnergy()
    {
-      this.level++;
+      return hasEnergy;
    }
    
-   @Override
-   public void update(GameTime gameTime)
+   public boolean isBuilt()
    {
-      // don't update building if nothing is specified
-      // has to be overwritten by sub class
+      return state >= 100;
    }
    
-   @Override
-   protected boolean renderHealth()
+   public boolean isCheckedForEngery()
    {
-      // render health only if building is placed
-      return isPlaced();
+      return isCheckedForEngery;
+   }
+   
+   public boolean isPlaceable()
+   {
+      return placeable;
+   }
+   
+   public boolean isPlaced()
+   {
+      return state > -1;
+   }
+   
+   public boolean isUpgradeable()
+   {
+      return level < getHighestLevel();
+   }
+   
+   public abstract int getHighestLevel();
+   
+   public int getRecycleReward()
+   {
+      return 100;
+   }
+   
+   public void place()
+   {
+      this.state = 0;
    }
    
    @Override
@@ -198,5 +173,45 @@ public abstract class Building extends PlayerElement implements IUpdateable
    {
       g.setColor(isPlaced() ? player.getColor() : (isPlaceable() ? Color.WHITE : Color.RED));
       g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
+   }
+   
+   @Override
+   protected boolean renderHealth()
+   {
+      // render health only if building is placed
+      return isPlaced();
+   }
+   
+   public void setCheckedForEngery(boolean isCheckedForEngery)
+   {
+      this.isCheckedForEngery = isCheckedForEngery;
+   }
+   
+   public void setHasEnergy(boolean hasEnergy)
+   {
+      this.hasEnergy = hasEnergy;
+   }
+   
+   public void setPlaceable(boolean placeable)
+   {
+      this.placeable = placeable;
+   }
+   
+   @Override
+   public void update(GameTime gameTime)
+   {
+      // don't update building if nothing is specified
+      // has to be overwritten by sub class
+   }
+   
+   /**
+    * Upgrade building
+    */
+   public void upgrade()
+   {
+      if (isUpgradeable())
+      {
+         this.level++;
+      }
    }
 }

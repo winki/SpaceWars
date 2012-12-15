@@ -14,11 +14,11 @@ import spacewars.game.model.PlayerElement;
 import spacewars.game.model.Ship;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.Vector;
+import spacewars.util.Config;
 
 @SuppressWarnings("serial")
 public class LaserCanon extends Building
 {
-   protected static final String name        = "Laser";
    protected static final int[]  laserRanges = new int[] { 150, 250, 400, 500, 600 };
    protected static final int[]  laserPowers = new int[] { 3, 4, 5, 6, 7 };
    
@@ -37,7 +37,7 @@ public class LaserCanon extends Building
    @Override
    public String getName()
    {
-      return name;
+      return Config.getStringValue("buildings/LaserCanon/name");
    }
    
    @Override
@@ -142,5 +142,11 @@ public class LaserCanon extends Building
          g.setComposite(composite);
          g.setStroke(stroke);
       }
+   }
+
+   @Override
+   public int getHighestLevel()
+   {
+      return 3;
    }
 }

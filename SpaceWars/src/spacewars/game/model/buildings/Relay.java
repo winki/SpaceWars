@@ -4,12 +4,11 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import spacewars.game.model.Player;
 import spacewars.gamelib.Vector;
+import spacewars.util.Config;
 
 @SuppressWarnings("serial")
 public class Relay extends Building
-{
-   protected static final String name = "Relay";
-   
+{   
    public Relay(final Vector position, final Player player)
    {
       super(position, 5, 100, player);
@@ -18,7 +17,7 @@ public class Relay extends Building
    @Override
    public String getName()
    {
-      return name;
+      return Config.getStringValue("buildings/Relay/name");
    }
    
    @Override
@@ -39,5 +38,11 @@ public class Relay extends Building
          g.setColor(Color.CYAN);
          g.fillOval(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER));
       }
+   }   
+
+   @Override
+   public int getHighestLevel()
+   {
+      return 3;
    }
 }

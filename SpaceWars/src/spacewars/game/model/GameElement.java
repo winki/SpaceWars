@@ -133,7 +133,7 @@ public abstract class GameElement implements IRenderable, Serializable
    @Override
    public void render(Graphics2D g)
    {
-      if (Client.DEBUG)
+      if (Client.isDebug())
       {
          g.setColor(Color.RED);
          g.drawOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);

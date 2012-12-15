@@ -16,6 +16,8 @@ import spacewars.gamelib.Vector;
 @SuppressWarnings("serial")
 public class GameState implements IRenderable, Serializable
 {
+   // TODO winkler: GameState minimieren
+   
    private int                  duration;
    private Map                  map;
    private final List<Player>   players;

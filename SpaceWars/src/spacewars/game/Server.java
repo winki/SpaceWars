@@ -31,17 +31,14 @@ import spacewars.network.IClient;
 import spacewars.network.IServer;
 import de.root1.simon.annotation.SimonRemote;
 
-/*
- * TODO: winkler - GameState minimieren - Clients können sich beim Server
- * registrieren - Server informiert Clients, wann das Spiel startet
- */
 @SimonRemote(value = { IServer.class })
 public class Server extends GameServer implements IServer
 {
    private static int                      playerId;
-   private static final int                minPlayers       = 1;
-   private static final Color[]            colors           = new Color[] { Color.BLUE, Color.PINK, Color.GRAY };
-   private static int                      startingMinerals = 400;
+   private static final int                dummyPlayers     = 1;
+   private static final int                minPlayers       = 2;
+   private static final Color[]            colors           = new Color[] { new Color(0, 0, 180), new Color(180, 0, 0) };
+   private static int                      startingMinerals = 2000;
    
    /**
     * Server instance
@@ -107,6 +104,13 @@ public class Server extends GameServer implements IServer
    protected void initialize()
    {
       createMap();
+      if (dummyPlayers > 0)
+      {
+         for (int i = 0; i < dummyPlayers; i++)
+         {
+            register(null);
+         }
+      }
    }
    
    private void createMap()
@@ -116,7 +120,7 @@ public class Server extends GameServer implements IServer
       gameState.setMap(map);
    }
    
-   private void updatePlayerObject(Building building)
+   private void reassignPlayer(Building building)
    {
       for (Player player : gameState.getPlayers())
       {
@@ -129,6 +133,18 @@ public class Server extends GameServer implements IServer
       
       // no player object found
       Logger.getGlobal().log(Level.SEVERE, "No user object found that corresponds with the building.");
+   }
+   
+   private Building getBuilding(Building building)
+   {
+      for (Building b : gameState.getBuildings())
+      {
+         if (b.equals(building)) { return b; }
+      }
+      
+      // no player object found
+      Logger.getGlobal().log(Level.SEVERE, "No user object found that corresponds with the building.");
+      return null;
    }
    
    @Override
@@ -157,7 +173,7 @@ public class Server extends GameServer implements IServer
       while (!toBuild.isEmpty())
       {
          final Building buildingToBuild = toBuild.poll();
-         updatePlayerObject(buildingToBuild);
+         reassignPlayer(buildingToBuild);
          final Player player = buildingToBuild.getPlayer();
          final int costs = buildingToBuild.getCosts();
          
@@ -218,8 +234,16 @@ public class Server extends GameServer implements IServer
    {
       while (!toUpgrade.isEmpty())
       {
-         final Building buildingToUpgrade = toBuild.poll();
-         updatePlayerObject(buildingToUpgrade);
+         final Building buildingToUpgrade = getBuilding(toUpgrade.poll());
+         final Player player = buildingToUpgrade.getPlayer();
+         final int costs = buildingToUpgrade.getCosts();
+         
+         if (player.getMinerals() < costs)
+         {
+            Logger.getGlobal().info("Not enough minerals to upgrade building.");
+            continue;
+         }
+         player.removeMinerals(costs);
          
          buildingToUpgrade.upgrade();
       }
@@ -229,8 +253,10 @@ public class Server extends GameServer implements IServer
    {
       while (!toRecycle.isEmpty())
       {
-         final Building buildingToRecycle = toBuild.poll();
-         updatePlayerObject(buildingToRecycle);
+         final Building buildingToRecycle = getBuilding(toRecycle.poll());
+         final Player player = buildingToRecycle.getPlayer();
+         
+         player.addMinerals(buildingToRecycle.getRecycleReward());
          
          for (Building linked : buildingToRecycle.getLinks())
          {
@@ -309,7 +335,7 @@ public class Server extends GameServer implements IServer
       // get player object
       // final Player player = getPlayerOfBuilding(buildingToBePlaced)// TODO
       final Player player = buildingToBePlaced.getPlayer();
-
+      
       // create links to other buildings that are reachable
       for (Building building : gameState.getBuildings())
       {
@@ -573,7 +599,7 @@ public class Server extends GameServer implements IServer
             final SolarStation solar = (SolarStation) building;
             solar.update(getGameTime());
             
-            if (getGameTime().timesPerSecond(1))
+            if (getGameTime().timesPerSecond(1) && solar.isBuilt())
             {
                // produce energy once a second
                

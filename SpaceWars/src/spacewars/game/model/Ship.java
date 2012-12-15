@@ -98,7 +98,7 @@ public class Ship extends PlayerElement implements IUpdateable
       final AffineTransform viewport = g.getTransform();
       
       Shape ship = new Polygon(new int[] { position.x + 8, position.x - 4, position.x - 4 }, new int[] { position.y, position.y + 4, position.y - 4 }, 3);
-      g.rotate(angle, x, y);
+      g.rotate(angle, position.x, position.y);
       g.setColor(player.getColor());
       g.fill(ship);
       

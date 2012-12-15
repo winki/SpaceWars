@@ -20,6 +20,7 @@ import javax.sound.sampled.DataLine;
 public class Ressources
 {
    public static final String               PATH_RES   = "res/";
+   
    public static final String               PATH_IMG   = "img/";
    public static final String               PATH_FONT  = "font/";
    public static final String               PATH_SOUND = "sound/";
@@ -59,7 +60,7 @@ public class Ressources
             // Derive and return a 12 pt version:
             // Need to use float otherwise
             // it would be interpreted as style
-            final Font sizedFont = font.deriveFont(size);    
+            final Font sizedFont = font.deriveFont(size);
             
             cache.put(path, sizedFont);
             return sizedFont;

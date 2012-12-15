@@ -30,4 +30,10 @@ public class HomeBase extends SolarStation
       final Image image = Ressources.loadImage("homeplanet.png");
       g.drawImage(image, position.x - radius - 35, position.y - radius - 22, null);
    }
+   
+   @Override
+   public boolean isUpgradeable()
+   {
+      return false;
+   }
 }

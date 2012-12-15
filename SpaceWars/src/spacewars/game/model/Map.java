@@ -76,7 +76,7 @@ public class Map implements IRenderable, Serializable
          planet.render(g);
       }
       
-      if (Client.DEBUG)
+      if (Client.isDebug())
       {
          g.setColor(Color.RED);
          

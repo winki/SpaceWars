@@ -31,19 +31,23 @@ public class MapFactory
       final BufferedImage image = Ressources.loadBufferedImage("../maps/" + path);
       final int NUM_STARS = 500;
       final int NUM_LAYERS = 10;
+      final int MAX_PLAYERS = 10;
+      final String name = "Testmap";
       
       if (image != null)
       {
-         map = new Map("Testmap", image.getWidth() * UNIT_SIZE, image.getHeight() * UNIT_SIZE, NUM_STARS, NUM_LAYERS);
+         Vector[] homePositions = new Vector[MAX_PLAYERS];         
+         map = new Map(name, image.getWidth() * UNIT_SIZE, image.getHeight() * UNIT_SIZE, NUM_STARS, NUM_LAYERS);
+         
          for (int x = 0; x < image.getWidth(); x++)
          {
             for (int y = 0; y < image.getHeight(); y++)
             {
-               Color color = new Color(image.getRGB(x, y));
-               if (color.getRed() == 255 && color.getGreen() == 0 && color.getBlue() == 0)
+               final Color color = new Color(image.getRGB(x, y));
+               if (color.getRed() == 255 && color.getGreen() == 0)
                {
                   // home planet position
-                  map.getHomePlanetPositions().add(new Vector(getPixelPosition(x), getPixelPosition(y)));
+                  homePositions[color.getBlue()] = new Vector(getPixelPosition(x), getPixelPosition(y));
                }
                else if (color.getGreen() > 0 && color.getRed() == 0 && color.getBlue() == 0)
                {
@@ -54,6 +58,13 @@ public class MapFactory
                }
             }
          }
+         
+         // add sorted home planet positions
+         for (int i = 0; i < homePositions.length && homePositions[i] != null; i++)
+         {
+            map.getHomePlanetPositions().add(homePositions[i]);
+         }
+         
          image.flush();
       }
       

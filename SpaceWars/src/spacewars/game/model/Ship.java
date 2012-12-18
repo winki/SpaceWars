@@ -18,10 +18,10 @@ public class Ship extends PlayerElement implements IUpdateable
     */
    protected transient double x;
    protected transient double y;
-   protected double           speed;
-   protected double           angle;
-   
+   protected transient double speed;
    protected PlayerElement    attackTarget;
+   
+   protected double           angle;
    
    public Ship(final Player player, final Vector position, final double angle)
    {
@@ -85,6 +85,53 @@ public class Ship extends PlayerElement implements IUpdateable
       // move only if not attacking
       if (attackTarget == null)
       {
+         Building flightTarget = null;
+         for (Building b : getClientGameState().getBuildings())
+         {
+            if (flightTarget == null || (b.getPlayer().isEnemy(this.getPlayer()) && b.getPosition().distance(this.getPosition()) < flightTarget.getPosition().distance(this.getPosition())))
+            {
+               flightTarget = b;
+            }
+         }
+         
+         if (flightTarget != null)
+         {
+            // direction of nearest enemy building
+            final Vector dir = flightTarget.getPosition().sub(position);
+            
+            // follow the mouse:
+            // final Vector mp = Screen.getInstance().getViewport().transformScreenToWorld(Mouse.getState().getVector());
+            // final Vector dir = mp.sub(position);
+            
+            if (dir.x != 0)
+            {
+               // flight in the direction of the vector
+               double targetangle = Math.atan((double) dir.y / (double) dir.x);
+               if (dir.x * dir.y < 0) targetangle += Math.PI;
+               if (dir.y < 0) targetangle += Math.PI;
+               
+               // angle difference
+               double anglediff = targetangle - angle;
+               while (anglediff < 0)
+               {
+                  anglediff += (2 * Math.PI);
+               }
+               
+               // turn
+               final int TURN_SLOWMO = 10;
+               if (anglediff > Math.PI)
+               {
+                  // turn left
+                  angle -= (2 * Math.PI - anglediff) / TURN_SLOWMO;
+               }
+               else
+               {
+                  // turn right
+                  angle += anglediff / TURN_SLOWMO;
+               }
+            }
+         }
+         
          x += speed * Math.cos(angle) * gameTime.getElapsedGameTime() / 1000000000;
          y += speed * Math.sin(angle) * gameTime.getElapsedGameTime() / 1000000000;
          position.x = (int) x;

@@ -157,4 +157,9 @@ public class Player implements Serializable
    {
       return id;
    }
+   
+   public boolean isEnemy(Player player) 
+   {
+      return id != player.id;
+   }
 }

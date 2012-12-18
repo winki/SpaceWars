@@ -13,7 +13,7 @@ public class SpaceWars
     * This method will be called if we are testing.
     */
    private static void testing()
-   {
+   {      
       // set logging
       Logger.getGlobal().setLevel(Level.ALL);
       

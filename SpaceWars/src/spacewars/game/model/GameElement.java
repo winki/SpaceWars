@@ -94,7 +94,10 @@ public abstract class GameElement implements IRenderable, Serializable
     */
    public boolean collidesWith(Vector point)
    {
-      return position.distance(point) < radius;
+      final double dx = position.x - point.x;
+      final double dy = position.y - point.y;
+      final double dr = getSizeRadius();   
+      return dx * dx + dy * dy < dr * dr;
    }
    
    /**
@@ -116,7 +119,10 @@ public abstract class GameElement implements IRenderable, Serializable
     */
    public boolean collidesWith(GameElement element)
    {
-      return position.distance(element.getPosition()) < getSizeRadius() + element.getSizeRadius();
+      final double dx = position.x - element.position.x;
+      final double dy = position.y - element.position.y;
+      final double dr = getSizeRadius() + element.getSizeRadius();      
+      return dx * dx + dy * dy < dr * dr;
    }
    
    /**
@@ -127,7 +133,10 @@ public abstract class GameElement implements IRenderable, Serializable
     */
    public boolean isReachableFrom(GameElement element)
    {
-      return position.distance(element.getPosition()) < element.getViewRadius();
+      final double dx = position.x - element.position.x;
+      final double dy = position.y - element.position.y;
+      final double dr = element.getViewRadius();      
+      return dx * dx + dy * dy < dr * dr;      
    }
    
    @Override

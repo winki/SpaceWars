@@ -37,7 +37,7 @@ public class Server extends GameServer implements IServer
    private static int                      playerId;
    private static final int                dummyPlayers     = 1;
    private static final int                minPlayers       = 2;
-   private static final Color[]            colors           = new Color[] { new Color(0, 0, 180), new Color(180, 0, 0) };
+   private static final Color[]            colors           = new Color[] { new Color(0, 0, 180), new Color(181, 0, 181) };
    private static int                      startingMinerals = 2000;
    
    /**

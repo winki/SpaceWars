@@ -88,11 +88,14 @@ public class GameState implements IRenderable, Serializable
          }
       }
       
+      /*
+       * These are now rendered as buildings
       // render players
       for (Player player : players)
       {
          player.getHomePlanet().render(g);
       }
+      */
       
       // render building elements
       for (Building element : buildings)

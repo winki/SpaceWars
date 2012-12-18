@@ -2,36 +2,75 @@
 <SpaceWars>
 
 	<server>
+		<minPlayers>2</minPlayers>
+		<dummyPlayers>1</dummyPlayers>
 	</server>
-	
+
 	<client>
 		<debug>false</debug>
-		<fullscreen>true</fullscreen>
+		<fullscreen>false</fullscreen>
+		<scrollSlowing>5</scrollSlowing>
 	</client>
 
+	<network>
+		<port>2222</port>
+		<registryName>spacewars_server</registryName>
+	</network>
+
 	<buildings>
-			
+
+		<Homebase>
+			<name>Home Planet</name>
+			<buildingCosts>200</buildingCosts>
+			<upgradingCosts>1,2,3</upgradingCosts>
+			<levels>0</levels>
+		</Homebase>
+
 		<Relay>
 			<name>Relay</name>
+			<buildingCosts>20</buildingCosts>
+			<upgradingCosts>1,2,3</upgradingCosts>			
+			<levels>3</levels>
 		</Relay>
-	
+
 		<Mine>
 			<name>Mine</name>
+			<buildingCosts>45</buildingCosts>
+			<upgradingCosts>1,2,3</upgradingCosts>
+			<levels>3</levels>
+			
 			<energyConsum>1,6,7,8,9,10</energyConsum>
 		</Mine>
-		
-		<SolarStation>
+
+		<Solar>
 			<name>Solar</name>
-		</SolarStation>		
-		
-		<LaserCanon>
+			<buildingCosts>200</buildingCosts>
+			<upgradingCosts>1,2,3</upgradingCosts>
+			<levels>3</levels>
+			
+			<energyProduction>4,12,15,20,27</energyProduction>
+			<energyCapacity>4,12,15,20,27</energyCapacity>
+		</Solar>
+
+		<Laser>
 			<name>Laser</name>
-		</LaserCanon>
-		
+			<buildingCosts>100</buildingCosts>
+			<upgradingCosts>1,2,3</upgradingCosts>
+			<levels>3</levels>
+			
+			<laserRange>150,250,400,500,600</laserRange>
+			<laserPower>3,4,5,6,7</laserPower>
+		</Laser>
+
 		<Shipyard>
 			<name>Shipyard</name>
+			<buildingCosts>400</buildingCosts>
+			<upgradingCosts>1,2,3</upgradingCosts>
+			<levels>3</levels>
+			
+			<buildingTime>8,7,6,5,4</buildingTime>
 		</Shipyard>
-		
+
 	</buildings>
-	
+
 </SpaceWars>

@@ -25,12 +25,12 @@ import spacewars.game.model.Player;
 import spacewars.game.model.Star;
 import spacewars.game.model.buildings.Building;
 import spacewars.game.model.buildings.BuildingType;
-import spacewars.game.model.buildings.HomeBase;
-import spacewars.game.model.buildings.LaserCanon;
+import spacewars.game.model.buildings.Homebase;
+import spacewars.game.model.buildings.Laser;
 import spacewars.game.model.buildings.Mine;
 import spacewars.game.model.buildings.Relay;
 import spacewars.game.model.buildings.Shipyard;
-import spacewars.game.model.buildings.SolarStation;
+import spacewars.game.model.buildings.Solar;
 import spacewars.game.model.planets.MineralPlanet;
 import spacewars.gamelib.Button;
 import spacewars.gamelib.GameClient;
@@ -201,6 +201,7 @@ public class Client extends GameClient implements IClient
    {
       try
       {
+         // get gamestate
          long start = System.currentTimeMillis();
          final GameState newGameState = server.getGameState();
          long time = System.currentTimeMillis() - start;
@@ -209,15 +210,31 @@ public class Client extends GameClient implements IClient
             Logger.getGlobal().info(String.format("Time to get game state: %d ms\n", time));
          }
          
+         // update client objects
          if (newGameState != null)
          {
             final boolean startGame = gameState == null;
             gameState = newGameState;
-            
+
+            // update player
             if (playerId != -1)
             {
-               // set player
                player = gameState.getPlayers().get(playerId);
+            }
+            
+            // update selected building/mineral planet
+            if (selected != null)
+            {
+               if (selected instanceof Building)
+               {
+                  final int index = gameState.getBuildings().indexOf(selected);
+                  selected = gameState.getBuildings().get(index);
+               }
+               else if (selected instanceof MineralPlanet)
+               {
+                  final int index = gameState.getMap().getMineralPlanets().indexOf(selected);
+                  selected = gameState.getMap().getMineralPlanets().get(index);
+               }
             }
             
             // begin of game
@@ -344,7 +361,7 @@ public class Client extends GameClient implements IClient
             {
                // take every link to relays, solar stations or buildings
                // with no links
-               if (building instanceof Relay || building instanceof SolarStation)
+               if (building instanceof Relay || building instanceof Solar)
                {
                   removeRest = !link.isCollision();
                   continue;
@@ -354,7 +371,7 @@ public class Client extends GameClient implements IClient
             iterator.remove();
          }
       }
-      else if (buildingToBePlaced instanceof Relay || buildingToBePlaced instanceof SolarStation)
+      else if (buildingToBePlaced instanceof Relay || buildingToBePlaced instanceof Solar)
       {
          for (Iterator<Link<Building>> iterator = linksToBuildings.iterator(); iterator.hasNext();)
          {
@@ -366,14 +383,14 @@ public class Client extends GameClient implements IClient
                // take every link to relays, solar stations or buildings
                // with no links
                if (building instanceof Relay) continue;
-               if (building instanceof SolarStation) continue;
+               if (building instanceof Solar) continue;
                if (building.getLinks().isEmpty()) continue;
             }
             
             iterator.remove();
          }
       }
-      else if (buildingToBePlaced instanceof LaserCanon || buildingToBePlaced instanceof Shipyard)
+      else if (buildingToBePlaced instanceof Laser || buildingToBePlaced instanceof Shipyard)
       {
          // remove too long links
          boolean removeRest = false;
@@ -387,7 +404,7 @@ public class Client extends GameClient implements IClient
             {
                // take every link to relays, solar stations or buildings
                // with no links
-               if (building instanceof Relay || building instanceof SolarStation)
+               if (building instanceof Relay || building instanceof Solar)
                {
                   removeRest = !link.isCollision();
                   continue;
@@ -571,10 +588,10 @@ public class Client extends GameClient implements IClient
                buildingToBePlaced = new Mine(position, player);
                break;
             case SOLAR:
-               buildingToBePlaced = new SolarStation(position, player);
+               buildingToBePlaced = new Solar(position, player);
                break;
             case LASER_CANON:
-               buildingToBePlaced = new LaserCanon(position, player);
+               buildingToBePlaced = new Laser(position, player);
                break;
             case SHIPYARD:
                buildingToBePlaced = new Shipyard(position, player);
@@ -631,7 +648,7 @@ public class Client extends GameClient implements IClient
     */
    private void upgradeOrRecycle()
    {
-      if (selected != null && selected instanceof Building && !(selected instanceof HomeBase))
+      if (selected != null && selected instanceof Building && !(selected instanceof Homebase))
       {
          final Building selectedBuilding = (Building) selected;
          if (Keyboard.getState().isKeyPressed(Key.PAGE_UP))
@@ -666,30 +683,30 @@ public class Client extends GameClient implements IClient
     */
    private void scroll()
    {
-      final Vector m = Mouse.getState().getVector();
+      final Vector mouse = Mouse.getState().getVector();
       
-      // scrolling with left mouse button
-      if (buildingType == BuildingType.NOTHING && Mouse.getState().isButtonDragged(Button.LEFT))
+      // scrolling by holding right mouse button and shift key
+      if (Keyboard.getState().isKeyDown(Key.SHIFT) && Mouse.getState().isButtonDown(Button.RIGHT))
+      {
+         if (Mouse.getState().isButtonPressed(Button.RIGHT))
+         {
+            scrollPosition.set(mouse.x, mouse.y);
+         }
+         
+         final int scrollSlowing = Config.getIntValue("client/scrollSlowing");
+         final Vector delta = mouse.sub(scrollPosition);
+         final int dx = delta.x / scrollSlowing;
+         final int dy = delta.y / scrollSlowing;
+         
+         Screen.getInstance().getViewport().move(-dx, -dy);
+      }
+      // scrolling by dragging right mouse button
+      else if (Mouse.getState().isButtonDragged(Button.RIGHT))
       {
          final int dx = Mouse.getState().getDeltaX();
          final int dy = Mouse.getState().getDeltaY();
          
          Screen.getInstance().getViewport().move(dx, dy);
-      }
-      // scrolling with right mouse button
-      else if (Mouse.getState().isButtonDown(Button.RIGHT))
-      {
-         if (Mouse.getState().isButtonPressed(Button.RIGHT))
-         {
-            scrollPosition.set(m.x, m.y);
-         }
-         
-         final int DIVISOR = 10;
-         final Vector delta = m.sub(scrollPosition);
-         final int dx = delta.x / DIVISOR;
-         final int dy = delta.y / DIVISOR;
-         
-         Screen.getInstance().getViewport().move(-dx, -dy);
       }
    }
    
@@ -877,9 +894,9 @@ public class Client extends GameClient implements IClient
             g.fillRect(screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED - BAR_HEIGHT, (int) (mineral.getMineralReserves() / (double) mineral.getMineralReservesMax() * (HUD_WIDTH - 2 * DX)), BAR_HEIGHT);
          }
          
-         if (selected instanceof HomeBase)
+         if (selected instanceof Homebase)
          {
-            final HomeBase home = (HomeBase) selected;
+            final Homebase home = (Homebase) selected;
             // TODO: draw homeplanet relevant stuff
          }
          
@@ -894,7 +911,7 @@ public class Client extends GameClient implements IClient
             
             // level
             g.setColor(Color.WHITE);
-            g.drawString(String.format("Level %s of 4", building.getLevel()), screen.width - HUD_WIDTH + DX, 1 * FONT_LINE + DY_SELECTED);
+            g.drawString(String.format("Level %d of %d", building.getLevel(), building.getHighestLevel()), screen.width - HUD_WIDTH + DX, 1 * FONT_LINE + DY_SELECTED);
             
             // upgrade
             if (building.isUpgradeable())
@@ -902,7 +919,7 @@ public class Client extends GameClient implements IClient
                g.setColor(Color.GREEN);
                if (building.getLevel() <= 3)
                {
-                  g.drawString(String.format("upgrade to level %s of 4", building.getLevel()), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+                  g.drawString(String.format("Upgrade to level %d of %d", building.getLevel(), building.getHighestLevel()), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
                }
                else
                {
@@ -923,9 +940,9 @@ public class Client extends GameClient implements IClient
                // number of connections
             }
             
-            if (selected instanceof SolarStation)
+            if (selected instanceof Solar)
             {
-               final SolarStation solar = (SolarStation) building;
+               final Solar solar = (Solar) building;
                // TODO: draw solar relevant stuff
                // energy capazity
             }
@@ -936,9 +953,9 @@ public class Client extends GameClient implements IClient
                // TODO: draw mine relevant stuff
             }
             
-            if (selected instanceof LaserCanon)
+            if (selected instanceof Laser)
             {
-               final LaserCanon laser = (LaserCanon) building;
+               final Laser laser = (Laser) building;
                // TODO: draw laser relevant stuff
             }
             

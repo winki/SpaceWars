@@ -17,11 +17,11 @@ import spacewars.game.model.Map;
 import spacewars.game.model.Player;
 import spacewars.game.model.Ship;
 import spacewars.game.model.buildings.Building;
-import spacewars.game.model.buildings.LaserCanon;
+import spacewars.game.model.buildings.Laser;
 import spacewars.game.model.buildings.Mine;
 import spacewars.game.model.buildings.Relay;
 import spacewars.game.model.buildings.Shipyard;
-import spacewars.game.model.buildings.SolarStation;
+import spacewars.game.model.buildings.Solar;
 import spacewars.game.model.planets.MineralPlanet;
 import spacewars.gamelib.GameServer;
 import spacewars.gamelib.GameTime;
@@ -29,16 +29,16 @@ import spacewars.gamelib.Vector;
 import spacewars.network.Guest;
 import spacewars.network.IClient;
 import spacewars.network.IServer;
+import spacewars.util.Config;
 import de.root1.simon.annotation.SimonRemote;
 
 @SimonRemote(value = { IServer.class })
 public class Server extends GameServer implements IServer
 {
    private static int                      playerId;
-   private static final int                dummyPlayers     = 1;
-   private static final int                minPlayers       = 2;
-   private static final Color[]            colors           = new Color[] { new Color(0, 0, 180), new Color(181, 0, 181) };
-   private static int                      startingMinerals = 2000;
+   private static final int                dummyPlayers = Config.getIntValue("server/dummyPlayers");
+   private static final int                minPlayers   = Config.getIntValue("server/minPlayers");
+   private static final Color[]            colors       = new Color[] { new Color(0, 0, 180), new Color(181, 0, 181) };
    
    /**
     * Server instance
@@ -172,10 +172,10 @@ public class Server extends GameServer implements IServer
    {
       while (!toBuild.isEmpty())
       {
-         final Building buildingToBuild = toBuild.poll();
-         reassignPlayer(buildingToBuild);
-         final Player player = buildingToBuild.getPlayer();
-         final int costs = buildingToBuild.getCosts();
+         final Building building = toBuild.poll();
+         reassignPlayer(building);
+         final Player player = building.getPlayer();
+         final int costs = building.getCosts();
          
          if (player.getMinerals() < costs)
          {
@@ -185,42 +185,42 @@ public class Server extends GameServer implements IServer
          player.removeMinerals(costs);
          
          // check collisions
-         boolean buildingIsPlaceable = !checkCollision(buildingToBuild);
-         buildingToBuild.setPlaceable(buildingIsPlaceable);
+         boolean buildingIsPlaceable = !checkCollision(building);
+         building.setPlaceable(buildingIsPlaceable);
          
          if (buildingIsPlaceable)
          {
             // calculate connections
-            computeLinksToBuildings(buildingToBuild);
+            computeLinksToBuildings(building);
             
             // can build mines only if there is minimum one mineral planet
             // reachable
-            if (buildingToBuild instanceof Mine && linksToMineralPlanets.isEmpty())
+            if (building instanceof Mine && linksToMineralPlanets.isEmpty())
             {
                buildingIsPlaceable = false;
-               buildingToBuild.setPlaceable(buildingIsPlaceable);
+               building.setPlaceable(buildingIsPlaceable);
                return;
             }
             
             // place this building
-            buildingToBuild.place();
-            gameState.getBuildings().add(buildingToBuild);
+            building.place();
+            gameState.getBuildings().add(building);
             
             // add links
             for (Link<Building> link : linksToBuildings)
             {
                if (!link.isCollision())
                {
-                  final Building building = link.getLinkedElement();
-                  buildingToBuild.getLinks().add(building);
-                  building.getLinks().add(buildingToBuild);
+                  final Building b = link.getLinkedElement();
+                  building.getLinks().add(b);
+                  b.getLinks().add(building);
                }
             }
             
             // add reachable mineral planets to mine
-            if (buildingToBuild instanceof Mine)
+            if (building instanceof Mine)
             {
-               Mine mine = (Mine) buildingToBuild;
+               Mine mine = (Mine) building;
                for (Link<MineralPlanet> link : linksToMineralPlanets)
                {
                   mine.getReachableMineralPlanets().add(link.getLinkedElement());
@@ -234,18 +234,21 @@ public class Server extends GameServer implements IServer
    {
       while (!toUpgrade.isEmpty())
       {
-         final Building buildingToUpgrade = getBuilding(toUpgrade.poll());
-         final Player player = buildingToUpgrade.getPlayer();
-         final int costs = buildingToUpgrade.getCosts();
-         
-         if (player.getMinerals() < costs)
+         final Building building = getBuilding(toUpgrade.poll());
+         if (building.isUpgradeable())
          {
-            Logger.getGlobal().info("Not enough minerals to upgrade building.");
-            continue;
+            final Player player = building.getPlayer();
+            final int costs = building.getCosts();
+            
+            if (player.getMinerals() < costs)
+            {
+               Logger.getGlobal().info("Not enough minerals to upgrade building.");
+               continue;
+            }
+            player.removeMinerals(costs);
+            
+            building.upgrade();
          }
-         player.removeMinerals(costs);
-         
-         buildingToUpgrade.upgrade();
       }
    }
    
@@ -253,16 +256,16 @@ public class Server extends GameServer implements IServer
    {
       while (!toRecycle.isEmpty())
       {
-         final Building buildingToRecycle = getBuilding(toRecycle.poll());
-         final Player player = buildingToRecycle.getPlayer();
+         final Building building = getBuilding(toRecycle.poll());
+         final Player player = building.getPlayer();
          
-         player.addMinerals(buildingToRecycle.getRecycleReward());
+         player.addMinerals(building.getRecycleReward());
          
-         for (Building linked : buildingToRecycle.getLinks())
+         for (Building linked : building.getLinks())
          {
-            linked.getLinks().remove(buildingToRecycle);
+            linked.getLinks().remove(building);
          }
-         getGameState().getBuildings().remove(buildingToRecycle);
+         getGameState().getBuildings().remove(building);
       }
    }
    
@@ -281,7 +284,7 @@ public class Server extends GameServer implements IServer
       {
          Building building = (Building) iterator.next();
          
-         if (building instanceof LaserCanon || building instanceof Shipyard)
+         if (building instanceof Laser || building instanceof Shipyard)
          {
             // defend, attack
             building.update(gameTime);
@@ -382,7 +385,7 @@ public class Server extends GameServer implements IServer
             {
                // take every link to relays, solar stations or buildings
                // with no links
-               if (building instanceof Relay || building instanceof SolarStation)
+               if (building instanceof Relay || building instanceof Solar)
                {
                   removeRest = !link.isCollision();
                   continue;
@@ -392,7 +395,7 @@ public class Server extends GameServer implements IServer
             iterator.remove();
          }
       }
-      else if (buildingToBePlaced instanceof Relay || buildingToBePlaced instanceof SolarStation)
+      else if (buildingToBePlaced instanceof Relay || buildingToBePlaced instanceof Solar)
       {
          for (Iterator<Link<Building>> iterator = linksToBuildings.iterator(); iterator.hasNext();)
          {
@@ -404,14 +407,14 @@ public class Server extends GameServer implements IServer
                // take every link to relays, solar stations or buildings
                // with no links
                if (building instanceof Relay) continue;
-               if (building instanceof SolarStation) continue;
+               if (building instanceof Solar) continue;
                if (building.getLinks().isEmpty()) continue;
             }
             
             iterator.remove();
          }
       }
-      else if (buildingToBePlaced instanceof LaserCanon || buildingToBePlaced instanceof Shipyard)
+      else if (buildingToBePlaced instanceof Laser || buildingToBePlaced instanceof Shipyard)
       {
          // remove too long links
          boolean removeRest = false;
@@ -425,7 +428,7 @@ public class Server extends GameServer implements IServer
             {
                // take every link to relays, solar stations or buildings
                // with no links
-               if (building instanceof Relay || building instanceof SolarStation)
+               if (building instanceof Relay || building instanceof Solar)
                {
                   removeRest = !link.isCollision();
                   continue;
@@ -527,21 +530,21 @@ public class Server extends GameServer implements IServer
     */
    private void checkEnergyAvailability()
    {
-      final List<SolarStation> solars = new LinkedList<>();
+      final List<Solar> solars = new LinkedList<>();
       
       // reset checked for energy flag
       for (Building building : getGameState().getBuildings())
       {
          building.setCheckedForEngery(false);
-         if (!(building instanceof SolarStation))
+         if (!(building instanceof Solar))
          {
             building.setHasEnergy(false);
          }
          
          // collect solars
-         if (building instanceof SolarStation)
+         if (building instanceof Solar)
          {
-            final SolarStation solar = (SolarStation) building;
+            final Solar solar = (Solar) building;
             solars.add(solar);
          }
       }
@@ -557,7 +560,7 @@ public class Server extends GameServer implements IServer
       */
       
       // checks recursively
-      for (SolarStation solar : solars)
+      for (Solar solar : solars)
       {
          checkEnergyAvailability(solar);
       }
@@ -594,9 +597,9 @@ public class Server extends GameServer implements IServer
       // produce energy
       for (Building building : getGameState().getBuildings())
       {
-         if (building instanceof SolarStation)
+         if (building instanceof Solar)
          {
-            final SolarStation solar = (SolarStation) building;
+            final Solar solar = (Solar) building;
             solar.update(getGameTime());
             
             if (getGameTime().timesPerSecond(1) && solar.isBuilt())
@@ -643,7 +646,7 @@ public class Server extends GameServer implements IServer
          {
             if (!building.isBuilt() && building.hasEnergy())
             {
-               building.establishBy(10);
+               building.establish(10);
             }
          }
       }
@@ -659,7 +662,7 @@ public class Server extends GameServer implements IServer
          final Color color = colors[guests.size()];
          final Vector position = gameState.getMap().getHomePlanetPositions().get(guests.size());
          
-         final Player player = new Player(id, color, position, startingMinerals);
+         final Player player = new Player(id, color, position, gameState.getMap().getStartingMinerals());
          final Guest guest = new Guest(client, player);
          
          gameState.getPlayers().add(player);

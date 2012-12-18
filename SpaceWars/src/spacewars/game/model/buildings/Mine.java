@@ -17,7 +17,7 @@ import spacewars.util.Config;
 
 @SuppressWarnings("serial")
 public class Mine extends Building
-{   
+{
    protected static final int[]  mineralsPerMin = { 60, 70, 80, 90, 100 };
    /**
     * List of mineral planets that are reachable from this mine
@@ -35,15 +35,9 @@ public class Mine extends Building
    }
    
    @Override
-   public String getName()
+   protected String getConfigName()
    {
-      return Config.getStringValue("buildings/Mine/name");
-   }
-   
-   @Override
-   public int getCosts()
-   {
-      return 100;
+      return Mine.class.getSimpleName();
    }
    
    public int getResPerMin()
@@ -165,11 +159,5 @@ public class Mine extends Building
          g.setColor(Color.GREEN);
          g.fillOval(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER));
       }
-   }
-   
-   @Override
-   public int getHighestLevel()
-   {
-      return 3;
    }
 }

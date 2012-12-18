@@ -2,7 +2,7 @@ package spacewars.gamelib;
 
 public class GameTime
 {
-   public static final int  TARGET_FRAMERATE  = 24;
+   public static final int  TARGET_FRAMERATE  = 24; // TODO: config? server or client?
    public static final long TARGET_CYCLE_TIME = 1000000000 / TARGET_FRAMERATE;
    
    private long             ticks;

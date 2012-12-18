@@ -24,10 +24,6 @@ public abstract class GameElement implements IRenderable, Serializable
     * The sight radius
     */
    protected int          sight;
-   /**
-    * The power
-    */
-   protected int          power;
    
    public GameElement(final Vector position, final int radius, final int sight)
    {
@@ -47,7 +43,7 @@ public abstract class GameElement implements IRenderable, Serializable
    }
    
    /**
-    * Gets the game state from the client game instance.
+    * Gets the game state from the server game instance.
     * 
     * @return game state
     */

@@ -18,6 +18,7 @@ public class Map implements IRenderable, Serializable
    private int                 height;
    private int                 numStars;
    private int                 numLayers;
+   private int                 startingMinerals;
    private List<MineralPlanet> mineralPlanets;
    private List<Vector>        homePlanetPositions;
    
@@ -55,6 +56,16 @@ public class Map implements IRenderable, Serializable
    public int getNumLayers()
    {
       return numLayers;
+   }
+   
+   public int getStartingMinerals()
+   {
+      return startingMinerals;
+   }
+   
+   public void setStartingMinerals(int startingMinerals)
+   {
+      this.startingMinerals = startingMinerals;
    }
    
    public List<MineralPlanet> getMineralPlanets()

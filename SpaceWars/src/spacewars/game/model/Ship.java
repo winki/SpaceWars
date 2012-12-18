@@ -5,7 +5,7 @@ import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import spacewars.game.model.buildings.Building;
-import spacewars.game.model.buildings.HomeBase;
+import spacewars.game.model.buildings.Homebase;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.IUpdateable;
 import spacewars.gamelib.Vector;
@@ -66,7 +66,7 @@ public class Ship extends PlayerElement implements IUpdateable
       }
       
       // attack enemys home planet
-      final HomeBase planet = enemy.getHomePlanet();
+      final Homebase planet = enemy.getHomePlanet();
       if (planet.isReachableFrom(this)) { return planet; }
       
       // no target

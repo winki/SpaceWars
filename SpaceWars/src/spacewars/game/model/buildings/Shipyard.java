@@ -11,23 +11,20 @@ import spacewars.util.Config;
 @SuppressWarnings("serial")
 public class Shipyard extends Building
 {
-   protected static final int[]  secondsPerShipbuild = { 8, 7, 6, 5, 4 };
-   
    public Shipyard(final Vector position, final Player player)
    {
       super(position, 20, 100, player);
    }
    
    @Override
-   public String getName()
+   protected String getConfigName()
    {
-      return Config.getStringValue("buildings/Shipyard/name");
+      return Shipyard.class.getSimpleName();
    }
    
-   @Override
-   public int getCosts()
+   public double getBuildingFrequency()
    {
-      return 500;
+      return 1.0 / Config.getIntArrayValue("buildings/" + getConfigName() + "/buildingTime")[level];
    }
    
    @Override
@@ -36,7 +33,7 @@ public class Shipyard extends Building
       if (isBuilt() && hasEnergy())
       {
          // repeat every x seconds depending on the level
-         if (gameTime.timesPerSecond(1.0 / secondsPerShipbuild[level]))
+         if (gameTime.timesPerSecond(getBuildingFrequency()))
          {
             final Ship ship = new Ship(player, new Vector(position), 0);
             getServerGameState().getShips().add(ship);
@@ -56,11 +53,5 @@ public class Shipyard extends Building
          g.setColor(Color.BLACK);
          g.fillOval(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER));
       }
-   }   
-
-   @Override
-   public int getHighestLevel()
-   {
-      return 3;
    }
 }

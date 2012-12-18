@@ -36,8 +36,9 @@ public class MapFactory
       
       if (image != null)
       {
-         Vector[] homePositions = new Vector[MAX_PLAYERS];         
+         Vector[] homePositions = new Vector[MAX_PLAYERS];
          map = new Map(name, image.getWidth() * UNIT_SIZE, image.getHeight() * UNIT_SIZE, NUM_STARS, NUM_LAYERS);
+         map.setStartingMinerals(3000);
          
          for (int x = 0; x < image.getWidth(); x++)
          {

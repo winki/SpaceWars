@@ -40,7 +40,14 @@ public class Vector implements Serializable
    
    public double distance(Vector other)
    {
-      return Math.sqrt(Math.pow(Math.abs(x - other.x), 2) + Math.pow(Math.abs(y - other.y), 2));
+      return Math.sqrt(distanceSquare(other));
+   }
+   
+   public double distanceSquare(Vector other)
+   {
+      final int dx = x - other.x;
+      final int dy = y - other.y;
+      return dx * dx + dy * dy;
    }
    
    public double lenght()

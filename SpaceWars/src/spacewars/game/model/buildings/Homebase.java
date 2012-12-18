@@ -10,9 +10,9 @@ import spacewars.util.Ressources;
  * The home planet is a special solar station.
  */
 @SuppressWarnings("serial")
-public class HomeBase extends SolarStation
+public class Homebase extends Solar
 {
-   public HomeBase(Vector position, Player player)
+   public Homebase(Vector position, Player player)
    {
       super(position, player);
       
@@ -25,15 +25,15 @@ public class HomeBase extends SolarStation
    }
    
    @Override
+   protected String getConfigName()
+   {
+      return Homebase.class.getSimpleName();
+   }
+   
+   @Override
    public void renderBuilding(Graphics2D g)
    {
       final Image image = Ressources.loadImage("homeplanet.png");
       g.drawImage(image, position.x - radius - 35, position.y - radius - 22, null);
-   }
-   
-   @Override
-   public boolean isUpgradeable()
-   {
-      return false;
    }
 }

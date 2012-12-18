@@ -17,43 +17,32 @@ import spacewars.gamelib.Vector;
 import spacewars.util.Config;
 
 @SuppressWarnings("serial")
-public class LaserCanon extends Building
+public class Laser extends Building
 {
-   protected static final int[]  laserRanges = new int[] { 150, 250, 400, 500, 600 };
-   protected static final int[]  laserPowers = new int[] { 3, 4, 5, 6, 7 };
-   
-   protected PlayerElement       attackTarget;
-   
    /**
-    * The power
+    * The current attacking element.
     */
-   protected int                 power;
+   protected PlayerElement attackTarget;
    
-   public LaserCanon(final Vector position, final Player player)
+   public Laser(final Vector position, final Player player)
    {
       super(position, (short) 10, (short) 100, player);
    }
    
    @Override
-   public String getName()
+   protected String getConfigName()
    {
-      return Config.getStringValue("buildings/LaserCanon/name");
-   }
-   
-   @Override
-   public int getCosts()
-   {
-      return 300;
+      return Laser.class.getSimpleName();
    }
    
    public int getLaserRange()
    {
-      return laserRanges[level];
+      return Config.getIntArrayValue("buildings/" + getConfigName() + "/laserRange")[level];
    }
    
    public int getLaserPower()
    {
-      return laserPowers[level];
+      return Config.getIntArrayValue("buildings/" + getConfigName() + "/laserPower")[level];
    }
    
    public PlayerElement getAttackTarget()
@@ -79,13 +68,6 @@ public class LaserCanon extends Building
       
       // no target
       return null;
-   }
-   
-   @Override
-   public void upgrade()
-   {
-      super.upgrade();
-      this.power += 10;
    }
    
    @Override
@@ -142,11 +124,5 @@ public class LaserCanon extends Building
          g.setComposite(composite);
          g.setStroke(stroke);
       }
-   }
-
-   @Override
-   public int getHighestLevel()
-   {
-      return 3;
    }
 }

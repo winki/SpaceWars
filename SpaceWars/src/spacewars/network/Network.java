@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import spacewars.util.Config;
 import de.root1.simon.Lookup;
 import de.root1.simon.Registry;
 import de.root1.simon.Simon;
@@ -13,8 +14,8 @@ import de.root1.simon.exceptions.NameBindingException;
 
 public class Network
 {
-   private static final int    PORT          = 2222;
-   private static final String REGISTRY_NAME = "server";
+   private static final int    PORT          = Config.getIntValue("network/port");
+   private static final String REGISTRY_NAME = Config.getStringValue("network/registryName");
    
    private static Registry     registry;
    private static Lookup       nameLookup;
@@ -101,7 +102,7 @@ public class Network
    public static void testNetwork(IServer server)
    {
       // first call (takes longer)
-      //server.getBytes(0);
+      // server.getBytes(0);
       
       // 1 byte:
       testNetworkSpeed(server, 1);
@@ -125,12 +126,12 @@ public class Network
       GameState gameState = server.getGameState();
       Logger.getGlobal().info(String.format("\nGetting GameState: %5d ms | %s", (int) (System.currentTimeMillis() - start), gameState));
       */
-   }   
+   }
    
    private static void testNetworkSpeed(IServer server, int bytes)
    {
       final long start = System.currentTimeMillis();
-      //server.getBytes(bytes);
+      // server.getBytes(bytes);
       Logger.getGlobal().info(String.format("%5d ms for %10d bytes\n", (int) (System.currentTimeMillis() - start), bytes));
    }
 }

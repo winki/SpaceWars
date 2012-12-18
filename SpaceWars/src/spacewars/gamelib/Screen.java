@@ -21,6 +21,7 @@ public class Screen
    private final JFrame   frame;
    private final Viewport viewport;
    
+   @SuppressWarnings("serial")
    private Screen()
    {
       this.viewport = new Viewport();
@@ -31,12 +32,7 @@ public class Screen
       frame.setBackground(Color.BLACK);
       frame.addKeyListener(Keyboard.getListener());
       frame.setContentPane(new JComponent()
-      {
-         /**
-          * Serial version
-          */
-         private static final long serialVersionUID = 1L;
-         
+      {         
          /**
           * Anonymous constructor
           */

@@ -9,6 +9,7 @@ import spacewars.game.model.PlayerElement;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.IUpdateable;
 import spacewars.gamelib.Vector;
+import spacewars.util.Config;
 
 @SuppressWarnings("serial")
 public abstract class Building extends PlayerElement implements IUpdateable
@@ -23,7 +24,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
     */
    protected transient boolean isCheckedForEngery;
    /**
-    * The upgrade level (zero-based)
+    * The zero-based upgrade level
     */
    protected byte              level;
    /**
@@ -38,7 +39,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
     * The build state (0 to 100 percent). -1 for not placed.
     */
    protected byte              state;
-
+   
    public Building(final Vector position, final int radius, final int sight, final Player player)
    {
       super(position, radius, sight, player, 100);
@@ -50,34 +51,77 @@ public abstract class Building extends PlayerElement implements IUpdateable
       this.linkedBuildings = new LinkedList<>();
    }
    
-   public byte establishBy(int percent)
+   /**
+    * Gets the name of the config section of the derrived subclass.
+    * 
+    * @return the config section name
+    */
+   protected abstract String getConfigName();
+   
+   /**
+    * Gets the building name.
+    * 
+    * @return the building name
+    */
+   public String getName()
    {
-      return state += (byte) percent;
+      return Config.getStringValue("buildings/" + getConfigName() + "/name");
    }
    
    /**
-    * Gets the costs of a building
+    * Gets the building or the upgrading costs. Depends on the level of the
+    * building.
     * 
     * @return costs in minerals
     */
-   public abstract int getCosts();
-   
-   public int getLevel()
+   public int getCosts()
    {
-      return this.level;
+      if (!isPlaced()) return Config.getIntValue("buildings/" + getConfigName() + "/buildingCosts");
+      else return Config.getIntArrayValue("buildings/" + getConfigName() + "/upgradingCosts")[level];
    }
    
+   /**
+    * Gets the highest upgrade level. 0 means, the building can't be upgraded.
+    * 
+    * @return the highest upgrade level
+    */
+   public int getHighestLevel()
+   {
+      return Config.getIntValue("buildings/" + getConfigName() + "/levels");
+   }
+   
+   /**
+    * Gets the current one-based level.
+    * 
+    * @return upgrade level
+    */
+   public int getLevel()
+   {
+      return this.level + 1;
+   }
+   
+   /**
+    * Continues the building process by a specified percent value. The building
+    * state can't exceed a maximum of 100 percent.
+    * 
+    * @param percent the percent value
+    */
+   public void establish(int percent)
+   {
+      final int state = this.state + percent;
+      if (state > 100) this.state = (byte) 100;
+      else this.state += (byte) percent;
+   }
+   
+   /**
+    * Gets a list of all buildings, this building is connected with.
+    * 
+    * @return list of connected buildings
+    */
    public List<Building> getLinks()
    {
       return linkedBuildings;
    }
-   
-   /**
-    * Gets the building name of the derrived subclass.
-    * 
-    * @return the building name
-    */
-   public abstract String getName();
    
    public boolean hasEnergy()
    {
@@ -106,10 +150,8 @@ public abstract class Building extends PlayerElement implements IUpdateable
    
    public boolean isUpgradeable()
    {
-      return level < getHighestLevel();
+      return level + 1 < getHighestLevel();
    }
-   
-   public abstract int getHighestLevel();
    
    public int getRecycleReward()
    {
@@ -138,9 +180,8 @@ public abstract class Building extends PlayerElement implements IUpdateable
          
          if (!isBuilt())
          {
-            final int maxState = 100;
-            
             // render build state
+            final int maxState = 100;
             final int WIDTH = 20;
             final int HEIGHT = 2;
             final int DY = 8;

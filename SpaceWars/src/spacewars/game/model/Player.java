@@ -2,7 +2,7 @@ package spacewars.game.model;
 
 import java.awt.Color;
 import java.io.Serializable;
-import spacewars.game.model.buildings.HomeBase;
+import spacewars.game.model.buildings.Homebase;
 import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
@@ -31,7 +31,7 @@ public class Player implements Serializable
    /**
     * The players home planet
     */
-   protected HomeBase homePlanet;
+   protected Homebase homePlanet;
    /**
     * The enable energy
     */
@@ -42,7 +42,7 @@ public class Player implements Serializable
    {
       this.id = id;
       this.color = color;
-      this.homePlanet = new HomeBase(position, this);
+      this.homePlanet = new Homebase(position, this);
       this.minerals = minerals;
    }
    
@@ -66,7 +66,7 @@ public class Player implements Serializable
       return color;
    }
    
-   public HomeBase getHomePlanet()
+   public Homebase getHomePlanet()
    {
       return homePlanet;
    }

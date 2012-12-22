@@ -29,15 +29,13 @@ public class MapFactory
    {
       Map map = null;
       final BufferedImage image = Ressources.loadBufferedImage("../maps/" + path);
-      final int NUM_STARS = 500;
-      final int NUM_LAYERS = 10;
       final int MAX_PLAYERS = 10;
       final String name = "Testmap";
       
       if (image != null)
       {
          Vector[] homePositions = new Vector[MAX_PLAYERS];
-         map = new Map(name, image.getWidth() * UNIT_SIZE, image.getHeight() * UNIT_SIZE, NUM_STARS, NUM_LAYERS);
+         map = new Map(name, image.getWidth() * UNIT_SIZE, image.getHeight() * UNIT_SIZE);
          map.setStartingMinerals(3000);
          
          for (int x = 0; x < image.getWidth(); x++)

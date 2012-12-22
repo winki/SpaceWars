@@ -2,7 +2,11 @@ package spacewars.gamelib;
 
 public class GameTime
 {
-   public static final int  TARGET_FRAMERATE  = 24; // TODO: config? server or client?
+   public static final int  TARGET_FRAMERATE  = 24;                           // TODO:
+                                                                               // config?
+                                                                               // server
+                                                                               // or
+                                                                               // client?
    public static final long TARGET_CYCLE_TIME = 1000000000 / TARGET_FRAMERATE;
    
    private long             ticks;
@@ -78,8 +82,20 @@ public class GameTime
     */
    public boolean timesPerSecond(double hertz)
    {
-      // TODO: maybe take nanosecons instead of ticks
       return ticks % (int) (TARGET_FRAMERATE / hertz) == 0;
+   }
+   
+   /**
+    * Checks whether an action is in time. The parameters specifies a frequency
+    * and a phase in which this function return <code>true</code>.
+    * 
+    * @param hertz the wished frequency
+    * @param phase the wished phase
+    * @return <code>true</code> if clock is in time
+    */
+   public boolean timesPerSecond(double hertz, int phase)
+   {
+      return (ticks + phase) % (int) (TARGET_FRAMERATE / hertz) == 0;
    }
    
    protected void setElapsedGameTime(long elapsedGameTime)

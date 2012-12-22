@@ -80,7 +80,7 @@ public class Laser extends Building
          if (attackTarget != null)
          {
             // attack in specified frequency
-            if (gameTime.timesPerSecond(getLaserFrequency()))
+            if (gameTime.timesPerSecond(getLaserFrequency(), getPosition().x))
             {
                attackTarget.attack(getLaserPower());
             }

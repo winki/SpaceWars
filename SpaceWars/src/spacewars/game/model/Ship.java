@@ -106,7 +106,7 @@ public class Ship extends PlayerElement implements IUpdateable
       if (attackTarget != null)
       {
          // attack in specified frequency
-         if (gameTime.timesPerSecond(getAttackFrequency()))
+         if (gameTime.timesPerSecond(getAttackFrequency(), getPosition().x))
          {
             attackTarget.attack(getAttackPower());
          }

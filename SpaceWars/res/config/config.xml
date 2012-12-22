@@ -110,10 +110,10 @@
 	</planets>
 	
 	<players>
-		<color1>#800d0d</color1>
-		<color2>#0d5980</color2>
-		<color3>#33800d</color3>
-		<color4>#6c0d80</color4>
+		<color1>#3377ff</color1>
+		<color2>#ff3333</color2>
+		<color3>#ff33ff</color3>
+		<color4>#ffff33</color4>
 	</players>
 
 </SpaceWars>

@@ -76,7 +76,7 @@ public class MineralPlanet extends Planet implements IRenderable
       final int radius = getSizeRadius();
       
       // draw planet without minerals
-      g.setColor(new Color(185, 122, 87));
+      g.setColor(new Color(44, 40, 28));
       g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
       
       // draw minerals

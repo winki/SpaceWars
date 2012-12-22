@@ -33,7 +33,7 @@ public class Shipyard extends Building
       if (isBuilt() && hasEnergy())
       {
          // repeat every x seconds depending on the level
-         if (gameTime.timesPerSecond(getBuildingFrequency()))
+         if (gameTime.timesPerSecond(getBuildingFrequency(), getPosition().x))
          {
             final Ship ship = new Ship(player, new Vector(position), 0);
             getServerGameState().getShips().add(ship);

@@ -16,19 +16,15 @@ public class Map implements IRenderable, Serializable
    private String              name;
    private int                 width;
    private int                 height;
-   private int                 numStars;
-   private int                 numLayers;
    private int                 startingMinerals;
    private List<MineralPlanet> mineralPlanets;
    private List<Vector>        homePlanetPositions;
    
-   public Map(final String name, final int width, final int height, final int numStars, final int numLayers)
+   public Map(final String name, final int width, final int height)
    {
       this.name = name;
       this.width = width;
       this.height = height;
-      this.numStars = numStars;
-      this.numLayers = numLayers;
       this.mineralPlanets = new LinkedList<>();
       this.homePlanetPositions = new LinkedList<>();
    }
@@ -46,16 +42,6 @@ public class Map implements IRenderable, Serializable
    public int getHeight()
    {
       return height;
-   }
-   
-   public int getNumStars()
-   {
-      return numStars;
-   }
-   
-   public int getNumLayers()
-   {
-      return numLayers;
    }
    
    public int getStartingMinerals()

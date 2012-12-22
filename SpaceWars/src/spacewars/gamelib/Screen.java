@@ -28,11 +28,10 @@ public class Screen
       
       frame = new JFrame();
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setResizable(false);
       frame.setBackground(Color.BLACK);
       frame.addKeyListener(Keyboard.getListener());
       frame.setContentPane(new JComponent()
-      {         
+      {
          /**
           * Anonymous constructor
           */
@@ -140,6 +139,16 @@ public class Screen
             frame.setCursor(Cursor.getDefaultCursor());
          }
       }
+   }
+   
+   public void setCursor(int cursorType)
+   {
+      frame.setCursor(Cursor.getPredefinedCursor(cursorType));
+   }
+   
+   public void setResizable(boolean resizable)
+   {
+      frame.setResizable(resizable);
    }
    
    public void render()

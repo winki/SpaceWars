@@ -15,9 +15,7 @@ import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
 public class GameState implements IRenderable, Serializable
-{
-   // TODO winkler: GameState minimieren
-   
+{   
    private int                  duration;
    private Map                  map;
    private final List<Player>   players;
@@ -87,15 +85,6 @@ public class GameState implements IRenderable, Serializable
             g.draw(line);
          }
       }
-      
-      /*
-       * These are now rendered as buildings
-      // render players
-      for (Player player : players)
-      {
-         player.getHomePlanet().render(g);
-      }
-      */
       
       // render building elements
       for (Building element : buildings)

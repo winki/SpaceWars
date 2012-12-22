@@ -4,6 +4,7 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -49,7 +50,7 @@ import de.root1.simon.annotation.SimonRemote;
 
 @SimonRemote(value = { IClient.class })
 public class Client extends GameClient implements IClient
-{   
+{
    /**
     * Game instance
     */
@@ -62,10 +63,13 @@ public class Client extends GameClient implements IClient
     * The stars in the background
     */
    private final List<Star>                stars;
+   private static final int                STARS_NUM          = 600;
+   private static final int                STARS_NUM_LAYERS   = 10;
+   private static final float              STARS_TRANSPARENCY = 0.3f;
    /**
     * The player
     */
-   private int                             playerId          = -1;
+   private int                             playerId           = -1;
    private Player                          player;
    /**
     * The game state
@@ -153,6 +157,15 @@ public class Client extends GameClient implements IClient
       try
       {
          playerId = server.register(this, name);
+         
+         // create dummy players
+         if (Config.getBool("server/dummyPlayers"))
+         {
+            for (int i = 0; i < Config.getInt("server/minPlayers") - 1; i++)
+            {
+               server.register(null, "Dummy");
+            }
+         }
       }
       catch (Exception ex)
       {
@@ -171,6 +184,7 @@ public class Client extends GameClient implements IClient
       screen.setTitle("Space Wars");
       screen.setIcon("icon.png");
       screen.setSize(Config.getBool("client/fullscreen") ? null : new Dimension(800, 600));
+      screen.setResizable(false);
       
       // show screen
       screen.setVisible(true);
@@ -188,13 +202,10 @@ public class Client extends GameClient implements IClient
    {
       final Random random = new Random();
       
-      for (int i = 0; i < gameState.getMap().getNumStars(); i++)
+      for (int i = 0; i < STARS_NUM; i++)
       {
-         final int x = random.nextInt(Screen.getInstance().getSize().width);
-         final int y = random.nextInt(Screen.getInstance().getSize().height);
-         final int layer = random.nextInt(gameState.getMap().getNumLayers());
-         
-         stars.add(new Star(x, y, layer));
+         final int layer = random.nextInt(STARS_NUM_LAYERS);
+         stars.add(new Star(random.nextFloat(), random.nextFloat(), layer));
       }
    }
    
@@ -261,7 +272,7 @@ public class Client extends GameClient implements IClient
       if (intro.isVisible()) intro.update(gameTime);
       
       if (gameState != null)
-      {         
+      {
          // else
          {
             // Zum homeplanet fliegen
@@ -707,6 +718,7 @@ public class Client extends GameClient implements IClient
          final int dy = Mouse.getState().getDeltaY();
          
          Screen.getInstance().getViewport().move(dx, dy);
+         Screen.getInstance().setCursor(Cursor.MOVE_CURSOR);
       }
       // scrolling by holding right mouse button and shift key
       else if (Keyboard.getState().isKeyDown(Key.SHIFT))
@@ -722,6 +734,12 @@ public class Client extends GameClient implements IClient
          final int dy = delta.y / scrollSlowing;
          
          Screen.getInstance().getViewport().move(-dx, -dy);
+         Screen.getInstance().setCursor(Cursor.MOVE_CURSOR);
+      }
+      else
+      {
+         // reset cursor
+         Screen.getInstance().setCursor(Cursor.DEFAULT_CURSOR);
       }
    }
    
@@ -754,9 +772,19 @@ public class Client extends GameClient implements IClient
    
    private void renderStars(Graphics2D g)
    {
-      final float TRANSPARENCY = 0.4f;
+      final Vector view = Screen.getInstance().getViewport().getCentralPosition();
+      final int screenw = Screen.getInstance().getSize().width;
+      final int screenh = Screen.getInstance().getSize().height;
+      
+      // background image
+      final Image img = Ressources.loadImage("../maps/map1.jpg");
+      final Dimension screen = Screen.getInstance().getSize();
+      final int bx = (int) (view.x / 500) + (int) (screen.getWidth() - img.getWidth(null)) / 2;
+      final int by = (int) (view.y / 500) + (int) (screen.getHeight() - img.getHeight(null)) / 2;
+      g.drawImage(img, bx, by, null);
+      
       final Composite original = g.getComposite();
-      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
+      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, STARS_TRANSPARENCY));
       g.setColor(Color.WHITE);
       
       final int DEEP_DELTA = 2;
@@ -766,14 +794,10 @@ public class Client extends GameClient implements IClient
       // render stars
       for (Star star : stars)
       {
-         final int SIZE = (int) ((gameState.getMap().getNumLayers() - star.getLayer()) * FACTOR);
+         final int SIZE = (int) ((STARS_NUM_LAYERS - star.getLayer()) * FACTOR);
          
-         final Vector o = Screen.getInstance().getViewport().getOriginPosition();
-         final int screenw = Screen.getInstance().getSize().width;
-         final int screenh = Screen.getInstance().getSize().height;
-         
-         int x = (o.x / (1 + DEEP_DELTA + star.getLayer() * DEEP_FACTOR) + star.getPosititon().x - SIZE / 2) % screenw;
-         int y = (o.y / (1 + DEEP_DELTA + star.getLayer() * DEEP_FACTOR) + star.getPosititon().y - SIZE / 2) % screenh;
+         int x = (int) (view.x / (1 + DEEP_DELTA + star.getLayer() * DEEP_FACTOR) + star.getX() * screenw - SIZE / 2) % screenw;
+         int y = (int) (view.y / (1 + DEEP_DELTA + star.getLayer() * DEEP_FACTOR) + star.getY() * screenh - SIZE / 2) % screenh;
          if (x < 0) x += screenw;
          if (y < 0) y += screenh;
          
@@ -867,22 +891,27 @@ public class Client extends GameClient implements IClient
       g.fillRect(screen.width - HUD_WIDTH, 0, HUD_WIDTH, screen.height);
       g.setComposite(original);
       
-      // player informations
+      // map informations
       g.setColor(Color.WHITE);
       g.drawString(String.format("\"%s\"", getGameState().getMap().getName()), screen.width - HUD_WIDTH + DX, 0 * FONT_LINE + DY);
       g.drawString(String.format("Time taken: %02d:%02d", seconds / 60, seconds % 60), screen.width - HUD_WIDTH + DX, 1 * FONT_LINE + DY);
-      g.drawString(String.format("Score: %d", player.getScore()), screen.width - HUD_WIDTH + DX, 2 * FONT_LINE + DY);
+      
+      // player informations
+      g.setColor(player.getColor());
+      g.drawString(String.format("%s", player.getName()), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY);
+      g.drawString(String.format("Score: %d", player.getScore()), screen.width - HUD_WIDTH + DX, 4 * FONT_LINE + DY);
       
       // minerals
       g.setColor(Color.GREEN);
-      g.drawString(String.format("%d minerals", player.getMinerals()), screen.width - HUD_WIDTH + DX, 4 * FONT_LINE + DY);
-      g.drawString(String.format("%d minerals per minute", player.getMineralsPerMinute()), screen.width - HUD_WIDTH + DX, 5 * FONT_LINE + DY);
+      g.drawString(String.format("%d minerals", player.getMinerals()), screen.width - HUD_WIDTH + DX, 6 * FONT_LINE + DY);
+      g.drawString(String.format("%d minerals per minute", player.getMineralsPerMinute()), screen.width - HUD_WIDTH + DX, 7 * FONT_LINE + DY);
+      
       // energy
       g.setColor(Color.DARK_GRAY);
-      g.fillRect(screen.width - HUD_WIDTH + DX, 8 * FONT_LINE + DY - BAR_HEIGHT, HUD_WIDTH - 2 * DX, BAR_HEIGHT);
+      g.fillRect(screen.width - HUD_WIDTH + DX, 10 * FONT_LINE + DY - BAR_HEIGHT, HUD_WIDTH - 2 * DX, BAR_HEIGHT);
       g.setColor(Color.CYAN);
-      g.drawString(String.format("%d energy (%d%%)", player.getEnergy(), player.getEnergyEfficency()), screen.width - HUD_WIDTH + DX, 7 * FONT_LINE + DY);
-      g.fillRect(screen.width - HUD_WIDTH + DX, 8 * FONT_LINE + DY - BAR_HEIGHT, (int) (player.getEnergy() / (double) player.getMaxEnergy() * (HUD_WIDTH - 2 * DX)), BAR_HEIGHT);
+      g.drawString(String.format("%d energy (%d%%)", player.getEnergy(), player.getEnergyEfficency()), screen.width - HUD_WIDTH + DX, 9 * FONT_LINE + DY);
+      g.fillRect(screen.width - HUD_WIDTH + DX, 10 * FONT_LINE + DY - BAR_HEIGHT, (int) (player.getEnergy() / (double) player.getMaxEnergy() * (HUD_WIDTH - 2 * DX)), BAR_HEIGHT);
       
       // selected object
       if (selected != null)

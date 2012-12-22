@@ -11,39 +11,54 @@ public class Player implements Serializable
    /**
     * Which homeplanet does he have
     */
-   protected int      id;
+   protected final int    id;
+   /**
+    * The players name
+    */
+   protected final String name;
    /**
     * The players color
     */
-   protected Color    color;
+   protected final Color  color;
    /**
     * The score
     */
-   protected int      score;
+   protected int          score;
    /**
     * The amount of minerals he owns
     */
-   protected int      minerals;
+   protected int          minerals;
    /**
     * The amount of minerals mined per minute
     */
-   protected int      mineralsPerMinute;
+   protected int          mineralsPerMinute;
    /**
     * The players home planet
     */
-   protected Homebase homePlanet;
+   protected Homebase     homePlanet;
    /**
     * The enable energy
     */
-   protected int      energy;
-   protected int      energyMax = 100;
+   protected int          energy;
+   protected int          energyMax = 100;
    
-   public Player(final int id, final Color color, final Vector position, final int minerals)
+   public Player(final int id, final String name, final Color color, final Vector position, final int minerals)
    {
       this.id = id;
+      this.name = name;
       this.color = color;
       this.homePlanet = new Homebase(position, this);
       this.minerals = minerals;
+   }
+   
+   public int getId()
+   {
+      return id;
+   }
+   
+   public String getName()
+   {
+      return name;
    }
    
    public int getScore()
@@ -54,11 +69,6 @@ public class Player implements Serializable
    public void setScore(int score)
    {
       this.score = score;
-   }
-   
-   public int getId()
-   {
-      return id;
    }
    
    public Color getColor()
@@ -158,7 +168,7 @@ public class Player implements Serializable
       return id;
    }
    
-   public boolean isEnemy(Player player) 
+   public boolean isEnemy(Player player)
    {
       return id != player.id;
    }

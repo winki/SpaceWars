@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
@@ -43,13 +44,12 @@ import spacewars.gamelib.Vector;
 import spacewars.network.IClient;
 import spacewars.network.IServer;
 import spacewars.util.Config;
+import spacewars.util.Ressources;
 import de.root1.simon.annotation.SimonRemote;
 
 @SimonRemote(value = { IClient.class })
 public class Client extends GameClient implements IClient
-{
-   private static final boolean            CAN_SWITCH_PLAYER = true;
-   
+{   
    /**
     * Game instance
     */
@@ -104,10 +104,6 @@ public class Client extends GameClient implements IClient
     * Intro screen before the game starts
     */
    private final IntroScreen               intro;
-   /**
-    * to set introScreen visible the first run
-    */
-   private boolean                         firstRun          = true;
    
    /**
     * Default constructor.
@@ -133,7 +129,7 @@ public class Client extends GameClient implements IClient
    
    public static boolean isDebug()
    {
-      return Config.getBooleanValue("client/debug");
+      return Config.getBool("client/debug");
    }
    
    public GameElement getSelected()
@@ -149,9 +145,14 @@ public class Client extends GameClient implements IClient
    public void setServer(IServer server)
    {
       this.server = server;
+      
+   }
+   
+   protected void registerAtServer(final String name)
+   {
       try
       {
-         playerId = server.register(this);
+         playerId = server.register(this, name);
       }
       catch (Exception ex)
       {
@@ -162,11 +163,14 @@ public class Client extends GameClient implements IClient
    @Override
    protected void initialize()
    {
+      // init intro
+      intro.setVisible(true);
+      
       Screen screen = Screen.getInstance();
       
       screen.setTitle("Space Wars");
       screen.setIcon("icon.png");
-      screen.setSize(Config.getBooleanValue("client/fullscreen") ? null : new Dimension(800, 600));
+      screen.setSize(Config.getBool("client/fullscreen") ? null : new Dimension(800, 600));
       
       // show screen
       screen.setVisible(true);
@@ -215,7 +219,7 @@ public class Client extends GameClient implements IClient
          {
             final boolean startGame = gameState == null;
             gameState = newGameState;
-
+            
             // update player
             if (playerId != -1)
             {
@@ -253,18 +257,12 @@ public class Client extends GameClient implements IClient
    @Override
    public void update(GameTime gameTime)
    {
-      if (firstRun)
-      {
-         intro.setVisible(false);
-         firstRun = false;
-      }
+      // update intro
+      if (intro.isVisible()) intro.update(gameTime);
+      
       if (gameState != null)
-      {
-         if (intro.isVisible())
-         {
-            intro.update(gameTime);
-         }
-         else
+      {         
+         // else
          {
             // Zum homeplanet fliegen
             // if (i<100){
@@ -274,10 +272,26 @@ public class Client extends GameClient implements IClient
             // }
             // else{
             
-            // if activated, user can switch player with F12
-            if (CAN_SWITCH_PLAYER && Keyboard.getState().isKeyPressed(Key.F12))
+            // if activated, user can switch player with F1 - F4
+            if (Config.getBool("client/changePlayer"))
             {
-               playerId = playerId == 0 ? 1 : 0;
+               final int numPlayers = gameState.getPlayers().size();
+               if (numPlayers >= 1 && Keyboard.getState().isKeyPressed(Key.F1))
+               {
+                  playerId = 0;
+               }
+               else if (numPlayers >= 2 && Keyboard.getState().isKeyPressed(Key.F2))
+               {
+                  playerId = 1;
+               }
+               else if (numPlayers >= 3 && Keyboard.getState().isKeyPressed(Key.F3))
+               {
+                  playerId = 2;
+               }
+               else if (numPlayers >= 4 && Keyboard.getState().isKeyPressed(Key.F4))
+               {
+                  playerId = 3;
+               }
             }
             
             scroll();
@@ -669,6 +683,7 @@ public class Client extends GameClient implements IClient
             try
             {
                server.recycle(selectedBuilding);
+               selected = null;
             }
             catch (Exception ex)
             {
@@ -685,82 +700,72 @@ public class Client extends GameClient implements IClient
    {
       final Vector mouse = Mouse.getState().getVector();
       
-      // scrolling by holding right mouse button and shift key
-      if (Keyboard.getState().isKeyDown(Key.SHIFT) && Mouse.getState().isButtonDown(Button.RIGHT))
-      {
-         if (Mouse.getState().isButtonPressed(Button.RIGHT))
-         {
-            scrollPosition.set(mouse.x, mouse.y);
-         }
-         
-         final int scrollSlowing = Config.getIntValue("client/scrollSlowing");
-         final Vector delta = mouse.sub(scrollPosition);
-         final int dx = delta.x / scrollSlowing;
-         final int dy = delta.y / scrollSlowing;
-         
-         Screen.getInstance().getViewport().move(-dx, -dy);
-      }
       // scrolling by dragging right mouse button
-      else if (Mouse.getState().isButtonDragged(Button.RIGHT))
+      if (Mouse.getState().isButtonDragged(Button.RIGHT))
       {
          final int dx = Mouse.getState().getDeltaX();
          final int dy = Mouse.getState().getDeltaY();
          
          Screen.getInstance().getViewport().move(dx, dy);
       }
+      // scrolling by holding right mouse button and shift key
+      else if (Keyboard.getState().isKeyDown(Key.SHIFT))
+      {
+         if (Keyboard.getState().isKeyPressed(Key.SHIFT))
+         {
+            scrollPosition.set(mouse.x, mouse.y);
+         }
+         
+         final int scrollSlowing = Config.getInt("client/scrollSlowing");
+         final Vector delta = mouse.sub(scrollPosition);
+         final int dx = delta.x / scrollSlowing;
+         final int dy = delta.y / scrollSlowing;
+         
+         Screen.getInstance().getViewport().move(-dx, -dy);
+      }
    }
    
-   // TODO: make a copy of the gamestate before rendering. If not, there can
-   // appear ConcurrentModificationExceptions because two threads (game thread
-   // and awt thread) iterate over the same list at the same time.
-   // This copy will be automatically made, when the client gets the game state
-   // from the server, so no problem.
    @Override
    public void render(Graphics2D g)
    {
-      if (gameState != null)
+      // render stars in the background
+      if (gameState != null) renderStars(g);
+      
+      // add viewport translation and scale to the world rendering
+      final AffineTransform viewport = Screen.getInstance().getViewport().getWorldToScreenTransform();
+      final AffineTransform original = g.getTransform();
+      g.setTransform(viewport); // render world relative to viewport
       {
-         // render stars in the background
-         renderStars(g);
+         // render world (game state, map...)
+         if (gameState != null) renderWorld(g);
+      }
+      g.setTransform(original); // reset transform
+      {
+         // render heads up display
+         if (gameState != null) renderHud(g);
          
-         // add viewport translation and scale to the world rendering
-         final AffineTransform viewport = Screen.getInstance().getViewport().getWorldToScreenTransform();
-         final AffineTransform original = g.getTransform();
-         g.setTransform(viewport); // render world relative to viewport
-         {
-            // render world (game state, map...)
-            renderWorld(g);
-            
-            if (intro.isVisible())
-            {
-               intro.render(g);
-            }
-         }
-         g.setTransform(original); // reset transform
-         {
-            // render heads up display
-            renderHud(g);
-            
-            if (isDebug())
-            {
-               renderDebug(g);
-            }
-         }
+         // debug
+         if (isDebug()) renderDebug(g);
+         
+         // render intro only if there's no gamestate
+         if (intro.isVisible()) intro.render(g);
       }
    }
    
    private void renderStars(Graphics2D g)
    {
-      // render stars
       final float TRANSPARENCY = 0.4f;
       final Composite original = g.getComposite();
-      g.setColor(Color.WHITE);
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
+      g.setColor(Color.WHITE);
+      
+      final int DEEP_DELTA = 2;
+      final int DEEP_FACTOR = 1;
+      final double FACTOR = 0.5;
+      
+      // render stars
       for (Star star : stars)
       {
-         final int DEEP_DELTA = 2;
-         final int DEEP_FACTOR = 1;
-         final double FACTOR = 0.5;
          final int SIZE = (int) ((gameState.getMap().getNumLayers() - star.getLayer()) * FACTOR);
          
          final Vector o = Screen.getInstance().getViewport().getOriginPosition();
@@ -886,12 +891,12 @@ public class Client extends GameClient implements IClient
          {
             final MineralPlanet mineral = (MineralPlanet) selected;
             g.setColor(Color.WHITE);
-            g.drawString(String.format("%d ton mineral planet", mineral.getMineralReservesMax()), screen.width - HUD_WIDTH + DX, 0 * FONT_LINE + DY_SELECTED);
+            g.drawString(String.format("%d ton mineral planet", mineral.getMineralCapacity()), screen.width - HUD_WIDTH + DX, 0 * FONT_LINE + DY_SELECTED);
             g.setColor(Color.DARK_GRAY);
             g.fillRect(screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED - BAR_HEIGHT, HUD_WIDTH - 2 * DX, BAR_HEIGHT);
             g.setColor(Color.GREEN);
-            g.drawString(String.format("%d minerals", mineral.getMineralReserves()), screen.width - HUD_WIDTH + DX, 2 * FONT_LINE + DY_SELECTED);
-            g.fillRect(screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED - BAR_HEIGHT, (int) (mineral.getMineralReserves() / (double) mineral.getMineralReservesMax() * (HUD_WIDTH - 2 * DX)), BAR_HEIGHT);
+            g.drawString(String.format("%d minerals", mineral.getMinerals()), screen.width - HUD_WIDTH + DX, 2 * FONT_LINE + DY_SELECTED);
+            g.fillRect(screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED - BAR_HEIGHT, (int) (mineral.getMinerals() / (double) mineral.getMineralCapacity() * (HUD_WIDTH - 2 * DX)), BAR_HEIGHT);
          }
          
          if (selected instanceof Homebase)

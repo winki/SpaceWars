@@ -112,8 +112,8 @@ public class GameState implements IRenderable, Serializable
          final PlayerElement attackTarget = ship.getAttackTarget();
          if (attackTarget != null)
          {
-            final int STROKE_WIDTH = 1;
-            final float TRANSPARENCY = 0.5f;
+            final int STROKE_WIDTH = 2;
+            final float TRANSPARENCY = 0.6f;
             
             final Composite composite = g.getComposite();
             final Stroke stroke = g.getStroke();

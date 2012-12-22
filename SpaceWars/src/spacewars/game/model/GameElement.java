@@ -16,20 +16,10 @@ public abstract class GameElement implements IRenderable, Serializable
     * The position
     */
    protected final Vector position;
-   /**
-    * The size radius
-    */
-   protected int          radius;
-   /**
-    * The sight radius
-    */
-   protected int          sight;
    
-   public GameElement(final Vector position, final int radius, final int sight)
+   public GameElement(final Vector position)
    {
       this.position = position;
-      this.radius = radius;
-      this.sight = sight;
    }
    
    /**
@@ -67,20 +57,14 @@ public abstract class GameElement implements IRenderable, Serializable
     * 
     * @return size radius in pixel
     */
-   public int getSizeRadius()
-   {
-      return radius;
-   }
+   public abstract int getSizeRadius();
    
    /**
     * Gets the view radius.
     * 
     * @return view radius in pixel
     */
-   public int getViewRadius()
-   {
-      return sight;
-   }
+   public abstract int getViewRadius();
    
    /**
     * Checks, whether a point collides with this element.
@@ -92,7 +76,7 @@ public abstract class GameElement implements IRenderable, Serializable
    {
       final double dx = position.x - point.x;
       final double dy = position.y - point.y;
-      final double dr = getSizeRadius();   
+      final double dr = getSizeRadius();
       return dx * dx + dy * dy < dr * dr;
    }
    
@@ -104,7 +88,7 @@ public abstract class GameElement implements IRenderable, Serializable
     */
    public boolean collidesWith(Line2D line)
    {
-      return line.ptSegDist(position.x, position.y) < radius;
+      return line.ptSegDist(position.x, position.y) < getSizeRadius();
    }
    
    /**
@@ -117,7 +101,7 @@ public abstract class GameElement implements IRenderable, Serializable
    {
       final double dx = position.x - element.position.x;
       final double dy = position.y - element.position.y;
-      final double dr = getSizeRadius() + element.getSizeRadius();      
+      final double dr = getSizeRadius() + element.getSizeRadius();
       return dx * dx + dy * dy < dr * dr;
    }
    
@@ -128,16 +112,20 @@ public abstract class GameElement implements IRenderable, Serializable
     * @return <code>true</code> if element is in the view radius of this element
     */
    public boolean isReachableFrom(GameElement element)
-   {
-      final double dx = position.x - element.position.x;
+   { 
+      return position.distance(element.getPosition()) < element.getViewRadius();
+      
+      /*final double dx = position.x - element.position.x;
       final double dy = position.y - element.position.y;
-      final double dr = element.getViewRadius();      
-      return dx * dx + dy * dy < dr * dr;      
+      final double dr = element.getViewRadius();
+      return dx * dx + dy * dy < dr * dr;*/
    }
    
    @Override
    public void render(Graphics2D g)
    {
+      final int radius = getSizeRadius();
+      
       if (Client.isDebug())
       {
          g.setColor(Color.RED);

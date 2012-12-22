@@ -10,7 +10,7 @@ public class Relay extends Building
 {   
    public Relay(final Vector position, final Player player)
    {
-      super(position, 5, 100, player);
+      super(position, player);
    }
       
    @Override
@@ -23,6 +23,8 @@ public class Relay extends Building
    protected void renderBuilding(Graphics2D g)
    {
       super.renderBuilding(g);
+      
+      final int radius = getSizeRadius();
       
       if (isBuilt() || !isPlaced())
       {

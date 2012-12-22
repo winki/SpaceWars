@@ -21,9 +21,9 @@ public abstract class PlayerElement extends GameElement implements Serializable
     */
    protected int    healthMax = 100;
    
-   public PlayerElement(final Vector position, final int radius, final int sight, final Player player, final int health)
+   public PlayerElement(final Vector position, final Player player, final int health)
    {
-      super(position, radius, sight);
+      super(position);
       
       this.player = player;
       this.health = health;
@@ -81,8 +81,7 @@ public abstract class PlayerElement extends GameElement implements Serializable
     */
    public void attack(int healthPoints)
    {
-      if (healthPoints > health)
-         health = 0;
+      if (healthPoints > health) health = 0;
       else health -= healthPoints;
    }
    
@@ -99,6 +98,8 @@ public abstract class PlayerElement extends GameElement implements Serializable
    @Override
    public void render(Graphics2D g)
    {
+      final int radius = getSizeRadius();
+      
       super.render(g);
       
       // health

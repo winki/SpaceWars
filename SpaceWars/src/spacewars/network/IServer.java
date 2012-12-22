@@ -9,9 +9,10 @@ public interface IServer
     * Client can register itself at the server. Returns a player object.
     * 
     * @param client the client callback interface
+    * @param name the players name
     * @return player id
     */
-   int register(IClient client);
+   int register(IClient client, String name);
    
    /**
     * Build a building.

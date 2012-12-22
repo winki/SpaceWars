@@ -2,13 +2,16 @@ package spacewars.game;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import javax.sound.sampled.Clip;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Player;
+import spacewars.game.model.Star;
 import spacewars.gamelib.Button;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.IRenderable;
@@ -20,45 +23,51 @@ import spacewars.util.Ressources;
 
 public class IntroScreen implements IUpdateable, IRenderable
 {
-   private boolean   visible;
-   final Dimension   screen        = Screen.getInstance().getSize();
+   private boolean          visible;
+   final Dimension          screen        = Screen.getInstance().getSize();
    
-   // Kai: fix this! why do i need to set these? !! with getting the viewport position and calculate the zero point! Vector p = gameState.getMap().getHomePlanetPositions().get(player.getId());
+   // Kai: fix this! why do i need to set these? !! with getting the viewport
+   // position and calculate the zero point! Vector p =
+   // gameState.getMap().getHomePlanetPositions().get(player.getId());
    
-   private int       zeroX         = -205;
-   private int       zeroY         = 875;
+   private static final int DY_TITLE      = 0;
    
-   private boolean   firstRound    = true;
+   // = -205;
+   private int              zeroX         = 0;
+   // = 875;
+   private int              zeroY         = 0;
+   
+   private boolean          firstRound    = true;
    
    // intro
-   private int       introWidth    = 1000;
-   private int       introHeight   = 700;
-   private int       introX        = zeroX + screen.width / 2 - introWidth / 2;
-   private int       introY        = zeroY + screen.height / 2 - introHeight / 2;
-   private boolean   exitIntro     = false;
-   private boolean   flyIn         = true;
-   private Dimension spaceSize;
-   private Dimension warsSize;
-   private int       spaceX        = zeroX - 600;
-   private int       spaceY        = introY + 200;
-   private int       warsX         = zeroX + screen.width;
-   private int       warsY         = introY + 300;
+   private int              introWidth    = 1000;
+   private int              introHeight   = 700;
+   private int              introX        = zeroX + screen.width / 2 - introWidth / 2;
+   private int              introY        = zeroY + screen.height / 2 - introHeight / 2;
+   private boolean          exitIntro     = false;
+   private boolean          flyIn         = true;
+   private Dimension        spaceSize;
+   private Dimension        warsSize;
+   private int              spaceX        = zeroX - 600;
+   private int              spaceY        = introY + 200;
+   private int              warsX         = zeroX + screen.width;
+   private int              warsY         = introY + 300;
    
    // start button
-   private Dimension startSize;
-   private int       startX        = introX + introWidth / 2 - 200;
-   private int       startY        = introY + introHeight / 2 + 200;
-   private float     startFontSize = 40.0f;
-   private Color     startColor    = Color.WHITE;
+   private Dimension        startSize;
+   private int              startX        = introX + introWidth / 2 - 200;
+   private int              startY        = introY + introHeight / 2 + 200;
+   private float            startFontSize = 40.0f;
+   private Color            startColor    = Color.WHITE;
    
    // background
-   private float     transparency  = 1.0f;
+   private float            transparency  = 1.0f;
    
    public IntroScreen()
    {
       this.visible = false;
-      Server server = Server.getInstance();
-      GameState gameState = server.getGameState();
+      // Server server = Server.getInstance();
+      // GameState gameState = server.getGameState();
       /*
       Player player = gameState.getPlayers().get(0);
       
@@ -83,8 +92,8 @@ public class IntroScreen implements IUpdateable, IRenderable
    @Override
    public void update(GameTime gameTime)
    {
-      Clip backgroundClip = Ressources.loadSound("background.wav");
-      Clip startButtonClip = Ressources.loadSound("start_button.wav");
+      Clip backgroundClip = Ressources.loadSound("intro.wav");
+      Clip startButtonClip = Ressources.loadSound("laser.wav");
       
       // TODO: kai
       if (exitIntro)
@@ -92,9 +101,10 @@ public class IntroScreen implements IUpdateable, IRenderable
          if (transparency >= 0.0f)
          {
             transparency = transparency - 0.04f;
+            if (transparency < 0) transparency = 0;
          }
          else
-         {
+         {            
             setVisible(false);
          }
       }
@@ -130,8 +140,11 @@ public class IntroScreen implements IUpdateable, IRenderable
                
                if (Mouse.getState().isButtonPressed(Button.LEFT))
                {
-                  startButtonClip.start();                  
+                  startButtonClip.start();
                   exitIntro = true;
+                  
+                  // register at server
+                  Client.getInstance().registerAtServer("hugahuga");
                }
             }
             else
@@ -159,12 +172,20 @@ public class IntroScreen implements IUpdateable, IRenderable
       Font font = Ressources.loadFont("space_age.ttf", startFontSize);
       FontMetrics metrics = g.getFontMetrics(font);
       
-      // background
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transparency));
+      
+      // background
       g.setColor(Color.BLACK);
       g.fillRect(zeroX, zeroY, screen.width, screen.height);
       
-      // title
+      // background image
+      final Image img = Ressources.loadImage("background.png");
+      final Dimension screen = Screen.getInstance().getSize();
+      final int x = (int) (screen.getWidth() - img.getWidth(null)) / 2;
+      final int y = (int) (screen.getHeight() - img.getHeight(null)) / 2 + DY_TITLE;
+      g.drawImage(img, x, y, null);
+      
+      // title      
       g.setColor(Color.GREEN);
       g.setFont(Ressources.loadFont("space_age.ttf", 150.0f));
       g.drawString("Space", spaceX, spaceY);
@@ -185,7 +206,6 @@ public class IntroScreen implements IUpdateable, IRenderable
       
       g.setColor(startColor);
       g.drawString("Start game", startX, startY);
-      
       
       // reset font
       g.setFont(original);

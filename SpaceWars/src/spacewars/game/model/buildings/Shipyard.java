@@ -13,7 +13,7 @@ public class Shipyard extends Building
 {
    public Shipyard(final Vector position, final Player player)
    {
-      super(position, 20, 100, player);
+      super(position, player);
    }
    
    @Override
@@ -24,7 +24,7 @@ public class Shipyard extends Building
    
    public double getBuildingFrequency()
    {
-      return 1.0 / Config.getIntArrayValue("buildings/" + getConfigName() + "/buildingTime")[level];
+      return 1.0 / Config.getIntArray("buildings/" + getConfigName() + "/buildingTime")[level];
    }
    
    @Override
@@ -45,6 +45,8 @@ public class Shipyard extends Building
    protected void renderBuilding(Graphics2D g)
    {
       super.renderBuilding(g);
+      
+      final int radius = getSizeRadius();
       
       if (isBuilt() || !isPlaced())
       {

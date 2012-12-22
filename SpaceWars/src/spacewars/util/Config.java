@@ -1,5 +1,6 @@
 package spacewars.util;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -25,18 +26,15 @@ public class Config
     * @param expression xpath expression
     * @return <code>String</code> config value
     */
-   public static String getStringValue(final String expression)
+   public static String getString(final String expression)
    {
-      if (!cache.containsKey(expression))
+      String value = (String) cache.get(expression);
+      if (value == null)
       {
-         String value = getValue(expression);
+         value = get(expression);
          cache.put(expression, value);
-         return value;
       }
-      else
-      {
-         return (String) cache.get(expression);
-      }
+      return value;
    }
    
    /**
@@ -45,18 +43,15 @@ public class Config
     * @param expression xpath expression
     * @return <code>boolean</code> config value
     */
-   public static boolean getBooleanValue(final String expression)
+   public static boolean getBool(final String expression)
    {
-      if (!cache.containsKey(expression))
+      Boolean value = (Boolean) cache.get(expression);
+      if (value == null)
       {
-         boolean value = Boolean.parseBoolean(getValue(expression));
+         value = Boolean.parseBoolean(get(expression));
          cache.put(expression, value);
-         return value;
       }
-      else
-      {
-         return (boolean) cache.get(expression);
-      }
+      return value;
    }
    
    /**
@@ -65,18 +60,15 @@ public class Config
     * @param expression xpath expression
     * @return <code>int</code> config value
     */
-   public static int getIntValue(final String expression)
+   public static int getInt(final String expression)
    {
+      Integer value = (Integer) cache.get(expression);
       if (!cache.containsKey(expression))
       {
-         int value = Integer.parseInt(getValue(expression));
+         value = Integer.parseInt(get(expression));
          cache.put(expression, value);
-         return value;
       }
-      else
-      {
-         return (int) cache.get(expression);
-      }
+      return value;
    }
    
    /**
@@ -85,18 +77,15 @@ public class Config
     * @param expression xpath expression
     * @return <code>double</code> config value
     */
-   public static double getDoubleValue(final String expression)
+   public static double getDouble(final String expression)
    {
-      if (!cache.containsKey(expression))
+      Double value = (Double) cache.get(expression);
+      if (value == null)
       {
-         double value = Double.parseDouble(getValue(expression));
+         value = Double.parseDouble(get(expression));
          cache.put(expression, value);
-         return value;
       }
-      else
-      {
-         return (double) cache.get(expression);
-      }
+      return value;
    }
    
    /**
@@ -105,26 +94,40 @@ public class Config
     * @param expression xpath expression
     * @return <code>int[]</code> config value
     */
-   public static int[] getIntArrayValue(final String expression)
+   public static int[] getIntArray(final String expression)
    {
-      if (!cache.containsKey(expression))
+      int[] value = (int[]) cache.get(expression);
+      if (value == null)
       {
-         String[] str = getValue(expression).split(ARRAY_SEPARARTOR);
-         int[] value = new int[str.length];
+         String[] str = get(expression).split(ARRAY_SEPARARTOR);
+         value = new int[str.length];
          for (int i = 0; i < value.length; i++)
          {
             value[i] = Integer.parseInt(str[i]);
          }
          cache.put(expression, value);
-         return value;
       }
-      else
-      {
-         return (int[]) cache.get(expression);
-      }
+      return value;
    }
    
-   private static String getValue(final String expression)
+   /**
+    * Gets a <code>Color</code> value from the config file.
+    * 
+    * @param expression xpath expression
+    * @return <code>Color</code> config value
+    */
+   public static Color getColor(final String expression)
+   {
+      Color value = (Color) cache.get(expression);
+      if (value == null)
+      {
+         value = new Color(Integer.decode(get(expression)));
+         cache.put(expression, value);
+      }
+      return value;
+   }
+   
+   private static String get(final String expression)
    {
       try
       {
@@ -132,7 +135,7 @@ public class Config
       }
       catch (XPathExpressionException ex)
       {
-         Logger.getGlobal().throwing(Ressources.class.getName(), "getValue", ex);
+         Logger.getGlobal().throwing(Ressources.class.getName(), "get", ex);
       }
       return null;
    }

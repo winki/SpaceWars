@@ -1,10 +1,8 @@
 package spacewars.network;
 
-import java.io.Serializable;
 import spacewars.game.model.Player;
 
-@SuppressWarnings("serial")
-public class Guest implements Serializable
+public class Guest
 {
    private final IClient callback;
    private final Player  player;

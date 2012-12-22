@@ -16,9 +16,6 @@ public class Homebase extends Solar
    {
       super(position, player);
       
-      super.radius = 40;
-      super.sight = 100;
-      
       // already built and produces energy
       super.state = 100;
       super.hasEnergy = true;
@@ -33,7 +30,14 @@ public class Homebase extends Solar
    @Override
    public void renderBuilding(Graphics2D g)
    {
+      final int DY_NAME = 6;
+      final int radius = getSizeRadius();
+      final String name = getPlayer().getName();
+      
       final Image image = Ressources.loadImage("homeplanet.png");
-      g.drawImage(image, position.x - radius - 35, position.y - radius - 22, null);
+      g.drawImage(image, position.x - radius - 35, position.y - radius - 22, null);     
+
+      g.setColor(getPlayer().getColor());
+      g.drawString(name, position.x - g.getFontMetrics().stringWidth(name) / 2, position.y + g.getFontMetrics().getHeight() / 2 + getSizeRadius() + DY_NAME);
    }
 }

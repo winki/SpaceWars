@@ -40,15 +40,27 @@ public abstract class Building extends PlayerElement implements IUpdateable
     */
    protected byte              state;
    
-   public Building(final Vector position, final int radius, final int sight, final Player player)
+   public Building(final Vector position, final Player player)
    {
-      super(position, radius, sight, player, 100);
+      super(position, player, 100);
       
       this.state = -1;
       this.isCheckedForEngery = false;
       this.hasEnergy = false;
       this.placeable = true;
       this.linkedBuildings = new LinkedList<>();
+   }
+   
+   @Override
+   public int getSizeRadius()
+   {
+      return Config.getInt("buildings/" + getConfigName() + "/size");
+   }
+   
+   @Override
+   public int getViewRadius()
+   {
+      return Config.getInt("buildings/" + getConfigName() + "/view");
    }
    
    /**
@@ -65,7 +77,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
     */
    public String getName()
    {
-      return Config.getStringValue("buildings/" + getConfigName() + "/name");
+      return Config.getString("buildings/" + getConfigName() + "/name");
    }
    
    /**
@@ -76,8 +88,8 @@ public abstract class Building extends PlayerElement implements IUpdateable
     */
    public int getCosts()
    {
-      if (!isPlaced()) return Config.getIntValue("buildings/" + getConfigName() + "/buildingCosts");
-      else return Config.getIntArrayValue("buildings/" + getConfigName() + "/upgradingCosts")[level];
+      if (!isPlaced()) return Config.getInt("buildings/" + getConfigName() + "/buildingCosts");
+      else return Config.getIntArray("buildings/" + getConfigName() + "/upgradingCosts")[level];
    }
    
    /**
@@ -87,7 +99,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
     */
    public int getHighestLevel()
    {
-      return Config.getIntValue("buildings/" + getConfigName() + "/levels");
+      return Config.getInt("buildings/" + getConfigName() + "/levels");
    }
    
    /**
@@ -111,6 +123,21 @@ public abstract class Building extends PlayerElement implements IUpdateable
       final int state = this.state + percent;
       if (state > 100) this.state = (byte) 100;
       else this.state += (byte) percent;
+   }
+   
+   public int getBuildState()
+   {
+      return state < 0 ? 0 : state;
+   }
+   
+   /**
+    * Gets the total energy consum that is needed to fully establish a building.
+    * 
+    * @return the total energy consum
+    */
+   public int getBuildEnergyConsum()
+   {
+      return Config.getInt("buildings/buildEnergyConsum");
    }
    
    /**
@@ -168,6 +195,9 @@ public abstract class Building extends PlayerElement implements IUpdateable
    {
       renderBuilding(g);
       
+      final int radius = getSizeRadius();
+      final int sight = getViewRadius();
+      
       if (isPlaced())
       {
          // no energy, render red point
@@ -212,6 +242,8 @@ public abstract class Building extends PlayerElement implements IUpdateable
     */
    protected void renderBuilding(Graphics2D g)
    {
+      final int radius = getSizeRadius();
+      
       g.setColor(isPlaced() ? player.getColor() : (isPlaceable() ? Color.WHITE : Color.RED));
       g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
    }

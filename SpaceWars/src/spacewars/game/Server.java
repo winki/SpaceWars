@@ -36,9 +36,9 @@ import de.root1.simon.annotation.SimonRemote;
 public class Server extends GameServer implements IServer
 {
    private static int                      playerId;
-   private static final int                dummyPlayers = Config.getIntValue("server/dummyPlayers");
-   private static final int                minPlayers   = Config.getIntValue("server/minPlayers");
-   private static final Color[]            colors       = new Color[] { new Color(0, 0, 180), new Color(181, 0, 181) };
+   private static final boolean            dummyPlayers = Config.getBool("server/dummyPlayers");
+   private static final int                minPlayers   = Config.getInt("server/minPlayers");
+   private static final Color[]            colors       = new Color[] { Config.getColor("players/color1"), Config.getColor("players/color2"), Config.getColor("players/color3"), Config.getColor("players/color4") };
    
    /**
     * Server instance
@@ -93,22 +93,23 @@ public class Server extends GameServer implements IServer
       }
       return instance;
    }
-   
+
    @Override
    public GameState getGameState()
    {
-      return gameState;
+      if (running) return gameState;
+      return null;
    }
    
    @Override
    protected void initialize()
    {
       createMap();
-      if (dummyPlayers > 0)
+      if (dummyPlayers)
       {
-         for (int i = 0; i < dummyPlayers; i++)
+         for (int i = 0; i < minPlayers - 1; i++)
          {
-            register(null);
+            register(null, "Dummy");
          }
       }
    }
@@ -265,7 +266,7 @@ public class Server extends GameServer implements IServer
          {
             linked.getLinks().remove(building);
          }
-         getGameState().getBuildings().remove(building);
+         gameState.getBuildings().remove(building);
       }
    }
    
@@ -280,7 +281,7 @@ public class Server extends GameServer implements IServer
       establishBuildings();
       
       // war: defend, attack
-      for (Iterator<Building> iterator = getGameState().getBuildings().iterator(); iterator.hasNext();)
+      for (Iterator<Building> iterator = gameState.getBuildings().iterator(); iterator.hasNext();)
       {
          Building building = (Building) iterator.next();
          
@@ -292,8 +293,6 @@ public class Server extends GameServer implements IServer
          
          if (building.isDead())
          {
-            // TODO: implement method for removing building clean
-            
             // remove all links
             for (Iterator<Building> iteratorLinked = building.getLinks().iterator(); iteratorLinked.hasNext();)
             {
@@ -307,16 +306,14 @@ public class Server extends GameServer implements IServer
       }
       
       // update ships
-      for (Iterator<Ship> iterator = getGameState().getShips().iterator(); iterator.hasNext();)
+      for (Iterator<Ship> iterator = gameState.getShips().iterator(); iterator.hasNext();)
       {
          Ship ship = (Ship) iterator.next();
          ship.update(gameTime); // move
          
          if (ship.isDead())
          {
-            // TODO: implement method for removing ship clean
-            
-            // remove remove from list
+            // remove from list
             iterator.remove();
          }
       }
@@ -533,7 +530,7 @@ public class Server extends GameServer implements IServer
       final List<Solar> solars = new LinkedList<>();
       
       // reset checked for energy flag
-      for (Building building : getGameState().getBuildings())
+      for (Building building : gameState.getBuildings())
       {
          building.setCheckedForEngery(false);
          if (!(building instanceof Solar))
@@ -595,40 +592,36 @@ public class Server extends GameServer implements IServer
        */
       
       // produce energy
-      for (Building building : getGameState().getBuildings())
+      for (Building building : gameState.getBuildings())
       {
          if (building instanceof Solar)
          {
             final Solar solar = (Solar) building;
-            solar.update(getGameTime());
             
-            if (getGameTime().timesPerSecond(1) && solar.isBuilt())
+            if (solar.isBuilt() && getGameTime().timesPerSecond(solar.getProductionFrequency()))
             {
-               // produce energy once a second
-               
-               // TODO
-               solar.getPlayer().addEnergy(1);
+               solar.getPlayer().addEnergy(solar.getEnergyProduction());
             }
          }
       }
       
       // mine minerals
-      for (Building building : getGameState().getBuildings())
+      for (Building building : gameState.getBuildings())
       {
          if (building instanceof Mine)
          {
             final Mine mine = (Mine) building;
             mine.update(getGameTime());
             
-            if (getGameTime().timesPerSecond(1))
+            if (mine.isBuilt() && getGameTime().timesPerSecond(mine.getMiningFrequency()))
             {
                final Player player = mine.getPlayer();
-               if (player.getEnergy() >= mine.getEnergyConsumPerMin())
+               if (player.getEnergy() >= mine.getEnergyConsum())
                {
                   mine.mine();
-                  final int amount = mine.getMineAmount();
+                  final int amount = mine.getMiningAmount();
                   mine.getPlayer().addMinerals(amount);
-                  player.removeEnergy(mine.getEnergyConsumPerMin());
+                  player.removeEnergy(mine.getEnergyConsum());
                }
             }
          }
@@ -642,18 +635,37 @@ public class Server extends GameServer implements IServer
    {
       if (getGameTime().timesPerSecond(3))
       {
-         for (Building building : getGameState().getBuildings())
+         for (Building building : gameState.getBuildings())
          {
             if (!building.isBuilt() && building.hasEnergy())
             {
-               building.establish(10);
+               final int BUILD_STEP = 10;
+               
+               final int buildEnergy = building.getBuildEnergyConsum();
+               final int buildEnergyStep = BUILD_STEP / buildEnergy;
+               final int currentStep = building.getBuildState() / BUILD_STEP;
+               
+               if (currentStep % buildEnergyStep == 0)
+               {
+                  // establishing need energy
+                  final Player player = building.getPlayer();
+                  if (player.getEnergy() < 1)
+                  {
+                     Logger.getGlobal().info("Not enough energy to establish building.");
+                     continue;
+                  }
+                  
+                  player.removeEnergy(1);
+               }
+               
+               building.establish(BUILD_STEP);
             }
          }
       }
    }
    
    @Override
-   public int register(IClient client)
+   public int register(final IClient client, final String name)
    {
       // can only register if game is not running
       if (!running)
@@ -662,7 +674,7 @@ public class Server extends GameServer implements IServer
          final Color color = colors[guests.size()];
          final Vector position = gameState.getMap().getHomePlanetPositions().get(guests.size());
          
-         final Player player = new Player(id, color, position, gameState.getMap().getStartingMinerals());
+         final Player player = new Player(id, name, color, position, gameState.getMap().getStartingMinerals());
          final Guest guest = new Guest(client, player);
          
          gameState.getPlayers().add(player);

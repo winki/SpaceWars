@@ -6,8 +6,28 @@ import spacewars.gamelib.Vector;
 @SuppressWarnings("serial")
 public abstract class Planet extends GameElement
 {
-   public Planet(final Vector position, final int radius, final int sight)
+   /**
+    * The size radius.
+    */
+   private short size;
+   
+   public Planet(final Vector position, final int size)
    {
-      super(position, radius, sight);
+      super(position);
+      
+      this.size = (short) size;
+   }
+   
+   @Override
+   public int getSizeRadius()
+   {
+      return size;
+   }
+   
+   @Override
+   public int getViewRadius()
+   {
+      // planet don't have a view radius
+      return 0;
    }
 }

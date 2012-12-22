@@ -8,7 +8,6 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
-import spacewars.game.model.GameState;
 import spacewars.game.model.Player;
 import spacewars.game.model.PlayerElement;
 import spacewars.game.model.Ship;
@@ -26,7 +25,7 @@ public class Laser extends Building
    
    public Laser(final Vector position, final Player player)
    {
-      super(position, (short) 10, (short) 100, player);
+      super(position, player);
    }
    
    @Override
@@ -37,12 +36,17 @@ public class Laser extends Building
    
    public int getLaserRange()
    {
-      return Config.getIntArrayValue("buildings/" + getConfigName() + "/laserRange")[level];
+      return Config.getIntArray("buildings/" + getConfigName() + "/laserRange")[level];
    }
    
    public int getLaserPower()
    {
-      return Config.getIntArrayValue("buildings/" + getConfigName() + "/laserPower")[level];
+      return Config.getIntArray("buildings/" + getConfigName() + "/laserPower")[level];
+   }
+   
+   public int getLaserFrequency()
+   {
+      return Config.getIntArray("buildings/" + getConfigName() + "/laserFrequency")[level];
    }
    
    public PlayerElement getAttackTarget()
@@ -57,13 +61,10 @@ public class Laser extends Building
    
    private PlayerElement chooseAttackTarget()
    {
-      final Player enemy = getEnemy();
-      final GameState gameState = getServerGameState();
-      
-      for (Ship ship : gameState.getShips())
+      for (Ship ship : getServerGameState().getShips())
       {
          // only attack enemy ships that are in range
-         if (this.canLaser(ship) && ship.getPlayer().equals(enemy)) { return ship; }
+         if (ship.getPlayer().isEnemy(this.getPlayer()) && this.canLaser(ship)) { return ship; }
       }
       
       // no target
@@ -78,8 +79,15 @@ public class Laser extends Building
          attackTarget = chooseAttackTarget();
          if (attackTarget != null)
          {
-            // attack ship
-            attackTarget.attack(getLaserPower());
+            // attack in specified frequency
+            if (gameTime.timesPerSecond(getLaserFrequency()))
+            {
+               attackTarget.attack(getLaserPower());
+            }
+            else
+            {
+               attackTarget = null;
+            }
          }
       }
    }
@@ -87,6 +95,8 @@ public class Laser extends Building
    @Override
    protected void renderBuilding(Graphics2D g)
    {
+      final int radius = getSizeRadius();
+      
       if (!isPlaced())
       {
          // draw laser range
@@ -107,8 +117,8 @@ public class Laser extends Building
       // draw attack line
       if (attackTarget != null)
       {
-         final int STROKE_WIDTH = 1;
-         final float TRANSPARENCY = 0.5f;
+         final int STROKE_WIDTH = 2;
+         final float TRANSPARENCY = 0.6f;
          
          final Composite composite = g.getComposite();
          final Stroke stroke = g.getStroke();

@@ -11,7 +11,7 @@ public class Solar extends Building
 {  
    public Solar(final Vector position, final Player player)
    {
-      super(position, 15, 100, player);
+      super(position, player);
    }
    
    @Override
@@ -20,30 +20,27 @@ public class Solar extends Building
       return Solar.class.getSimpleName();
    }
    
+   public double getProductionFrequency()
+   {
+      return Config.getDouble("buildings/" + getConfigName() + "/productionFrequency");
+   }   
+   
    public int getEnergyProduction()
    {
-      return Config.getIntArrayValue("buildings/" + getConfigName() + "/energyProduction")[level];
+      return Config.getIntArray("buildings/" + getConfigName() + "/energyProduction")[level];
    }
    
    public int getEnergyCapacity()
    {
-      return Config.getIntArrayValue("buildings/" + getConfigName() + "/energyCapacity")[level];
+      return Config.getIntArray("buildings/" + getConfigName() + "/energyCapacity")[level];
    }   
-
-   /*
-    * TODO: handle energy production
-   @Override
-   public void update(GameTime gameTime)
-   {
-      if (energy + getEnergyProduction() > getMaxEnergy()) energy = getMaxEnergy();
-      else energy += getEnergyProduction();
-   }
-   */
    
    @Override
    protected void renderBuilding(Graphics2D g)
    {
       super.renderBuilding(g);
+      
+      final int radius = getSizeRadius();
       
       if (isBuilt() || !isPlaced())
       {

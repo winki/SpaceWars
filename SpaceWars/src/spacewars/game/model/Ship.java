@@ -5,10 +5,11 @@ import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import spacewars.game.model.buildings.Building;
-import spacewars.game.model.buildings.Homebase;
+import spacewars.game.model.buildings.Shipyard;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.IUpdateable;
 import spacewars.gamelib.Vector;
+import spacewars.util.Config;
 
 @SuppressWarnings("serial")
 public class Ship extends PlayerElement implements IUpdateable
@@ -25,7 +26,7 @@ public class Ship extends PlayerElement implements IUpdateable
    
    public Ship(final Player player, final Vector position, final double angle)
    {
-      super(position, 5, 100, player, 100);
+      super(position, player, 100);
       
       this.x = position.x;
       this.y = position.y;
@@ -33,10 +34,28 @@ public class Ship extends PlayerElement implements IUpdateable
       setDirectionToEnemy();
    }
    
+   @Override
+   public int getSizeRadius()
+   {
+      return Config.getInt("buildings/" + Shipyard.class.getSimpleName() + "/Ship/size");
+   }
+   
+   @Override
+   public int getViewRadius()
+   {
+      return Config.getInt("buildings/" + Shipyard.class.getSimpleName() + "/Ship/view");
+   }
+   
    public int getAttackPower()
    {
       // TODO: depends on level
-      return 1;
+      return Config.getInt("buildings/" + Shipyard.class.getSimpleName() + "/Ship/attackPower");
+   }
+   
+   public int getAttackFrequency()
+   {
+      // TODO: depends on level
+      return Config.getInt("buildings/" + Shipyard.class.getSimpleName() + "/Ship/attackFrequency");
    }
    
    public PlayerElement getAttackTarget()
@@ -56,52 +75,61 @@ public class Ship extends PlayerElement implements IUpdateable
    
    private PlayerElement chooseAttackTarget()
    {
-      final Player enemy = getEnemy();
-      final GameState gameState = getServerGameState();
-      
       // attack buildings
-      for (Building building : gameState.getBuildings())
+      for (Building building : getServerGameState().getBuildings())
       {
-         if (building.isReachableFrom(this) && building.getPlayer().equals(enemy)) { return building; }
+         if (building.getPlayer().isEnemy(this.getPlayer()) && building.isReachableFrom(this)) { return building; }
       }
-      
-      // attack enemys home planet
-      final Homebase planet = enemy.getHomePlanet();
-      if (planet.isReachableFrom(this)) { return planet; }
       
       // no target
       return null;
+   }
+   
+   private PlayerElement chooseFlightTarget()
+   {
+      Building flightTarget = null;
+      for (Building b : getServerGameState().getBuildings())
+      {
+         if (flightTarget == null || (b.getPlayer().isEnemy(this.getPlayer()) && b.getPosition().distance(this.getPosition()) < flightTarget.getPosition().distance(this.getPosition())))
+         {
+            flightTarget = b;
+         }
+      }
+      return flightTarget;
    }
    
    @Override
    public void update(GameTime gameTime)
    {
       attackTarget = chooseAttackTarget();
+      
       if (attackTarget != null)
       {
-         attackTarget.attack(getAttackPower());
-      }
-      
-      // move only if not attacking
-      if (attackTarget == null)
-      {
-         Building flightTarget = null;
-         for (Building b : getClientGameState().getBuildings())
+         // attack in specified frequency
+         if (gameTime.timesPerSecond(getAttackFrequency()))
          {
-            if (flightTarget == null || (b.getPlayer().isEnemy(this.getPlayer()) && b.getPosition().distance(this.getPosition()) < flightTarget.getPosition().distance(this.getPosition())))
-            {
-               flightTarget = b;
-            }
+            attackTarget.attack(getAttackPower());
          }
-         
+         else
+         {
+            attackTarget = null;
+         }
+      }
+      else
+      {
+         // move only if not attacking
+         final PlayerElement flightTarget = chooseFlightTarget();
          if (flightTarget != null)
          {
             // direction of nearest enemy building
             final Vector dir = flightTarget.getPosition().sub(position);
             
+            /*
             // follow the mouse:
-            // final Vector mp = Screen.getInstance().getViewport().transformScreenToWorld(Mouse.getState().getVector());
-            // final Vector dir = mp.sub(position);
+            final Vector mp =
+            Screen.getInstance().getViewport().transformScreenToWorld(Mouse.getState().getVector());
+            final Vector dir = mp.sub(position);
+            */
             
             if (dir.x != 0)
             {
@@ -113,9 +141,7 @@ public class Ship extends PlayerElement implements IUpdateable
                // angle difference
                double anglediff = targetangle - angle;
                while (anglediff < 0)
-               {
                   anglediff += (2 * Math.PI);
-               }
                
                // turn
                final int TURN_SLOWMO = 10;

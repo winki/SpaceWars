@@ -5,29 +5,57 @@ import java.awt.Graphics2D;
 import java.util.Random;
 import spacewars.gamelib.IRenderable;
 import spacewars.gamelib.Vector;
+import spacewars.util.Config;
 
 @SuppressWarnings("serial")
 public class MineralPlanet extends Planet implements IRenderable
 {
-   protected int mineralReserves;
-   protected int mineralReservesMax;
+   /**
+    * The current amount of minerals
+    */
+   protected short minerals;
+   /**
+    * The maximum mineral capacity
+    */
+   protected short mineralCapacity;
    
    public MineralPlanet(final Vector position, final int size, int minerals)
    {
-      super(position, size, 0);
+      super(position, size);
       
-      this.mineralReserves = minerals;
-      this.mineralReservesMax = minerals;
+      if (minerals > getMaximalMineralCapacity()) minerals = getMaximalMineralCapacity();
+      this.minerals = (short) minerals;
+      this.mineralCapacity = (short) minerals;
    }
    
-   public int getMineralReserves()
+   /**
+    * Gets the current amount of minerals of this planet.
+    * 
+    * @return the current amount of minerals
+    */
+   public int getMinerals()
    {
-      return mineralReserves;
+      return minerals;
    }
    
-   public int getMineralReservesMax()
+   /**
+    * Gets the maximum mineral capacity of this planet.
+    * 
+    * @return the maximum mineral capacity
+    */
+   public int getMineralCapacity()
    {
-      return mineralReservesMax;
+      return mineralCapacity;
+   }
+   
+   /**
+    * Gets the absolute mineral capacity maximum of a mineral planet.
+    * 
+    * @return the maximum mineral capacity
+    */
+   public static int getMaximalMineralCapacity()
+   {
+      return Config.getInt("planets/MineralPlanet/maxMineralCapacity");
    }
    
    /**
@@ -38,13 +66,15 @@ public class MineralPlanet extends Planet implements IRenderable
     */
    public void mine(int minerals)
    {
-      if (minerals > mineralReserves) minerals = mineralReserves;
-      mineralReserves -= minerals;
+      if (minerals > this.minerals) minerals = this.minerals;
+      this.minerals -= minerals;
    }
    
    @Override
    public void render(Graphics2D g)
    {
+      final int radius = getSizeRadius();
+      
       // draw planet without minerals
       g.setColor(new Color(185, 122, 87));
       g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
@@ -60,8 +90,7 @@ public class MineralPlanet extends Planet implements IRenderable
          final double dist = random.nextDouble() * (radius - rmax);
          final int x = (int) (position.x + Math.cos(a) * dist);
          final int y = (int) (position.y + Math.sin(a) * dist);
-         // TODO: regard biggest possible mineral reserves here (instead of 100)
-         final int r = (int) (rmax * 0.01 * getMineralReserves());
+         final int r = (int) (rmax * getMinerals() / (double) getMaximalMineralCapacity());
          
          g.fillOval(x - r, y - r, 2 * r, 2 * r);
       }

@@ -2,14 +2,15 @@
 <SpaceWars>
 
 	<server>
-		<minPlayers>2</minPlayers>
-		<dummyPlayers>1</dummyPlayers>
+		<minPlayers>4</minPlayers>
+		<dummyPlayers>true</dummyPlayers>
 	</server>
 
 	<client>
 		<debug>false</debug>
-		<fullscreen>false</fullscreen>
+		<fullscreen>true</fullscreen>
 		<scrollSlowing>5</scrollSlowing>
+		<changePlayer>true</changePlayer>
 	</client>
 
 	<network>
@@ -18,16 +19,25 @@
 	</network>
 
 	<buildings>
+		<buildEnergyConsum>2</buildEnergyConsum>
 
 		<Homebase>
 			<name>Home Planet</name>
+			<size>40</size>
+			<view>100</view>
 			<buildingCosts>200</buildingCosts>
 			<upgradingCosts>1,2,3</upgradingCosts>
 			<levels>0</levels>
+			
+			<energyProduction>1</energyProduction>
+			<energyCapacity>10</energyCapacity>
+			<productionFrequency>3.0</productionFrequency>
 		</Homebase>
 
 		<Relay>
 			<name>Relay</name>
+			<size>5</size>
+			<view>100</view>
 			<buildingCosts>20</buildingCosts>
 			<upgradingCosts>1,2,3</upgradingCosts>			
 			<levels>3</levels>
@@ -35,42 +45,75 @@
 
 		<Mine>
 			<name>Mine</name>
+			<size>10</size>
+			<view>100</view>
 			<buildingCosts>45</buildingCosts>
-			<upgradingCosts>1,2,3</upgradingCosts>
-			<levels>3</levels>
+			<upgradingCosts>100</upgradingCosts>
+			<levels>2</levels>
 			
-			<energyConsum>1,6,7,8,9,10</energyConsum>
+			<energyConsum>1</energyConsum>
+			<miningRate>80,200</miningRate>
+			<miningFrequency>0.3</miningFrequency>
 		</Mine>
 
 		<Solar>
 			<name>Solar</name>
+			<size>15</size>
+			<view>100</view>
 			<buildingCosts>200</buildingCosts>
 			<upgradingCosts>1,2,3</upgradingCosts>
 			<levels>3</levels>
 			
 			<energyProduction>4,12,15,20,27</energyProduction>
 			<energyCapacity>4,12,15,20,27</energyCapacity>
+			<productionFrequency>3.0</productionFrequency>
 		</Solar>
 
 		<Laser>
 			<name>Laser</name>
+			<size>10</size>
+			<view>100</view>
 			<buildingCosts>100</buildingCosts>
 			<upgradingCosts>1,2,3</upgradingCosts>
 			<levels>3</levels>
 			
 			<laserRange>150,250,400,500,600</laserRange>
 			<laserPower>3,4,5,6,7</laserPower>
+			<laserFrequency>4,6,8,12,24</laserFrequency>
 		</Laser>
 
 		<Shipyard>
 			<name>Shipyard</name>
+			<size>20</size>
+			<view>100</view>
 			<buildingCosts>400</buildingCosts>
 			<upgradingCosts>1,2,3</upgradingCosts>
 			<levels>3</levels>
 			
 			<buildingTime>8,7,6,5,4</buildingTime>
+			
+			<Ship>
+				<size>5</size>
+				<view>100</view>
+				<attackPower>1</attackPower>
+				<attackFrequency>6</attackFrequency>
+			</Ship>
+			
 		</Shipyard>
 
 	</buildings>
+	
+	<planets>	
+		<MineralPlanet>
+			<maxMineralCapacity>100</maxMineralCapacity>
+		</MineralPlanet>	
+	</planets>
+	
+	<players>
+		<color1>#800d0d</color1>
+		<color2>#0d5980</color2>
+		<color3>#33800d</color3>
+		<color4>#6c0d80</color4>
+	</players>
 
 </SpaceWars>

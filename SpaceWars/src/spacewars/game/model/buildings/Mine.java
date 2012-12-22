@@ -18,7 +18,6 @@ import spacewars.util.Config;
 @SuppressWarnings("serial")
 public class Mine extends Building
 {
-   protected static final int[]  mineralsPerMin = { 60, 70, 80, 90, 100 };
    /**
     * List of mineral planets that are reachable from this mine
     */
@@ -30,7 +29,7 @@ public class Mine extends Building
    
    public Mine(final Vector position, final Player player)
    {
-      super(position, 10, 100, player);
+      super(position, player);
       this.reachableMineralPlanets = new LinkedList<>();
    }
    
@@ -40,29 +39,28 @@ public class Mine extends Building
       return Mine.class.getSimpleName();
    }
    
-   public int getResPerMin()
+   public double getMiningFrequency()
    {
-      return mineralsPerMin[level];
+      return Config.getDouble("buildings/" + getConfigName() + "/miningFrequency");
    }
    
-   public int getEnergyConsumPerMin()
+   public int getMiningAmount()
    {
-      int[] energyConsum = Config.getIntArrayValue("buildings/Mine/energyConsum");
-      return energyConsum[level];
+      final int perMinute = Config.getIntArray("buildings/" + getConfigName() + "/miningRate")[level];
+      return (int) (perMinute / 60.0 / getMiningFrequency());
+   }
+   
+   public int getEnergyConsum()
+   {
+      return Config.getInt("buildings/" + getConfigName() + "/energyConsum");
    }
    
    /**
     * Gets the range in which the mine can collect minerals.
     */
-   public int getMineRange()
+   public int getMiningRange()
    {
-      return sight / 2;
-   }
-   
-   public int getMineAmount()
-   {
-      // TODO: depends on level
-      return 1;
+      return getViewRadius() / 2;
    }
    
    public List<MineralPlanet> getReachableMineralPlanets()
@@ -81,14 +79,14 @@ public class Mine extends Building
       for (MineralPlanet planet : reachableMineralPlanets)
       {
          // take first random planet which has mineral reserves
-         if (planet.getMineralReserves() > 0) { return planet; }
+         if (planet.getMinerals() > 0) { return planet; }
       }
       return null;
    }
    
    public boolean canMine(MineralPlanet planet)
    {
-      return position.distance(planet.getPosition()) - planet.getSizeRadius() < getMineRange();
+      return position.distance(planet.getPosition()) - planet.getSizeRadius() < getMiningRange();
    }
    
    public void mine()
@@ -101,7 +99,7 @@ public class Mine extends Building
          // mine if there's a planet with minerals
          if (miningTarget != null)
          {
-            miningTarget.mine(getMineAmount());
+            miningTarget.mine(getMiningAmount());
          }
       }
    }
@@ -147,10 +145,12 @@ public class Mine extends Building
       {
          // draw mine range
          g.setColor(isPlaceable() ? Color.WHITE : Color.RED);
-         g.drawOval(position.x - getMineRange(), position.y - getMineRange(), 2 * getMineRange(), 2 * getMineRange());
+         g.drawOval(position.x - getMiningRange(), position.y - getMiningRange(), 2 * getMiningRange(), 2 * getMiningRange());
       }
       
       super.renderBuilding(g);
+      
+      final int radius = getSizeRadius();
       
       if (isBuilt() || !isPlaced())
       {

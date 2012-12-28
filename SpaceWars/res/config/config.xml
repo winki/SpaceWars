@@ -25,8 +25,8 @@
 			<name>Home Planet</name>
 			<size>40</size>
 			<view>100</view>
-			<health>10000</health>
-			<costs>200</costs>
+			<health>2000</health>
+			<costs>0</costs>
 			<levels>0</levels>
 			
 			<energyProduction>1</energyProduction>

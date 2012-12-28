@@ -39,7 +39,7 @@ public abstract class GameElement implements IRenderable, Serializable
     */
    public GameState getServerGameState()
    {
-      return Server.getInstance().getGameState();
+      return Server.getInstance().getUnbufferedGameState();
    }
    
    /**

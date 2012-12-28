@@ -2,11 +2,6 @@ package spacewars.game;
 
 import java.awt.Color;
 import java.awt.geom.Line2D;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -35,6 +30,7 @@ import spacewars.network.Guest;
 import spacewars.network.IClient;
 import spacewars.network.IServer;
 import spacewars.util.Config;
+import spacewars.util.Helpers;
 import de.root1.simon.annotation.SimonRemote;
 
 @SimonRemote(value = { IServer.class })
@@ -105,8 +101,13 @@ public class Server extends GameServer implements IServer
    @Override
    public GameState getGameState()
    {
-      if (running) return gameState;
+      if (running) return gameStateBuffer;
       return null;
+   }
+      
+   public GameState getUnbufferedGameState()
+   {
+      return gameState;
    }
    
    @Override
@@ -155,7 +156,7 @@ public class Server extends GameServer implements IServer
       if (running)
       {
          // buffer game state
-         // bufferGameState();
+         bufferGameState();
          
          // process all build, upgrade and recycle requests
          buildAll();
@@ -274,26 +275,12 @@ public class Server extends GameServer implements IServer
       }
    }
    
+   /**
+    * Buffers a copy of the game state.
+    */
    private void bufferGameState()
    {
-      try
-      {
-         // serialize
-         ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
-         ObjectOutputStream objectOutput = new ObjectOutputStream(byteOutput);
-         objectOutput.writeObject(gameState);
-         
-         // deserialize
-         ByteArrayInputStream byteInput = new ByteArrayInputStream(byteOutput.toByteArray());
-         ObjectInputStream objectInput = new ObjectInputStream(byteInput);
-         Object object = objectInput.readObject();
-         
-         gameStateBuffer = (GameState) object;
-      }
-      catch (Exception ex)
-      {
-         Logger.getGlobal().log(Level.SEVERE, "Couldn't buffer game state.", ex);
-      }
+      gameStateBuffer = Helpers.deepCopy(gameState);
    }
    
    private void updateWorld(GameTime gameTime)

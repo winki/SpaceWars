@@ -2,6 +2,11 @@ package spacewars.game;
 
 import java.awt.Color;
 import java.awt.geom.Line2D;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -35,7 +40,7 @@ import de.root1.simon.annotation.SimonRemote;
 @SimonRemote(value = { IServer.class })
 public class Server extends GameServer implements IServer
 {
-   private static int                      playerId;
+   private static int                      playerId   = 0;
    private static final int                minPlayers = Config.getInt("server/minPlayers");
    private static final Color[]            colors     = new Color[] { Config.getColor("players/color1"), Config.getColor("players/color2"), Config.getColor("players/color3"), Config.getColor("players/color4") };
    
@@ -50,7 +55,11 @@ public class Server extends GameServer implements IServer
    /**
     * The game state
     */
-   private final GameState                 gameState;
+   private GameState                       gameState;
+   /**
+    * The buffered copy of the game state TODO: built in correct
+    */
+   private GameState                       gameStateBuffer;
    /**
     * Starting time of the game
     */
@@ -136,7 +145,7 @@ public class Server extends GameServer implements IServer
       }
       
       // no player object found
-      Logger.getGlobal().log(Level.SEVERE, "No user object found that corresponds with the building.");
+      Logger.getGlobal().log(Level.SEVERE, "No building found that corresponds with the building.");
       return null;
    }
    
@@ -145,6 +154,9 @@ public class Server extends GameServer implements IServer
    {
       if (running)
       {
+         // buffer game state
+         // bufferGameState();
+         
          // process all build, upgrade and recycle requests
          buildAll();
          upgradeAll();
@@ -262,10 +274,34 @@ public class Server extends GameServer implements IServer
       }
    }
    
+   private void bufferGameState()
+   {
+      try
+      {
+         // serialize
+         ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
+         ObjectOutputStream objectOutput = new ObjectOutputStream(byteOutput);
+         objectOutput.writeObject(gameState);
+         
+         // deserialize
+         ByteArrayInputStream byteInput = new ByteArrayInputStream(byteOutput.toByteArray());
+         ObjectInputStream objectInput = new ObjectInputStream(byteInput);
+         Object object = objectInput.readObject();
+         
+         gameStateBuffer = (GameState) object;
+      }
+      catch (Exception ex)
+      {
+         Logger.getGlobal().log(Level.SEVERE, "Couldn't buffer game state.", ex);
+      }
+   }
+   
    private void updateWorld(GameTime gameTime)
    {
       // check which buildings are on the energy net
       checkEnergyAvailability();
+      
+      refreshIndicators();
       
       // economy
       produceEnergy();
@@ -279,6 +315,36 @@ public class Server extends GameServer implements IServer
       // update game time
       int seconds = (int) ((System.nanoTime() - startingTime) / 1000000000);
       gameState.setDuration(seconds);
+   }
+   
+   private void refreshIndicators()
+   {
+      for (Player player : gameState.getPlayers())
+      {
+         // reset indicators to make the new current sum
+         player.resetEnergyCapacity();
+         player.resetMineralsPerMinute();
+      }
+      
+      for (Building building : gameState.getBuildings())
+      {
+         if (building instanceof Solar)
+         {
+            final Solar solar = (Solar) building;
+            final Player player = solar.getPlayer();
+            
+            // count energy capacity to player total
+            player.addEnergyCapacity(solar.getEnergyCapacity());
+         }
+         else if (building instanceof Mine)
+         {
+            final Mine mine = (Mine) building;
+            final Player player = mine.getPlayer();
+            
+            // count mining amount capacity to player total
+            player.addMineralsPerMinute(mine.getMiningAmount());
+         }
+      }
    }
    
    /**
@@ -531,7 +597,7 @@ public class Server extends GameServer implements IServer
    }
    
    /**
-    * Produce energy.
+    * Produces energy and counts the energy capacity of every solar of a player.
     */
    protected void produceEnergy()
    {
@@ -540,14 +606,15 @@ public class Server extends GameServer implements IServer
          if (building instanceof Solar)
          {
             final Solar solar = (Solar) building;
-            
             if (getGameTime().timesPerSecond(solar.getProductionFrequency(), solar.getPosition().x) && solar.isBuilt())
             {
-               solar.getPlayer().addEnergy(solar.getEnergyProduction());
+               final Player player = solar.getPlayer();
+               
+               // produce
+               player.addEnergy(solar.getEnergyProduction());
             }
          }
       }
-      
    }
    
    /**
@@ -605,7 +672,7 @@ public class Server extends GameServer implements IServer
                player.removeEnergy(1);
             }
             
-            building.establish(BUILD_STEP);            
+            building.establish(BUILD_STEP);
          }
       }
    }

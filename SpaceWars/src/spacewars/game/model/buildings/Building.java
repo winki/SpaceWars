@@ -42,7 +42,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
    
    public Building(final Vector position, final Player player)
    {
-      super(position, player, 100);
+      super(position, player);
       
       this.state = -1;
       this.isCheckedForEngery = false;
@@ -88,12 +88,12 @@ public abstract class Building extends PlayerElement implements IUpdateable
     */
    public int getCosts()
    {
-      if (!isPlaced()) return Config.getInt("buildings/" + getConfigName() + "/buildingCosts");
-      else return Config.getIntArray("buildings/" + getConfigName() + "/upgradingCosts")[level];
+      final int index = !isPlaced() ? 0 : level + 1;
+      return Config.getIntArray("buildings/" + getConfigName() + "/costs")[index];
    }
    
    /**
-    * Gets the highest upgrade level. 0 means, the building can't be upgraded.
+    * Gets the highest upgrade level. 0 means, the building has no levels.
     * 
     * @return the highest upgrade level
     */
@@ -112,6 +112,12 @@ public abstract class Building extends PlayerElement implements IUpdateable
       return this.level + 1;
    }
    
+   @Override
+   public int getMaxHealth()
+   {
+      return Config.getIntArray("buildings/" + getConfigName() + "/health")[level];
+   }
+   
    /**
     * Continues the building process by a specified percent value. The building
     * state can't exceed a maximum of 100 percent.
@@ -121,7 +127,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
    public void establish(int percent)
    {
       final int state = this.state + percent;
-      if (state > 100) this.state = (byte) 100;
+      if (state >= 100) this.state = (byte) 100;
       else this.state += (byte) percent;
    }
    
@@ -175,9 +181,14 @@ public abstract class Building extends PlayerElement implements IUpdateable
       return state > -1;
    }
    
+   public boolean hasLevels()
+   {
+      return getHighestLevel() != 0;
+   }
+   
    public boolean isUpgradeable()
    {
-      return level + 1 < getHighestLevel();
+      return getLevel() < getHighestLevel();
    }
    
    public int getRecycleReward()
@@ -214,7 +225,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
             final int maxState = 100;
             final int WIDTH = 20;
             final int HEIGHT = 2;
-            final int DY = 8;
+            final int DY = 5;
             
             // g.setColor(new Color(20, 90, 88));
             // g.fillRect(position.x - WIDTH / 2, position.y - radius - DY -
@@ -251,8 +262,8 @@ public abstract class Building extends PlayerElement implements IUpdateable
    @Override
    protected boolean renderHealth()
    {
-      // render health only if building is placed
-      return isPlaced();
+      // render health only if building is placed an built
+      return isPlaced() && isBuilt();
    }
    
    public void setCheckedForEngery(boolean isCheckedForEngery)
@@ -284,7 +295,12 @@ public abstract class Building extends PlayerElement implements IUpdateable
    {
       if (isUpgradeable())
       {
-         this.level++;
+         final double healtQuotient = 1.0 * health / getMaxHealth();
+         
+         state = 0;
+         level++;
+
+         health = (int) (healtQuotient * getMaxHealth());
       }
    }
 }

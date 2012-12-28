@@ -109,12 +109,11 @@ public class Client extends GameClient implements IClient
     */
    private final IntroScreen               intro;
    
-   final int HUD_WIDTH = 160;
-   final Dimension screen = Screen.getInstance().getSize();
-   final int FONT_LINE = 15;
-   final int DY_SELECTED = 200;
-   Vector p = new Vector(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 30, 4 * FONT_LINE + DY_SELECTED);
-   
+   final int                               HUD_WIDTH          = 160;
+   final Dimension                         screen             = Screen.getInstance().getSize();
+   final int                               FONT_LINE          = 15;
+   final int                               DY_SELECTED        = 200;
+   Vector                                  p                  = new Vector(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 30, 4 * FONT_LINE + DY_SELECTED);
    
    /**
     * Default constructor.
@@ -684,9 +683,9 @@ public class Client extends GameClient implements IClient
       {
          final Building selectedBuilding = (Building) selected;
          
-         //calculate distance from mouse to center of upgrade circle
+         // calculate distance from mouse to center of upgrade circle
          Vector p2 = Mouse.getState().getVector();
-         int distance = (int) Math.sqrt(Math.pow(Math.abs(p.x+30 - p2.x),2) + Math.pow(Math.abs(p.y+30 - p2.y),2));
+         int distance = (int) Math.sqrt(Math.pow(Math.abs(p.x + 30 - p2.x), 2) + Math.pow(Math.abs(p.y + 30 - p2.y), 2));
          if (Keyboard.getState().isKeyPressed(Key.PAGE_UP) || Mouse.getState().isButtonPressed(Button.LEFT) && distance <= 30)
          {
             // upgrade
@@ -889,7 +888,6 @@ public class Client extends GameClient implements IClient
       
       final int DX = 10;
       final int DY = 24;
-
       
       final int BAR_HEIGHT = 5;
       
@@ -915,14 +913,14 @@ public class Client extends GameClient implements IClient
       // minerals
       g.setColor(Color.GREEN);
       g.drawString(String.format("%d minerals", player.getMinerals()), screen.width - HUD_WIDTH + DX, 6 * FONT_LINE + DY);
-      g.drawString(String.format("%d minerals per minute", player.getMineralsPerMinute()), screen.width - HUD_WIDTH + DX, 7 * FONT_LINE + DY);
+      g.drawString(String.format("%d minerals per min.", player.getMineralsPerMinute()), screen.width - HUD_WIDTH + DX, 7 * FONT_LINE + DY);
       
       // energy
       g.setColor(Color.DARK_GRAY);
       g.fillRect(screen.width - HUD_WIDTH + DX, 10 * FONT_LINE + DY - BAR_HEIGHT, HUD_WIDTH - 2 * DX, BAR_HEIGHT);
       g.setColor(Color.CYAN);
-      g.drawString(String.format("%d energy (%d%%)", player.getEnergy(), player.getEnergyEfficency()), screen.width - HUD_WIDTH + DX, 9 * FONT_LINE + DY);
-      g.fillRect(screen.width - HUD_WIDTH + DX, 10 * FONT_LINE + DY - BAR_HEIGHT, (int) (player.getEnergy() / (double) player.getMaxEnergy() * (HUD_WIDTH - 2 * DX)), BAR_HEIGHT);
+      g.drawString(String.format("%d / %d energy", player.getEnergy(), player.getEnergyCapacity()), screen.width - HUD_WIDTH + DX, 9 * FONT_LINE + DY);
+      g.fillRect(screen.width - HUD_WIDTH + DX, 10 * FONT_LINE + DY - BAR_HEIGHT, (int) (player.getEnergyEfficency() / 100 * (HUD_WIDTH - 2 * DX)), BAR_HEIGHT);
       
       // selected object
       if (selected != null)
@@ -954,32 +952,38 @@ public class Client extends GameClient implements IClient
             g.setColor(Color.WHITE);
             g.drawString(String.format("%s", building.getName()), screen.width - HUD_WIDTH + DX, 0 * FONT_LINE + DY_SELECTED);
             
-            // level
-            g.setColor(Color.WHITE);
-            g.drawString(String.format("Level %d of %d", building.getLevel(), building.getHighestLevel()), screen.width - HUD_WIDTH + DX, 1 * FONT_LINE + DY_SELECTED);
-            
             // upgrade
-            if (building.isUpgradeable())
+            if (building.hasLevels())
             {
+               // level
+               g.setColor(Color.WHITE);
+               g.drawString(String.format("Level %d of %d", building.getLevel(), building.getHighestLevel()), screen.width - HUD_WIDTH + DX, 1 * FONT_LINE + DY_SELECTED);
+               
                g.setColor(Color.GREEN);
-               if (building.getLevel() <= 3)
+               if (building.isUpgradeable())
                {
-                  g.drawString(String.format("Upgrade to level %d of %d", building.getLevel(), building.getHighestLevel()), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+                  g.drawString(String.format("Upgrade to level %d of %d", building.getLevel() + 1, building.getHighestLevel()), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+                  
+                  // upgrade button
+                  g.setColor(Color.GREEN);
+                  final Image img = Ressources.loadImage("../img/upgrade.png");
+                  g.drawImage(img, p.x, p.y, 60, 60, null);
+                  // g.fillRect(screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 *
+                  // FONT_LINE + DY_SELECTED, 1, 50);
+                  // g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 20, 4 *
+                  // FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH +
+                  // HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
+                  // g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 + 20, 4 *
+                  // FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH +
+                  // HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
+                  // g.draw(new Arc2D.Double(screen.width - HUD_WIDTH + HUD_WIDTH /
+                  // 2 - 30, 4 * FONT_LINE + DY_SELECTED - 5, 60, 60, 100, 340,
+                  // Arc2D.OPEN));               
                }
                else
                {
-                  g.drawString("Maximalstufe erreicht", screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+                  g.drawString("Reached highest level", screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
                }
-               
-               g.setColor(Color.GREEN);
-              
-               
-               final Image img = Ressources.loadImage("../img/upgrade.png");
-               g.drawImage(img, p.x, p.y, 60, 60, null);
-               //g.fillRect(screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED, 1, 50);
-//               g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
-//               g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 + 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
-//               g.draw(new Arc2D.Double(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 30, 4 * FONT_LINE + DY_SELECTED - 5, 60, 60, 100, 340, Arc2D.OPEN));
             }
             
             if (selected instanceof Relay)

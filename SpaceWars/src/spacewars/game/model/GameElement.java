@@ -112,13 +112,11 @@ public abstract class GameElement implements IRenderable, Serializable
     * @return <code>true</code> if element is in the view radius of this element
     */
    public boolean isReachableFrom(GameElement element)
-   { 
-      return position.distance(element.getPosition()) < element.getViewRadius();
-      
-      /*final double dx = position.x - element.position.x;
+   {
+      final double dx = position.x - element.position.x;
       final double dy = position.y - element.position.y;
       final double dr = element.getViewRadius();
-      return dx * dx + dy * dy < dr * dr;*/
+      return dx * dx + dy * dy < dr * dr;
    }
    
    @Override

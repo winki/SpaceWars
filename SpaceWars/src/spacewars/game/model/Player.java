@@ -9,7 +9,10 @@ import spacewars.gamelib.Vector;
 public class Player implements Serializable
 {
    /**
-    * Which homeplanet does he have
+    * The players id. Can be used to get the player object from the players list
+    * in the gamestate.
+    * <p>
+    * <code>gameState.getPlayers().get(id);</code>
     */
    protected final int    id;
    /**
@@ -40,7 +43,10 @@ public class Player implements Serializable
     * The enable energy
     */
    protected int          energy;
-   protected int          energyMax = 100;
+   /**
+    * The maximum energy capacity from all solars
+    */
+   protected int          energyCapacity;
    
    public Player(final int id, final String name, final Color color, final Vector position, final int minerals)
    {
@@ -54,6 +60,11 @@ public class Player implements Serializable
    public int getId()
    {
       return id;
+   }
+      
+   public boolean isEnemy(Player player)
+   {
+      return id != player.id;
    }
    
    public String getName()
@@ -85,11 +96,15 @@ public class Player implements Serializable
    {
       return this.minerals;
    }
-   
-   // TODO: only returns a dummy value
+
    public int getMineralsPerMinute()
    {
-      return 2;
+      return this.mineralsPerMinute;
+   }
+   
+   public void resetMineralsPerMinute()
+   {
+      this.mineralsPerMinute = 0;
    }
    
    public void addMinerals(int mineralsToAdd)
@@ -105,29 +120,13 @@ public class Player implements Serializable
    public int getEnergy()
    {
       return this.energy;
-   }
-   
-   // TODO: only returns a dummy value
-   public int getEnergyEfficency()
-   {
-      return 60;
-   }
-   
-   public int getMaxEnergy()
-   {
-      return energyMax;
-   }
-   
-   public void setMaxEnergy(int maxEnergy)
-   {
-      this.energyMax = maxEnergy;
-   }
+   }   
    
    public void addEnergy(int energy)
    {
-      if (this.energy + energy >= energyMax)
+      if (this.energy + energy >= energyCapacity)
       {
-         this.energy = energyMax;
+         this.energy = energyCapacity;
       }
       else
       {
@@ -149,6 +148,37 @@ public class Player implements Serializable
       }
    }
    
+   public int getEnergyCapacity()
+   {
+      return energyCapacity;
+   }
+   
+   public void addEnergyCapacity(int energyCapacity)
+   {
+      this.energyCapacity += energyCapacity;
+   }
+   
+   public void resetEnergyCapacity()
+   {
+      this.energyCapacity = 0;
+   }
+   
+   public void addMineralsPerMinute(int mineralsPerMinute)
+   {
+      this.mineralsPerMinute += mineralsPerMinute;
+   }
+   
+   /**
+    * Gets the percentage of the available energy to the total energy capcity of
+    * all solars.
+    * 
+    * @return available energy in percent
+    */
+   public double getEnergyEfficency()
+   {
+      return 100.0 * getEnergy() / getEnergyCapacity();
+   }
+   
    @Override
    public boolean equals(Object obj)
    {
@@ -166,10 +196,5 @@ public class Player implements Serializable
    public int hashCode()
    {
       return id;
-   }
-   
-   public boolean isEnemy(Player player)
-   {
-      return id != player.id;
    }
 }

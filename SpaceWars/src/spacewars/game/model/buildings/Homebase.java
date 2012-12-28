@@ -1,10 +1,10 @@
 package spacewars.game.model.buildings;
 
-import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import spacewars.game.model.Player;
+import spacewars.gamelib.BlendComposite;
 import spacewars.gamelib.Vector;
 import spacewars.util.Ressources;
 
@@ -42,7 +42,8 @@ public class Homebase extends Solar
       g.setColor(getPlayer().getColor());
       
       final Composite original = g.getComposite();
-      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.2f));
+      //g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25f));
+      g.setComposite(BlendComposite.Color.derive(0.6f));
       g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
       g.setComposite(original);
       

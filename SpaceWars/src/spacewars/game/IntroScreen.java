@@ -264,7 +264,8 @@ public class IntroScreen implements IUpdateable, IRenderable
             circle = 5;
          }
       }
-      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+     
+      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transparency));
       g.setColor(startColor);
       g.drawString("Start game", startX, startY);
       

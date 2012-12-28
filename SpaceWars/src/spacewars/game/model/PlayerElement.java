@@ -16,18 +16,13 @@ public abstract class PlayerElement extends GameElement implements Serializable
     * The actual health
     */
    protected int    health;
-   /**
-    * The maximal health
-    */
-   protected int    healthMax = 100;
    
-   public PlayerElement(final Vector position, final Player player, final int health)
+   public PlayerElement(final Vector position, final Player player)
    {
       super(position);
       
       this.player = player;
-      this.health = health;
-      this.healthMax = health;
+      this.health = getMaxHealth();
    }
    
    /**
@@ -75,6 +70,13 @@ public abstract class PlayerElement extends GameElement implements Serializable
    }
    
    /**
+    * Gets the maximum health.
+    * 
+    * @return maximum health
+    */
+   public abstract int getMaxHealth();
+   
+   /**
     * Attacks this game element and take the specified number of health points.
     * 
     * @param healthPoints health points to be taken
@@ -112,7 +114,7 @@ public abstract class PlayerElement extends GameElement implements Serializable
          g.setColor(new Color(0, 90, 0));
          g.fillRect(position.x - WIDTH / 2, position.y - radius - DY - HEIGHT, WIDTH, HEIGHT);
          g.setColor(new Color(181, 230, 29));
-         g.fillRect(position.x - WIDTH / 2, position.y - radius - DY - HEIGHT, (int) ((double) WIDTH * health / healthMax), HEIGHT);
+         g.fillRect(position.x - WIDTH / 2, position.y - radius - DY - HEIGHT, (int) ((double) WIDTH * health / getMaxHealth()), HEIGHT);
       }
    }
    

@@ -25,8 +25,8 @@
 			<name>Home Planet</name>
 			<size>40</size>
 			<view>100</view>
-			<buildingCosts>200</buildingCosts>
-			<upgradingCosts>1,2,3</upgradingCosts>
+			<health>10000</health>
+			<costs>200</costs>
 			<levels>0</levels>
 			
 			<energyProduction>1</energyProduction>
@@ -38,17 +38,17 @@
 			<name>Relay</name>
 			<size>5</size>
 			<view>100</view>
-			<buildingCosts>20</buildingCosts>
-			<upgradingCosts>1,2,3</upgradingCosts>			
-			<levels>3</levels>
+			<health>100</health>
+			<costs>20</costs>		
+			<levels>1</levels>
 		</Relay>
 
 		<Mine>
 			<name>Mine</name>
 			<size>10</size>
 			<view>100</view>
-			<buildingCosts>45</buildingCosts>
-			<upgradingCosts>100</upgradingCosts>
+			<health>100,500</health>
+			<costs>45,100</costs>
 			<levels>2</levels>
 			
 			<energyConsum>1</energyConsum>
@@ -60,12 +60,12 @@
 			<name>Solar</name>
 			<size>15</size>
 			<view>100</view>
-			<buildingCosts>200</buildingCosts>
-			<upgradingCosts>1,2,3</upgradingCosts>
+			<health>600,800,1000</health>
+			<costs>200,200,200</costs>
 			<levels>3</levels>
 			
-			<energyProduction>4,12,15,20,27</energyProduction>
-			<energyCapacity>4,12,15,20,27</energyCapacity>
+			<energyProduction>4,6,8</energyProduction>
+			<energyCapacity>10,20,30</energyCapacity>
 			<productionFrequency>3.0</productionFrequency>
 		</Solar>
 
@@ -73,35 +73,37 @@
 			<name>Laser</name>
 			<size>10</size>
 			<view>100</view>
-			<buildingCosts>100</buildingCosts>
-			<upgradingCosts>1,2,3</upgradingCosts>
+			<health>200,300,500</health>
+			<costs>100,100,150</costs>
 			<levels>3</levels>
 			
-			<laserRange>150,250,400,500,600</laserRange>
-			<laserPower>3,4,5,6,7</laserPower>
-			<laserFrequency>4,6,8,12,24</laserFrequency>
+			<laserRange>150,250,400</laserRange>
+			<laserPower>3,4,5</laserPower>
+			<laserFrequency>4,6,8</laserFrequency>
 		</Laser>
 
 		<Shipyard>
 			<name>Shipyard</name>
 			<size>20</size>
 			<view>100</view>
-			<buildingCosts>400</buildingCosts>
-			<upgradingCosts>1,2,3</upgradingCosts>
+			<health>500,550,600</health>
+			<costs>400,500,1000</costs>
 			<levels>3</levels>
 			
-			<buildingTime>8,7,6,5,4</buildingTime>
-			
-			<Ship>
-				<size>5</size>
-				<view>100</view>
-				<attackPower>1</attackPower>
-				<attackFrequency>6</attackFrequency>
-			</Ship>
-			
+			<shipProductionTime>8,7,6</shipProductionTime>		
 		</Shipyard>
 
 	</buildings>
+	
+	<ships>
+		<Ship>
+			<size>5</size>
+			<view>100</view>
+			<health>30</health>
+			<attackPower>1</attackPower>
+			<attackFrequency>6</attackFrequency>
+		</Ship>
+	</ships>
 	
 	<planets>	
 		<MineralPlanet>

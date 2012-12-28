@@ -5,7 +5,6 @@ import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import spacewars.game.model.buildings.Building;
-import spacewars.game.model.buildings.Shipyard;
 import spacewars.gamelib.GameTime;
 import spacewars.gamelib.IUpdateable;
 import spacewars.gamelib.Vector;
@@ -26,7 +25,7 @@ public class Ship extends PlayerElement implements IUpdateable
    
    public Ship(final Player player, final Vector position, final double angle)
    {
-      super(position, player, 100);
+      super(position, player);
       
       this.x = position.x;
       this.y = position.y;
@@ -37,25 +36,32 @@ public class Ship extends PlayerElement implements IUpdateable
    @Override
    public int getSizeRadius()
    {
-      return Config.getInt("buildings/" + Shipyard.class.getSimpleName() + "/Ship/size");
+      return Config.getInt("ships/" + Ship.class.getSimpleName() + "/size");
    }
    
    @Override
    public int getViewRadius()
    {
-      return Config.getInt("buildings/" + Shipyard.class.getSimpleName() + "/Ship/view");
+      return Config.getInt("ships/" + Ship.class.getSimpleName() + "/view");
    }
    
    public int getAttackPower()
    {
       // TODO: depends on level
-      return Config.getInt("buildings/" + Shipyard.class.getSimpleName() + "/Ship/attackPower");
+      return Config.getInt("ships/" + Ship.class.getSimpleName() + "/attackPower");
    }
    
    public int getAttackFrequency()
    {
       // TODO: depends on level
-      return Config.getInt("buildings/" + Shipyard.class.getSimpleName() + "/Ship/attackFrequency");
+      return Config.getInt("ships/" + Ship.class.getSimpleName() + "/attackFrequency");
+   }
+   
+   @Override
+   public int getMaxHealth()
+   {
+      // TODO: depends on level
+      return Config.getInt("ships/" + Ship.class.getSimpleName() + "/health");
    }
    
    public PlayerElement getAttackTarget()
@@ -90,7 +96,7 @@ public class Ship extends PlayerElement implements IUpdateable
       Building flightTarget = null;
       for (Building b : getServerGameState().getBuildings())
       {
-         if (flightTarget == null || (b.getPlayer().isEnemy(this.getPlayer()) && b.getPosition().distance(this.getPosition()) < flightTarget.getPosition().distance(this.getPosition())))
+         if (b.getPlayer().isEnemy(this.getPlayer()) && (flightTarget == null || b.getPosition().distance(this.getPosition()) < flightTarget.getPosition().distance(this.getPosition())))
          {
             flightTarget = b;
          }

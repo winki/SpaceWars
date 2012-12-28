@@ -24,7 +24,7 @@ public class Shipyard extends Building
    
    public double getBuildingFrequency()
    {
-      return 1.0 / Config.getIntArray("buildings/" + getConfigName() + "/buildingTime")[level];
+      return 1.0 / Config.getIntArray("buildings/" + getConfigName() + "/shipProductionTime")[level];
    }
    
    @Override

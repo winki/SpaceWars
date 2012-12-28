@@ -109,6 +109,13 @@ public class Client extends GameClient implements IClient
     */
    private final IntroScreen               intro;
    
+   final int HUD_WIDTH = 160;
+   final Dimension screen = Screen.getInstance().getSize();
+   final int FONT_LINE = 15;
+   final int DY_SELECTED = 200;
+   Vector p = new Vector(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 30, 4 * FONT_LINE + DY_SELECTED);
+   
+   
    /**
     * Default constructor.
     */
@@ -565,7 +572,7 @@ public class Client extends GameClient implements IClient
    private void select()
    {
       // check if mouse is on building/planet
-      if (Mouse.getState().isButtonDown(Button.LEFT))
+      if (Mouse.getState().isButtonDown(Button.LEFT) && Mouse.getState().getX() <= screen.width - HUD_WIDTH)
       {
          final Vector mousescreen = Mouse.getState().getVector();
          final Vector mouseworld = Screen.getInstance().getViewport().transformScreenToWorld(mousescreen);
@@ -676,7 +683,11 @@ public class Client extends GameClient implements IClient
       if (selected != null && selected instanceof Building && !(selected instanceof Homebase))
       {
          final Building selectedBuilding = (Building) selected;
-         if (Keyboard.getState().isKeyPressed(Key.PAGE_UP))
+         
+         //calculate distance from mouse to center of upgrade circle
+         Vector p2 = Mouse.getState().getVector();
+         int distance = (int) Math.sqrt(Math.pow(Math.abs(p.x+30 - p2.x),2) + Math.pow(Math.abs(p.y+30 - p2.y),2));
+         if (Keyboard.getState().isKeyPressed(Key.PAGE_UP) || Mouse.getState().isButtonPressed(Button.LEFT) && distance <= 30)
          {
             // upgrade
             try
@@ -875,13 +886,13 @@ public class Client extends GameClient implements IClient
        *  - Siehe The Space Game
        *  
        */
-      final int FONT_LINE = 15;
+      
       final int DX = 10;
       final int DY = 24;
-      final int DY_SELECTED = 200;
-      final int HUD_WIDTH = 160;
+
+      
       final int BAR_HEIGHT = 5;
-      final Dimension screen = Screen.getInstance().getSize();
+      
       final int seconds = gameState.getDuration();
       final float TRANSPARENCY = 0.8f;
       
@@ -961,10 +972,14 @@ public class Client extends GameClient implements IClient
                }
                
                g.setColor(Color.GREEN);
-               g.fillRect(screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED, 1, 50);
-               g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
-               g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 + 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
-               g.draw(new Arc2D.Double(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 30, 4 * FONT_LINE + DY_SELECTED - 5, 60, 60, 100, 340, Arc2D.OPEN));
+              
+               
+               final Image img = Ressources.loadImage("../img/upgrade.png");
+               g.drawImage(img, p.x, p.y, 60, 60, null);
+               //g.fillRect(screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED, 1, 50);
+//               g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
+//               g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 + 20, 4 * FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
+//               g.draw(new Arc2D.Double(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 30, 4 * FONT_LINE + DY_SELECTED - 5, 60, 60, 100, 340, Arc2D.OPEN));
             }
             
             if (selected instanceof Relay)

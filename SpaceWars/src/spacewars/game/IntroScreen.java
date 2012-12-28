@@ -19,6 +19,7 @@ import spacewars.gamelib.IUpdateable;
 import spacewars.gamelib.Mouse;
 import spacewars.gamelib.Screen;
 import spacewars.gamelib.Vector;
+import spacewars.gamelib.Viewport;
 import spacewars.util.Ressources;
 
 public class IntroScreen implements IUpdateable, IRenderable
@@ -29,6 +30,8 @@ public class IntroScreen implements IUpdateable, IRenderable
    // Kai: fix this! why do i need to set these? !! with getting the viewport
    // position and calculate the zero point! Vector p =
    // gameState.getMap().getHomePlanetPositions().get(player.getId());
+   
+   
    
    private static final int DY_TITLE      = 0;
    
@@ -48,8 +51,8 @@ public class IntroScreen implements IUpdateable, IRenderable
    private boolean          flyIn         = true;
    private Dimension        spaceSize;
    private Dimension        warsSize;
-   private int              spaceX        = zeroX - 600;
-   private int              spaceY        = introY + 200;
+   private int              spaceX        = zeroX - introWidth/10*6;
+   private int              spaceY        = introY + introHeight/10*2;
    private int              warsX         = zeroX + screen.width;
    private int              warsY         = introY + 300;
    
@@ -60,22 +63,33 @@ public class IntroScreen implements IUpdateable, IRenderable
    private float            startFontSize = 40.0f;
    private Color            startColor    = Color.WHITE;
    
+   private int              circle        = 5;
+   private boolean          shrink        = false;
+   
    // background
    private float            transparency  = 1.0f;
+   
+   // start button
+   private float            startTransparency  = 1.0f;
    
    public IntroScreen()
    {
       this.visible = false;
-      // Server server = Server.getInstance();
-      // GameState gameState = server.getGameState();
-      /*
-      Player player = gameState.getPlayers().get(0);
+//      Server server = Server.getInstance();
+//      GameState gameState = server.getGameState();
+//      
+//      Player player = gameState.getPlayers().get(0);
+//      Screen screen = new Screen();
+//      Dimension d = screen.getViewport();
+//      Vector p = gameState.getMap().getHomePlanetPositions().get(player.getId());
+//      GameState gamestate = new GameState();
+//      Screen screen = 
+     
+     // System.out.println(Client.getInstance().getGameState().getMap().getHomePlanetPositions().size());
+            
+     // zeroX = p.x - screen.width/2;
+      //zeroY = p.y - screen.height/2;
       
-      Vector p = gameState.getMap().getHomePlanetPositions().get(player.getId());
-      
-      zeroX = p.x - screen.width/2;
-      zeroY = p.y - screen.height/2;
-      */
       
    }
    
@@ -198,12 +212,59 @@ public class IntroScreen implements IUpdateable, IRenderable
       warsSize = new Dimension(adv + 2, hgt + 2);
       
       // start
-      
       g.setFont(font);
       hgt = metrics.getHeight();
       adv = metrics.stringWidth("Start Game");
       startSize = new Dimension(adv + 2, hgt + 2);
-      
+      if(!exitIntro){
+         if(startColor == Color.ORANGE){
+            g.setColor(Color.WHITE);
+            
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, startTransparency));
+            g.drawOval(startX + startSize.width/2 - circle/2, startY - startSize.height/2 - circle/2, circle, circle);
+            
+            if (circle >= 50){
+               g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, startTransparency-0.2f));
+               g.drawOval(startX + startSize.width/2 - (circle-40)/2, startY - startSize.height/2 - (circle-40)/2, circle-40, circle-40);
+            }
+            if (circle >= 100){
+               g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, startTransparency-0.3f));
+               g.drawOval(startX + startSize.width/2 - (circle-90)/2, startY - startSize.height/2 - (circle-90)/2, circle-90, circle-90);
+            }
+            if (circle >= 150){
+               g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, startTransparency-0.5f));
+               g.drawOval(startX + startSize.width/2 - (circle-140)/2, startY - startSize.height/2 - (circle-140)/2, circle-140, circle-140);
+            }
+            if (circle >= 200){
+               g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, startTransparency-0.7f));
+               g.drawOval(startX + startSize.width/2 - (circle-200)/2, startY - startSize.height/2 - (circle-200)/2, circle-200, circle-200);
+            }
+            if (circle >= 250){
+               g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, startTransparency-0.9f));
+               g.drawOval(startX + startSize.width/2 - (circle-240)/2, startY - startSize.height/2 - (circle-240)/2, circle-240, circle-240);
+            }
+            
+            if (circle >= 2*startSize.width){
+               if (circle >= 3*startSize.width){
+                  shrink = true;
+               }
+               
+            }
+            if (circle <= 10){
+               shrink = false;
+            }
+            if(shrink){
+               circle = 20;
+               startTransparency = 1.0f;
+               shrink = false;
+            }else{
+               circle = circle + 20;
+            }   
+         }else{
+            circle = 5;
+         }
+      }
+      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
       g.setColor(startColor);
       g.drawString("Start game", startX, startY);
       

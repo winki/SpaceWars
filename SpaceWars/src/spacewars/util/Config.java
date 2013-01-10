@@ -8,6 +8,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.xml.sax.InputSource;
+import spacewars.SpaceWars;
 
 public class Config
 {
@@ -18,7 +19,13 @@ public class Config
    
    private static final Map<String, Object> cache            = new HashMap<>();
    private static final XPath               xpath            = XPathFactory.newInstance().newXPath();
-   private static final InputSource         source           = new InputSource(Ressources.PATH_RES + PATH_CONFIG + FILE_CONFIG);
+   private static final InputSource         source;
+   
+   static
+   {
+      if (SpaceWars.RELEASE_VERSION) source = new InputSource(Ressources.getJarPath() + Ressources.PATH_RES + PATH_CONFIG + FILE_CONFIG);
+      else source = new InputSource(Ressources.PATH_RES + PATH_CONFIG + FILE_CONFIG);
+   }
    
    /**
     * Gets a <code>String</code> value from the config file.

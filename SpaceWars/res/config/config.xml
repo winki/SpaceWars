@@ -3,7 +3,7 @@
 
 	<server>
 		<minPlayers>2</minPlayers>
-		<dummyPlayers>true</dummyPlayers>
+		<dummyPlayers>false</dummyPlayers>
 	</server>
 
 	<client>
@@ -11,10 +11,11 @@
 		<debug>false</debug>
 		<fullscreen>true</fullscreen>
 		<scrollSlowing>5</scrollSlowing>
-		<changePlayer>true</changePlayer>
+		<changePlayer>false</changePlayer>
 	</client>
 
 	<network>
+		<host>127.0.0.1</host>
 		<port>2222</port>
 		<registryName>spacewars_server</registryName>
 	</network>

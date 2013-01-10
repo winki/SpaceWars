@@ -59,6 +59,8 @@ public class IntroScreen implements IUpdateable, IRenderable
    private int              circle            = 5;
    private boolean          shrink            = false;
    
+   private final Font       font              = Ressources.loadFont("space_age.ttf", startFontSize);
+   
    // background
    private float            transparency      = 1.0f;
    
@@ -152,7 +154,6 @@ public class IntroScreen implements IUpdateable, IRenderable
    {
       // save original font to reset it later
       Font original = g.getFont();
-      Font font = Ressources.loadFont("space_age.ttf", startFontSize);
       FontMetrics metrics = g.getFontMetrics(font);
       
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transparency));

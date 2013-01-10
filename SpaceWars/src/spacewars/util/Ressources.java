@@ -7,6 +7,8 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -16,6 +18,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import spacewars.SpaceWars;
 
 public class Ressources
 {
@@ -28,6 +31,38 @@ public class Ressources
    private static final Map<String, Object> cache      = new HashMap<>();
    
    /**
+    * Gets the path, where the runnable jar file is located.
+    * 
+    * @return location of the runnable jar file
+    */
+   public static String getJarPath()
+   {
+      try
+      {
+         final String path = ClassLoader.getSystemClassLoader().getResource(".").getPath();
+         return URLDecoder.decode(path, "UTF-8");
+      }
+      catch (UnsupportedEncodingException ex)
+      {
+         Logger.getGlobal().throwing(Ressources.class.getName(), "getJarPath", ex);
+      }
+      return null;
+   }
+   
+   /**
+    * Gets the path to the game ressources. In the runnable jar file the
+    * ressources are in the root folder of the jar file. If developing in
+    * eclipse, the ressources are in the root folder of the project.
+    * 
+    * @return path to the game ressources
+    */
+   public static String getRessourcesPath(String path)
+   {
+      if (SpaceWars.RELEASE_VERSION) return getJarPath() + path;
+      else return path;
+   }
+   
+   /**
     * Loads an <code>Image</code> from the path relative to the directory
     * "res/img/". The image will be cached in memory.
     * 
@@ -36,9 +71,11 @@ public class Ressources
     */
    public static Image loadImage(String path)
    {
+      path = getRessourcesPath(PATH_RES + PATH_IMG + path);
       if (!cache.containsKey(path))
       {
-         Image image = Toolkit.getDefaultToolkit().getImage(PATH_RES + PATH_IMG + path);
+         Image image = Toolkit.getDefaultToolkit().getImage(path);
+         
          cache.put(path, image);
          return image;
       }
@@ -50,12 +87,13 @@ public class Ressources
    
    public static Font loadFont(String path, float size)
    {
+      path = getRessourcesPath(PATH_RES + PATH_FONT + path);
       if (!cache.containsKey(path))
       {
          try
          {
             // Returned font is of pt size 1
-            final Font font = Font.createFont(Font.TRUETYPE_FONT, new File(PATH_RES + PATH_FONT + path));
+            final Font font = Font.createFont(Font.TRUETYPE_FONT, new File(path));
             
             // Derive and return a 12 pt version:
             // Need to use float otherwise
@@ -80,11 +118,12 @@ public class Ressources
    
    public static Clip loadSound(String path)
    {
+      path = getRessourcesPath(PATH_RES + PATH_SOUND + path);
       if (!cache.containsKey(path))
       {
          try
          {
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(PATH_RES + PATH_SOUND + path));
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(path));
             AudioFormat af = audioInputStream.getFormat();
             int size = (int) (af.getFrameSize() * audioInputStream.getFrameLength());
             byte[] audio = new byte[size];
@@ -115,11 +154,12 @@ public class Ressources
     */
    public static BufferedImage loadBufferedImage(String path)
    {
+      path = getRessourcesPath(PATH_RES + PATH_IMG + path);
       if (!cache.containsKey(path))
       {
          try
          {
-            BufferedImage image = ImageIO.read(new File(PATH_RES + PATH_IMG + path));
+            BufferedImage image = ImageIO.read(new File(path));
             cache.put(path, image);
             return image;
          }

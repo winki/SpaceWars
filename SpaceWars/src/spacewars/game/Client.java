@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import spacewars.SpaceWars;
 import spacewars.game.model.GameElement;
 import spacewars.game.model.GameState;
 import spacewars.game.model.Link;
@@ -674,11 +675,11 @@ public class Client extends GameClient implements IClient
    }
    
    /**
-    * If activated, user can switch player with F1 - F4.
+    * If activated and not in release, user can switch player with F1 - F4.
     */
    private void changePlayer()
    {
-      if (Config.getBool("client/changePlayer"))
+      if (!SpaceWars.RELEASE_VERSION && Config.getBool("client/changePlayer"))
       {
          final int numPlayers = gameState.getPlayers().size();
          if (numPlayers >= 1 && Keyboard.getState().isKeyPressed(Key.F1))
@@ -943,7 +944,7 @@ public class Client extends GameClient implements IClient
                   
                   // upgrade button
                   g.setColor(Color.GREEN);
-                  final Image img = Ressources.loadImage("../img/upgrade.png");
+                  final Image img = Ressources.loadImage("upgrade.png");
                   g.drawImage(img, upgradeButtonPosition.x, upgradeButtonPosition.y, 60, 60, null);
                }
             }

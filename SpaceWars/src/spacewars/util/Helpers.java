@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 public class Helpers
 {
    /**
-    * Creates a deep copy of an object.
+    * Creates a deep copy of an object by serializing and deserializing.
     * 
     * @param object object to copy
     * @return copy of the object

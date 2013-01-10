@@ -104,7 +104,7 @@ public class Server extends GameServer implements IServer
       if (running) return gameStateBuffer;
       return null;
    }
-      
+   
    public GameState getUnbufferedGameState()
    {
       return gameState;
@@ -289,6 +289,7 @@ public class Server extends GameServer implements IServer
       checkEnergyAvailability();
       
       refreshIndicators();
+      calculateScore();
       
       // economy
       produceEnergy();
@@ -315,21 +316,53 @@ public class Server extends GameServer implements IServer
       
       for (Building building : gameState.getBuildings())
       {
-         if (building instanceof Solar)
+         if (building.isBuilt())
          {
-            final Solar solar = (Solar) building;
-            final Player player = solar.getPlayer();
-            
-            // count energy capacity to player total
-            player.addEnergyCapacity(solar.getEnergyCapacity());
+            if (building instanceof Solar)
+            {
+               final Solar solar = (Solar) building;
+               final Player player = solar.getPlayer();
+               
+               // count energy capacity to player total
+               player.addEnergyCapacity(solar.getEnergyCapacity());
+            }
+            else if (building instanceof Mine)
+            {
+               final Mine mine = (Mine) building;
+               final Player player = mine.getPlayer();
+               
+               // count mining amount capacity to player total
+               player.addMineralsPerMinute(mine.getMiningRate());
+            }
          }
-         else if (building instanceof Mine)
+      }
+   }
+   
+   private void calculateScore()
+   {
+      for (Player player : gameState.getPlayers())
+      {
+         // reset score
+         player.resetScore();
+         
+         // score for minerals
+         int mineralsScore = player.getMinerals();
+         player.addScore(mineralsScore);
+         
+         // score for energy capacity
+         int energyScore = player.getEnergyCapacity();
+         player.addScore(energyScore);
+      }
+      
+      // score for buildings
+      for (Building building : gameState.getBuildings())
+      {
+         if (building.isBuilt())
          {
-            final Mine mine = (Mine) building;
-            final Player player = mine.getPlayer();
+            final Player player = building.getPlayer();
             
-            // count mining amount capacity to player total
-            player.addMineralsPerMinute(mine.getMiningAmount());
+            int reward = building.getRecycleReward();
+            player.addScore(reward);
          }
       }
    }
@@ -650,13 +683,13 @@ public class Server extends GameServer implements IServer
             {
                // establishing need energy
                final Player player = building.getPlayer();
-               if (player.getEnergy() < 1)
+               if (player.getEnergy() < buildEnergy)
                {
                   Logger.getGlobal().info("Not enough energy to establish building.");
                   continue;
                }
                
-               player.removeEnergy(1);
+               player.removeEnergy(buildEnergy);
             }
             
             building.establish(BUILD_STEP);

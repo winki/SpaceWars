@@ -188,12 +188,18 @@ public abstract class Building extends PlayerElement implements IUpdateable
    
    public boolean isUpgradeable()
    {
-      return getLevel() < getHighestLevel();
+      return getLevel() < getHighestLevel() && isBuilt();
    }
    
    public int getRecycleReward()
    {
-      return 100;
+      // all costs inclusive building and upgrading to the current level
+      int total = 0;
+      for (int i = 0; i <= level; i++)
+      {
+         total += Config.getIntArray("buildings/" + getConfigName() + "/costs")[i];
+      }
+      return total;
    }
    
    public void place()
@@ -226,10 +232,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
             final int WIDTH = 20;
             final int HEIGHT = 2;
             final int DY = 5;
-            
-            // g.setColor(new Color(20, 90, 88));
-            // g.fillRect(position.x - WIDTH / 2, position.y - radius - DY -
-            // HEIGHT, WIDTH, HEIGHT);
+
             g.setColor(Color.WHITE);
             g.fillRect(position.x - WIDTH / 2, position.y - radius - DY - HEIGHT, (int) ((double) WIDTH * state / maxState), HEIGHT);
          }
@@ -299,7 +302,7 @@ public abstract class Building extends PlayerElement implements IUpdateable
          
          state = 0;
          level++;
-
+         
          health = (int) (healtQuotient * getMaxHealth());
       }
    }

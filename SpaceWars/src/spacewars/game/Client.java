@@ -10,7 +10,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.util.Collections;
 import java.util.Comparator;
@@ -63,13 +62,13 @@ public class Client extends GameClient implements IClient
     * The stars in the background
     */
    private final List<Star>                stars;
-   private static final int                STARS_NUM          = 600;
-   private static final int                STARS_NUM_LAYERS   = 10;
-   private static final float              STARS_TRANSPARENCY = 0.3f;
+   private static final int                STARS_NUM             = 600;
+   private static final int                STARS_NUM_LAYERS      = 10;
+   private static final float              STARS_TRANSPARENCY    = 0.3f;
    /**
     * The player
     */
-   private int                             playerId           = -1;
+   private int                             playerId              = -1;
    private Player                          player;
    /**
     * The game state
@@ -109,11 +108,11 @@ public class Client extends GameClient implements IClient
     */
    private final IntroScreen               intro;
    
-   final int                               HUD_WIDTH          = 160;
-   final Dimension                         screen             = Screen.getInstance().getSize();
-   final int                               FONT_LINE          = 15;
-   final int                               DY_SELECTED        = 200;
-   Vector                                  p                  = new Vector(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 30, 4 * FONT_LINE + DY_SELECTED);
+   // Some help variables for rendering the hud
+   private final int                       HUD_WIDTH             = 160;
+   private final int                       FONT_LINE             = 15;
+   private final int                       DY_SELECTED           = 240;
+   private final Vector                    upgradeButtonPosition = new Vector(Screen.getInstance().getSize().width - HUD_WIDTH + HUD_WIDTH / 2 - 30, 10 * FONT_LINE + DY_SELECTED);
    
    /**
     * Default constructor.
@@ -199,8 +198,6 @@ public class Client extends GameClient implements IClient
    private void startGame()
    {
       createStars();
-      
-      // TODO: is this done now in intro screen?
       returnToHomePlanet();
    }
    
@@ -249,12 +246,16 @@ public class Client extends GameClient implements IClient
                if (selected instanceof Building)
                {
                   final int index = gameState.getBuildings().indexOf(selected);
-                  selected = gameState.getBuildings().get(index);
+                  
+                  if (index != -1) selected = gameState.getBuildings().get(index);
+                  else selected = null;
                }
                else if (selected instanceof MineralPlanet)
                {
                   final int index = gameState.getMap().getMineralPlanets().indexOf(selected);
-                  selected = gameState.getMap().getMineralPlanets().get(index);
+                  
+                  if (index != -1) selected = gameState.getMap().getMineralPlanets().get(index);
+                  else selected = null;
                }
             }
             
@@ -279,55 +280,21 @@ public class Client extends GameClient implements IClient
       
       if (gameState != null)
       {
-         // else
-         {
-            // Zum homeplanet fliegen
-            // if (i<100){
-            // if (i == 1)
-            // Screen.getInstance().getViewport().move(-10,-15);
-            // i++;
-            // }
-            // else{
-            
-            // if activated, user can switch player with F1 - F4
-            if (Config.getBool("client/changePlayer"))
-            {
-               final int numPlayers = gameState.getPlayers().size();
-               if (numPlayers >= 1 && Keyboard.getState().isKeyPressed(Key.F1))
-               {
-                  playerId = 0;
-               }
-               else if (numPlayers >= 2 && Keyboard.getState().isKeyPressed(Key.F2))
-               {
-                  playerId = 1;
-               }
-               else if (numPlayers >= 3 && Keyboard.getState().isKeyPressed(Key.F3))
-               {
-                  playerId = 2;
-               }
-               else if (numPlayers >= 4 && Keyboard.getState().isKeyPressed(Key.F4))
-               {
-                  playerId = 3;
-               }
-            }
-            
-            scroll();
-            if (Keyboard.getState().isKeyPressed(Key.HOME))
-            {
-               returnToHomePlanet();
-            }
-            
-            // select
-            select();
-            
-            // upgrade or recycle buildings
-            upgradeOrRecycle();
-            
-            // build
-            setBuildMode();
-            build();
-            // }
-         }
+         // if activated, user can switch player with F1 - F4
+         changePlayer();
+         
+         scroll();
+         if (Keyboard.getState().isKeyPressed(Key.HOME)) returnToHomePlanet();
+         
+         // select
+         select();
+         
+         // upgrade or recycle buildings
+         upgradeOrRecycle();
+         
+         // build
+         setBuildMode();
+         build();
       }
    }
    
@@ -390,8 +357,8 @@ public class Client extends GameClient implements IClient
             // only treat the players building
             if (!removeRest && building.getPlayer().equals(player))
             {
-               // take every link to relays, solar stations or buildings
-               // with no links
+               // take every link to relays, solar stations or buildings with no
+               // links
                if (building instanceof Relay || building instanceof Solar)
                {
                   removeRest = !link.isCollision();
@@ -571,7 +538,7 @@ public class Client extends GameClient implements IClient
    private void select()
    {
       // check if mouse is on building/planet
-      if (Mouse.getState().isButtonDown(Button.LEFT) && Mouse.getState().getX() <= screen.width - HUD_WIDTH)
+      if (Mouse.getState().isButtonDown(Button.LEFT) && Mouse.getState().getX() <= Screen.getInstance().getSize().width - HUD_WIDTH)
       {
          final Vector mousescreen = Mouse.getState().getVector();
          final Vector mouseworld = Screen.getInstance().getViewport().transformScreenToWorld(mousescreen);
@@ -661,14 +628,6 @@ public class Client extends GameClient implements IClient
                {
                   Logger.getGlobal().log(Level.WARNING, "Couldn't build building on server.", ex);
                }
-               
-               /*
-               if (!Keyboard.getState().isKeyDown(Key.SHIFT))
-               {
-                  // lose building type if shift is not pressed
-                  buildingType = BuildingType.NOTHING;
-               }
-               */
             }
          }
       }
@@ -685,7 +644,7 @@ public class Client extends GameClient implements IClient
          
          // calculate distance from mouse to center of upgrade circle
          Vector p2 = Mouse.getState().getVector();
-         int distance = (int) Math.sqrt(Math.pow(Math.abs(p.x + 30 - p2.x), 2) + Math.pow(Math.abs(p.y + 30 - p2.y), 2));
+         int distance = (int) Math.sqrt(Math.pow(Math.abs(upgradeButtonPosition.x + 30 - p2.x), 2) + Math.pow(Math.abs(upgradeButtonPosition.y + 30 - p2.y), 2));
          if (Keyboard.getState().isKeyPressed(Key.PAGE_UP) || Mouse.getState().isButtonPressed(Button.LEFT) && distance <= 30)
          {
             // upgrade
@@ -710,6 +669,33 @@ public class Client extends GameClient implements IClient
             {
                Logger.getGlobal().log(Level.WARNING, "Couldn't recycle building on server.", ex);
             }
+         }
+      }
+   }
+   
+   /**
+    * If activated, user can switch player with F1 - F4.
+    */
+   private void changePlayer()
+   {
+      if (Config.getBool("client/changePlayer"))
+      {
+         final int numPlayers = gameState.getPlayers().size();
+         if (numPlayers >= 1 && Keyboard.getState().isKeyPressed(Key.F1))
+         {
+            playerId = 0;
+         }
+         else if (numPlayers >= 2 && Keyboard.getState().isKeyPressed(Key.F2))
+         {
+            playerId = 1;
+         }
+         else if (numPlayers >= 3 && Keyboard.getState().isKeyPressed(Key.F3))
+         {
+            playerId = 2;
+         }
+         else if (numPlayers >= 4 && Keyboard.getState().isKeyPressed(Key.F4))
+         {
+            playerId = 3;
          }
       }
    }
@@ -877,22 +863,14 @@ public class Client extends GameClient implements IClient
    {
       if (player == null) return;
       
-      /*
-       *  TODO: kai
-       *  
-       *  - Anzeige der Ressourcen: Energie, Mineralien
-       *  - Anzeige des aktuell ausgewählten GameElements (Tipp: getSelected())
-       *  - Siehe The Space Game
-       *  
-       */
-      
       final int DX = 10;
       final int DY = 24;
-      
       final int BAR_HEIGHT = 5;
+      final float TRANSPARENCY = 0.8f;
+      
+      final Dimension screen = Screen.getInstance().getSize();
       
       final int seconds = gameState.getDuration();
-      final float TRANSPARENCY = 0.8f;
       
       final Composite original = g.getComposite();
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, TRANSPARENCY));
@@ -939,14 +917,13 @@ public class Client extends GameClient implements IClient
          
          if (selected instanceof Homebase)
          {
-            final Homebase home = (Homebase) selected;
+            /*final Homebase home = (Homebase) selected;*/
             // TODO: draw homeplanet relevant stuff
          }
          
          if (selected instanceof Building)
          {
             final Building building = (Building) selected;
-            // TODO: draw building relevant stuff
             
             // type
             g.setColor(Color.WHITE);
@@ -962,95 +939,55 @@ public class Client extends GameClient implements IClient
                g.setColor(Color.GREEN);
                if (building.isUpgradeable())
                {
-                  g.drawString(String.format("Upgrade to level %d of %d", building.getLevel() + 1, building.getHighestLevel()), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+                  g.drawString(String.format("Upgrade to level %d of %d", building.getLevel() + 1, building.getHighestLevel()), screen.width - HUD_WIDTH + DX, 9 * FONT_LINE + DY_SELECTED);
                   
                   // upgrade button
                   g.setColor(Color.GREEN);
                   final Image img = Ressources.loadImage("../img/upgrade.png");
-                  g.drawImage(img, p.x, p.y, 60, 60, null);
-                  // g.fillRect(screen.width - HUD_WIDTH + HUD_WIDTH / 2, 4 *
-                  // FONT_LINE + DY_SELECTED, 1, 50);
-                  // g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 - 20, 4 *
-                  // FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH +
-                  // HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
-                  // g.drawLine(screen.width - HUD_WIDTH + HUD_WIDTH / 2 + 20, 4 *
-                  // FONT_LINE + DY_SELECTED + 20, screen.width - HUD_WIDTH +
-                  // HUD_WIDTH / 2, 4 * FONT_LINE + DY_SELECTED);
-                  // g.draw(new Arc2D.Double(screen.width - HUD_WIDTH + HUD_WIDTH /
-                  // 2 - 30, 4 * FONT_LINE + DY_SELECTED - 5, 60, 60, 100, 340,
-                  // Arc2D.OPEN));               
-               }
-               else
-               {
-                  g.drawString("Reached highest level", screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+                  g.drawImage(img, upgradeButtonPosition.x, upgradeButtonPosition.y, 60, 60, null);
                }
             }
             
+            // health
+            g.setColor(new Color(0, 90, 0));
+            g.fillRect(screen.width - HUD_WIDTH + DX, 4 * FONT_LINE + DY_SELECTED - BAR_HEIGHT, HUD_WIDTH - 2 * DX, BAR_HEIGHT);
+            g.setColor(new Color(181, 230, 29));
+            g.fillRect(screen.width - HUD_WIDTH + DX, 4 * FONT_LINE + DY_SELECTED - BAR_HEIGHT, (int) (building.getHealth() / (double) building.getMaxHealth() * (HUD_WIDTH - 2 * DX)), BAR_HEIGHT);
+            g.drawString(String.format("%d / %d health", building.getHealth(), building.getMaxHealth()), screen.width - HUD_WIDTH + DX, 3 * FONT_LINE + DY_SELECTED);
+            
             if (selected instanceof Relay)
             {
-               final Relay relay = (Relay) building;
+               /*final Relay relay = (Relay) building;*/
                // TODO: draw relay relevant stuff
                // number of connections
             }
             
             if (selected instanceof Solar)
             {
-               final Solar solar = (Solar) building;
+               /*final Solar solar = (Solar) building;*/
                // TODO: draw solar relevant stuff
                // energy capazity
             }
             
             if (selected instanceof Mine)
             {
-               final Mine mine = (Mine) building;
+               /*final Mine mine = (Mine) building;*/
                // TODO: draw mine relevant stuff
             }
             
             if (selected instanceof Laser)
             {
-               final Laser laser = (Laser) building;
+               /*final Laser laser = (Laser) building;*/
                // TODO: draw laser relevant stuff
             }
             
             if (selected instanceof Shipyard)
             {
-               final Shipyard shipyard = (Shipyard) building;
+               /*final Shipyard shipyard = (Shipyard) building;*/
                // TODO: draw shipyard relevant stuff
             }
          }
       }
-      /* 
-      Dimension dimension = Screen.getInstance().getSize();
-      @SuppressWarnings("unused")
-      int minerals = player.getMinerals();
-      @SuppressWarnings("unused")
-      int score = player.getScore();
-      int hudX = (int) dimension.getWidth() - 501;
-      int hudY = (int) dimension.getHeight() - 101;
-      int maxEnergy = 0;
-      
-      for (Building building : getGameState().getBuildings())
-      {
-         if (building instanceof SolarStation)
-         {
-            maxEnergy += ((SolarStation) building).getMaxEnergy();
-            // Logger.getGlobal().info("Energy: " + player.getEnergy());
-            // Logger.getGlobal().info("player max ener " +
-            // player.getMaxEnergy());
-         }
-      }
-      
-      player.setMaxEnergy(maxEnergy);
-      
-      g.setColor(Color.WHITE);
-      
-      g.drawRect(hudX, hudY, 500, 100);
-      g.drawRect(hudX + 10, hudY + 10, 95, 20);
-      if (maxEnergy != 0)
-      {
-         g.fillRect(hudX + 10, hudY + 10, (int) (100.0 / maxEnergy * player.getEnergy()), 20);
-      }
-      */
    }
    
    /**

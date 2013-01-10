@@ -7,17 +7,17 @@ import spacewars.gamelib.Vector;
 
 @SuppressWarnings("serial")
 public class Relay extends Building
-{   
+{
    public Relay(final Vector position, final Player player)
    {
       super(position, player);
    }
-      
+   
    @Override
    protected String getConfigName()
    {
       return Relay.class.getSimpleName();
-   }  
+   }
    
    @Override
    protected void renderBuilding(Graphics2D g)
@@ -33,5 +33,5 @@ public class Relay extends Building
          g.setColor(Color.CYAN);
          g.fillOval(position.x - radius + BORDER, position.y - radius + BORDER, 2 * (radius - BORDER), 2 * (radius - BORDER));
       }
-   }  
+   }
 }

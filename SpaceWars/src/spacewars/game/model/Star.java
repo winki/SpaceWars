@@ -3,7 +3,7 @@ package spacewars.game.model;
 public class Star
 {
    private float x, y;
-   private int    layer;
+   private int   layer;
    
    public Star(final float x, final float y, final int layer)
    {

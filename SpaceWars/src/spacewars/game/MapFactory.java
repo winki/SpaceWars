@@ -6,6 +6,7 @@ import java.util.Random;
 import spacewars.game.model.Map;
 import spacewars.game.model.planets.MineralPlanet;
 import spacewars.gamelib.Vector;
+import spacewars.util.Config;
 import spacewars.util.Ressources;
 
 public class MapFactory
@@ -29,8 +30,8 @@ public class MapFactory
    {
       Map map = null;
       final BufferedImage image = Ressources.loadBufferedImage("../maps/" + path);
-      final int MAX_PLAYERS = 10;
-      final String name = "Testmap";
+      final int MAX_PLAYERS = Config.getInt("map/maxPlayers");
+      final String name = Config.getString("map/name");
       
       if (image != null)
       {

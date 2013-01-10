@@ -14,16 +14,13 @@ import spacewars.gamelib.IRenderable;
 import spacewars.gamelib.IUpdateable;
 import spacewars.gamelib.Mouse;
 import spacewars.gamelib.Screen;
+import spacewars.util.Config;
 import spacewars.util.Ressources;
 
 public class IntroScreen implements IUpdateable, IRenderable
 {
-   private boolean          visible;
+   private boolean          visible           = false;
    final Dimension          screen            = Screen.getInstance().getSize();
-   
-   // Kai: fix this! why do i need to set these? !! with getting the viewport
-   // position and calculate the zero point! Vector p =
-   // gameState.getMap().getHomePlanetPositions().get(player.getId());
    
    private final Image      background        = Ressources.loadImage("background.png");
    private final Image      title             = Ressources.loadImage("title.png");
@@ -68,26 +65,6 @@ public class IntroScreen implements IUpdateable, IRenderable
    // start button
    private float            startTransparency = 1.0f;
    
-   public IntroScreen()
-   {
-      this.visible = false;
-      // Server server = Server.getInstance();
-      // GameState gameState = server.getGameState();
-      //
-      // Player player = gameState.getPlayers().get(0);
-      // Screen screen = new Screen();
-      // Dimension d = screen.getViewport();
-      // Vector p =
-      // gameState.getMap().getHomePlanetPositions().get(player.getId());
-      // GameState gamestate = new GameState();
-      // Screen screen =
-      
-      // System.out.println(Client.getInstance().getGameState().getMap().getHomePlanetPositions().size());
-      
-      // zeroX = p.x - screen.width/2;
-      // zeroY = p.y - screen.height/2;
-   }
-   
    public boolean isVisible()
    {
       return visible;
@@ -104,7 +81,6 @@ public class IntroScreen implements IUpdateable, IRenderable
       Clip backgroundClip = Ressources.loadSound("intro.wav");
       Clip startButtonClip = Ressources.loadSound("laser.wav");
       
-      // TODO: kai
       if (exitIntro)
       {
          if (transparency >= 0.0f)
@@ -127,36 +103,20 @@ public class IntroScreen implements IUpdateable, IRenderable
                backgroundClip.start();
                firstRound = false;
             }
-            
-            final int toFly = (introWidth / 2 - title.getWidth(null) / 2) - spaceX;
-            if (toFly > 0)
+            // start title animation after a short delay (0.4 sec)
+            else if (Client.getInstance().getGameTime().getTotalGameTime() > 400000000)
             {
-               spaceX += toFly / 6 + 1;
-               warsX -= toFly / 6 + 1;
+               final int toFly = (introWidth / 2 - title.getWidth(null) / 2) - spaceX;
+               if (toFly > 0)
+               {
+                  spaceX += toFly / 6 + 1;
+                  warsX -= toFly / 6 + 1;
+               }
+               else
+               {
+                  flyIn = false;
+               }
             }
-            else
-            {
-               flyIn = false;
-            }
-            
-            /*
-            if (spaceX <= introWidth / 2 - title.getWidth(null) / 2)
-            {
-               int diffx = (introWidth / 2 - title.getWidth(null) / 2) - spaceX;
-               if (diffx < flySpeed) spaceX += diffx;
-               else spaceX += flySpeed;
-            }
-            if (warsX >= introWidth / 2)
-            {
-               int diffy = warsX - (introWidth / 2);
-               if (diffy < flySpeed) warsX -= diffy;
-               else warsX -= flySpeed;
-            }
-            else
-            {
-               flyIn = false;
-            }
-            */
          }
          else
          {
@@ -170,7 +130,8 @@ public class IntroScreen implements IUpdateable, IRenderable
                   exitIntro = true;
                   
                   // register at server
-                  Client.getInstance().registerAtServer("hugahuga");
+                  final String playerName = Config.getString("client/playerName");
+                  Client.getInstance().registerAtServer(playerName);
                }
             }
             else
@@ -189,8 +150,6 @@ public class IntroScreen implements IUpdateable, IRenderable
    @Override
    public void render(Graphics2D g)
    {
-      // TODO: kai
-      
       // save original font to reset it later
       Font original = g.getFont();
       Font font = Ressources.loadFont("space_age.ttf", startFontSize);
@@ -207,19 +166,6 @@ public class IntroScreen implements IUpdateable, IRenderable
       final int x = (int) (screen.getWidth() - background.getWidth(null)) / 2;
       final int y = (int) (screen.getHeight() - background.getHeight(null)) / 2 + DY_LOGO;
       g.drawImage(background, x, y, null);
-      
-      /*
-      g.setColor(Color.GREEN);
-      g.setFont(Ressources.loadFont("space_age.ttf", 150.0f));
-      g.drawString("Space", spaceX, spaceY);
-      int hgt = metrics.getHeight();
-      int adv = metrics.stringWidth("Space");
-      spaceSize = new Dimension(adv + 2, hgt + 2);
-      g.drawString("Wars", warsX, warsY);
-      hgt = metrics.getHeight();
-      adv = metrics.stringWidth("Wars");
-      warsSize = new Dimension(adv + 2, hgt + 2);
-      */
       
       // title
       g.drawImage(title, spaceX, spaceY, spaceX + title.getWidth(null) / 2, spaceY + title.getHeight(null), 0, 0, title.getWidth(null) / 2, title.getHeight(null), null);

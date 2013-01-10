@@ -61,7 +61,7 @@ public class Player implements Serializable
    {
       return id;
    }
-      
+   
    public boolean isEnemy(Player player)
    {
       return id != player.id;
@@ -77,9 +77,14 @@ public class Player implements Serializable
       return score;
    }
    
-   public void setScore(int score)
+   public void resetScore()
    {
-      this.score = score;
+      this.score = 0;
+   }
+   
+   public void addScore(int score)
+   {
+      this.score += score;
    }
    
    public Color getColor()
@@ -96,7 +101,7 @@ public class Player implements Serializable
    {
       return this.minerals;
    }
-
+   
    public int getMineralsPerMinute()
    {
       return this.mineralsPerMinute;
@@ -120,7 +125,7 @@ public class Player implements Serializable
    public int getEnergy()
    {
       return this.energy;
-   }   
+   }
    
    public void addEnergy(int energy)
    {
@@ -132,7 +137,6 @@ public class Player implements Serializable
       {
          this.energy += energy;
       }
-      
    }
    
    public boolean removeEnergy(int energy)

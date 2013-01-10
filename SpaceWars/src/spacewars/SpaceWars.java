@@ -16,7 +16,7 @@ public class SpaceWars
    {
       // set logging
       Logger.getGlobal().setLevel(Level.ALL);
-
+      
       runServer(true);
       runClient("localhost");
    }

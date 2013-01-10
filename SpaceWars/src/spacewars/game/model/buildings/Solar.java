@@ -8,7 +8,7 @@ import spacewars.util.Config;
 
 @SuppressWarnings("serial")
 public class Solar extends Building
-{  
+{
    public Solar(final Vector position, final Player player)
    {
       super(position, player);
@@ -23,7 +23,7 @@ public class Solar extends Building
    public double getProductionFrequency()
    {
       return Config.getDouble("buildings/" + getConfigName() + "/productionFrequency");
-   }   
+   }
    
    public int getEnergyProduction()
    {
@@ -33,7 +33,7 @@ public class Solar extends Building
    public int getEnergyCapacity()
    {
       return Config.getIntArray("buildings/" + getConfigName() + "/energyCapacity")[level];
-   }   
+   }
    
    @Override
    protected void renderBuilding(Graphics2D g)

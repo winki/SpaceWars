@@ -2,11 +2,12 @@
 <SpaceWars>
 
 	<server>
-		<minPlayers>4</minPlayers>
+		<minPlayers>2</minPlayers>
 		<dummyPlayers>true</dummyPlayers>
 	</server>
 
 	<client>
+	    <playerName>Spielername</playerName>	
 		<debug>false</debug>
 		<fullscreen>true</fullscreen>
 		<scrollSlowing>5</scrollSlowing>
@@ -19,7 +20,7 @@
 	</network>
 
 	<buildings>
-		<buildEnergyConsum>2</buildEnergyConsum>
+		<buildEnergyConsum>5</buildEnergyConsum>
 
 		<Homebase>
 			<name>Home Planet</name>
@@ -64,7 +65,7 @@
 			<costs>200,200,200</costs>
 			<levels>3</levels>
 			
-			<energyProduction>4,6,8</energyProduction>
+			<energyProduction>3,4,5</energyProduction>
 			<energyCapacity>10,20,30</energyCapacity>
 			<productionFrequency>3.0</productionFrequency>
 		</Solar>
@@ -90,7 +91,7 @@
 			<costs>400,500,1000</costs>
 			<levels>3</levels>
 			
-			<shipProductionTime>8,7,6</shipProductionTime>		
+			<shipProductionTime>12,10,8</shipProductionTime>		
 		</Shipyard>
 
 	</buildings>
@@ -100,6 +101,8 @@
 			<size>5</size>
 			<view>100</view>
 			<health>30</health>
+			
+			<speed>50</speed>
 			<attackPower>1</attackPower>
 			<attackFrequency>6</attackFrequency>
 		</Ship>
@@ -117,5 +120,10 @@
 		<color3>#ff33ff</color3>
 		<color4>#ffff33</color4>
 	</players>
+	
+	<map>
+		<name>Galaxy Fight</name>
+		<maxPlayers>10</maxPlayers>
+	</map>
 
 </SpaceWars>

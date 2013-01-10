@@ -29,7 +29,7 @@ public class Ship extends PlayerElement implements IUpdateable
       
       this.x = position.x;
       this.y = position.y;
-      this.speed = 50;
+      this.speed = Config.getInt("ships/" + Ship.class.getSimpleName() + "/speed");;
       setDirectionToEnemy();
    }
    
@@ -47,20 +47,20 @@ public class Ship extends PlayerElement implements IUpdateable
    
    public int getAttackPower()
    {
-      // TODO: depends on level
+      // TODO: make levels dependent?
       return Config.getInt("ships/" + Ship.class.getSimpleName() + "/attackPower");
    }
    
    public int getAttackFrequency()
    {
-      // TODO: depends on level
+      // TODO: make levels dependent?
       return Config.getInt("ships/" + Ship.class.getSimpleName() + "/attackFrequency");
    }
    
    @Override
    public int getMaxHealth()
    {
-      // TODO: depends on level
+      // TODO: make levels dependent?
       return Config.getInt("ships/" + Ship.class.getSimpleName() + "/health");
    }
    
@@ -129,13 +129,6 @@ public class Ship extends PlayerElement implements IUpdateable
          {
             // direction of nearest enemy building
             final Vector dir = flightTarget.getPosition().sub(position);
-            
-            /*
-            // follow the mouse:
-            final Vector mp =
-            Screen.getInstance().getViewport().transformScreenToWorld(Mouse.getState().getVector());
-            final Vector dir = mp.sub(position);
-            */
             
             if (dir.x != 0)
             {

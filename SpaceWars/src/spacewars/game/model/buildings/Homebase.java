@@ -42,7 +42,7 @@ public class Homebase extends Solar
       g.setColor(getPlayer().getColor());
       
       final Composite original = g.getComposite();
-      //g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25f));
+      // blend player color over homebase image
       g.setComposite(BlendComposite.Color.derive(0.6f));
       g.fillOval(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
       g.setComposite(original);

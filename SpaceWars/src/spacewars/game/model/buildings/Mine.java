@@ -46,8 +46,17 @@ public class Mine extends Building
    
    public int getMiningAmount()
    {
-      final int perMinute = Config.getIntArray("buildings/" + getConfigName() + "/miningRate")[level];
-      return (int) (perMinute / 60.0 / getMiningFrequency());
+      return (int) (getMiningRate() / 60.0 / getMiningFrequency());
+   }
+   
+   /**
+    * Gets the number of minerals that are mined per minute.
+    * 
+    * @return mined minerals per minute
+    */
+   public int getMiningRate()
+   {
+      return Config.getIntArray("buildings/" + getConfigName() + "/miningRate")[level];
    }
    
    public int getEnergyConsum()

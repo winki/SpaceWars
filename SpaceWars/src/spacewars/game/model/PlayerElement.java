@@ -54,7 +54,8 @@ public abstract class PlayerElement extends GameElement implements Serializable
    {
       for (Player player : getServerGameState().getPlayers())
       {
-         if (!player.equals(this.player)) { return player; }
+         // TODO: don't take first enemy but nearest enemy?
+         if (player.isEnemy(this.getPlayer())) { return player; }
       }
       return null;
    }
